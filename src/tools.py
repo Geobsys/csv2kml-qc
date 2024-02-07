@@ -8,6 +8,9 @@ import numpy as np
 import pandas as pd
 from pyproj import Transformer
 
+# exemple line :
+# python3 src/csv_to_kml.py test/EXTENVENT.LOG
+
 
 def custom_pt(
 			  kml,
@@ -82,6 +85,7 @@ def csv_to_kml(
 
 	# Calculate distance between two points
 	data["dist"] = np.sqrt(data["coordX"].diff()**2 + data["coordY"].diff()**2 + data["coordZ"].diff()**2).round(3)
+	data.loc[0,"dist"] = 0.
 
 	# Calculate time between to measures
 	data["time_laps"] = data["time"].diff().round(3)
@@ -90,7 +94,13 @@ def csv_to_kml(
 	# Calculate time since start, and until end
 	data["time_elapsed"] = data["time_laps"].cumsum().round(3)
 	data["time_left"] = data["time_elapsed"].values[-1] - data["time_elapsed"]
-	data["time_left"].round(3)
+	data["time_left"] = data["time_left"].round(3)
+
+	# Calculate instantaneous velocity
+	data["velocity"] = data["dist"]/data["time_laps"]
+	data["velocity"] = (data["velocity"].shift(-1) + data["velocity"])/2
+	data["velocity"] = data["velocity"].round(3)
+	print(data["velocity"])
 	
 	
 	
@@ -124,11 +134,7 @@ def gen_description(pt) :
 		else :
 			value = str(pt[i])
 		text += i + " : " + value + "\n"
-	return text
-
-def get_dist_point_to_point(dataframe, index):  
-	return  np.sqrt(dataframe.coordX[index].diff()**2 + dataframe.coordY[index].diff()**2 + dataframe.coordZ[index].diff()**2)
-	
+	return text	
 
 	
 	
