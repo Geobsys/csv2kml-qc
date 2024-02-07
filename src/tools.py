@@ -3,7 +3,26 @@
 @author: mehdi daakir
 """
 
-import csts,os,simplekml
+import csts,os #simplekml
+import numpy as np
+import pandas as pd
+from pyproj import Transformer
+
+#création du dataframe à partir du csv
+colName = ["time", "day", "state", "lat", "lon", "h", "incert_lat", "incert_lon", "oX", "oY", "oZ"]
+df = pd.read_csv("../test/EXTENVENT.LOG", delimiter=",", header=None)
+df.columns = colName
+
+#transformation des coordonnées (EPSG:432 vers EPSG:4964 (XYZ)) et stockage dans un autre dataframe
+transformer = Transformer.from_crs(4326, 4964)
+coordLambert = transformer.transform(df['lat'], df['lon'], df['h'])
+coordLambert = np.array(coordLambert)
+
+df2 = pd.DataFrame(coordLambert.T, columns=['coordX', 'coordY', 'coordZ'])
+
+# #Fusion des deux dataframes
+df = pd.concat([df, df2], axis=1)
+
 
 def custom_pt(
               kml,
@@ -90,3 +109,24 @@ def csv_to_kml(
 	kml.save(output_file)
 
 	return None
+
+def get_dist_point_to_point(dataframe, index):  
+    return  (dataframe.coordX[index] - dataframe.coordX[index-1])**2 + (dataframe.coordY[index] - dataframe.coordY[index-1])**2 + (dataframe.coordZ[index] - dataframe.coordZ[index-1])**2
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
