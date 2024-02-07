@@ -92,28 +92,53 @@ def csv_to_kml(
 	#assign a name
 	if(output_file==""): output_file="".join([os.path.splitext(input_file)[0],".kml"])
 
-	#iterate over the pts
-	for pt in data:
+    # Calculate time between to measures
+	data["time_laps"] = data["time"].diff().round(3)
+	data.loc[0,"time_laps"] = 0.
+	
+	# Calculate time since start, and until end
+	data["time_elapsed"] = data["time_laps"].cumsum().round(3)
+	data["time_left"] = data["time_elapsed"].values[-1] - data["time_elapsed"]
+	data["time_left"].round(3)
+	
+	
+	
+	#iterate over the pts	
+	for index, pt in data.iterrows():
+		description = gen_description(pt)
 		custom_pt(
-                  kml,
-                  float(pt[4]),
-                  float(pt[3]),
-                  float(pt[5]),
-                  status=pt[2],
-                  mode=mode,
-                  label_scale=label_scale,
-                  icon_scale=icon_scale,
-                  icon_href=icon_href
-                 )
+				  kml,
+				  float(pt["lon"]),
+				  float(pt["lat"]),
+				  float(pt["h"]),
+				  status=pt["state"],
+				  mode=mode,
+				  description = description,
+				  label_scale=label_scale,
+				  icon_scale=icon_scale,
+				  icon_href=icon_href
+				 )
 	#save kml
 	kml.save(output_file)
 
 	return None
 
+def gen_description(pt) :
+	# generate a description based on the dataframes columns
+	index = pt.index
+	text = ""
+	for i in index :
+		if i == "state" :
+			value = csts.status_dict[pt[i]]['name']
+		else :
+			value = str(pt[i])
+		text += i + " : " + value + "\n"
+	return text
+
 def get_dist_point_to_point(dataframe, index):  
     return  (dataframe.coordX[index] - dataframe.coordX[index-1])**2 + (dataframe.coordY[index] - dataframe.coordY[index-1])**2 + (dataframe.coordZ[index] - dataframe.coordZ[index-1])**2
     
-    
+
     
     
     
