@@ -16,3 +16,31 @@ status_dict={
              "N":{"name":"DGNSS","color":"red"},
              "None":{"name":"Unknown","color":"black"}
              }
+
+param_dict={
+             "index":       {'unity' : ''   ,'name' : 'Index'},
+             "time":        {'unity' : 's'  ,'name' : 'Time'}, 
+             "day":         {'unity' : ''   ,'name' : 'Day'}, 
+             "state":       {'unity' : ''   ,'name' : 'State'}, 
+             "lat":         {'unity' : '°'  ,'name' : 'Latitude  (WGS84)'}, 
+             "lon":         {'unity' : '°'  ,'name' : 'Longitude (WGS84)'}, 
+             "h":           {'unity' : 'm'  ,'name' : 'High'}, 
+             "incert_pla":  {'unity' : 'm'  ,'name' : 'Uncertainties Lat-Lon'}, 
+             "incert_hig":  {'unity' : 'm'  ,'name' : 'Uncertainty High'}, 
+             "oX":          {'unity' : 'rad','name' : 'Orientation X'}, 
+             "oY":          {'unity' : 'rad','name' : 'Orientation Y'}, 
+             "oZ":          {'unity' : 'rad','name' : 'Orientation Z'},
+             "uk1":         {'unity' : ''   ,'name' : 'Unknown'}, 
+             "GNSS":        {'unity' : ''   ,'name' : 'GNSS'}, 
+             "uk2":         {'unity' : ''   ,'name' : 'Unknown'}, 
+             "date":        {'unity' : ''   ,'name' : 'Date'},
+
+             "coordX":      {'unity' : 'm'  ,'name' : 'X (RGF93v1)'}, 
+             "coordY":      {'unity' : 'm'  ,'name' : 'Y (RGF93v1)'}, 
+             "coordZ":      {'unity' : 'm'  ,'name' : 'Z (RGF93v1)'},
+             "time_left":   {'unity' : 's'  ,'name' : 'Time left'},
+             "time_laps":   {'unity' : 's'  ,'name' : 'Time laps since prev pt'},
+             "time_elapsed":{'unity' : 's'  ,'name' : 'Elapsed time'},
+             "velocity":    {'unity' : 'm/s','name' : 'Velocity'},
+             "dist":        {'unity' : 'm'  ,'name' : 'Distance since prev pt'},
+            }
