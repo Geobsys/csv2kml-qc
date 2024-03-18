@@ -10,6 +10,7 @@ from pyproj import Transformer
 
 # exemple line :
 # python3 src/csv_to_kml.py test/EXTENVENT.LOG
+# python3 src/csv_to_kml.py test/20240223.LOG -it 'special'    
 
 
 def custom_pt(
@@ -73,12 +74,14 @@ def custom_int_conf(
 				color=csts.colors_dict["green"]
 				):
 	if (mode=="pyr"):
-		#pt["incert_pla"] == 0.0001 temp
-		corners = np.array([(pt["lon"]-0.0001, pt["lat"], pt["h"]), 
-			 	   			(pt["lon"]       , pt["lat"]+0.0001, pt["h"]), 
-				   			(pt["lon"]+0.0001, pt["lat"], pt["h"]), 
-				   			(pt["lon"]       , pt["lat"]-0.0001, pt["h"]), 
-				   			(pt["lon"]       , pt["lat"],        pt["h"] + pt["incert_hig"]  )])
+		incert_pla = np.log10(pt["incert_pla"])/10000
+
+		corners = np.array([(pt["lon"]-incert_pla, pt["lat"]           , pt["h"]), 
+			 	   			(pt["lon"]       	 , pt["lat"]+incert_pla, pt["h"]), 
+				   			(pt["lon"]+incert_pla, pt["lat"]           , pt["h"]), 
+				   			(pt["lon"]           , pt["lat"]-incert_pla, pt["h"]), 
+				   			(pt["lon"]           , pt["lat"]           , pt["h"] + pt["incert_hig"]  )])
+		#append the four faces of the pyramid
 		pol = kml.newpolygon(name=name, description=description, altitudemode=altitudemode, extrude = 0)
 		pol.outerboundaryis = [corners[0], corners[1], corners[-1], corners[0]]
 		pol.style.polystyle.color = color
@@ -156,13 +159,6 @@ def csv_to_kml(
 	
 	data[['coordX', 'coordY', 'coordZ']] = coordRGF93.T.round(3)
 
-	# Coordinates transformation to Lambert 93
-	transformer = Transformer.from_crs(4326, 2154)
-	coordL93 = transformer.transform(data['lat'], data['lon'], data['h'])
-	coordL93 = np.array(coordL93)
-
-	data[['E', 'N', 'A']] = coordL93.T.round(3)
-
 	# Calculate distance between two points
 	data["dist"] = np.sqrt(data["coordX"].diff()**2 + data["coordY"].diff()**2 + data["coordZ"].diff()**2).round(3)
 	data.loc[data.index[0],"dist"] = 0.
@@ -210,13 +206,15 @@ def csv_to_kml(
 				  altitudemode=altitudemode
 				 )
 		
+		#insert the confidence intervals in the kml
 		custom_int_conf(
 				int_conf,
 				pt,
 				mode="pyr",
 				name="Point n° " + str(index),
 				description="",
-				altitudemode=altitudemode
+				altitudemode=altitudemode,
+				color='green'
 				)
 		
 		#prepare a segmentation of the trajectory by GNSS status
@@ -247,9 +245,9 @@ def csv_to_kml(
 				line = [[pt["state"]], 
 						[pt["index"]], 
 						[(pt["lon"], pt["lat"], pt["h"])]]
+		print(f"Loading {100*index//len(data)} % \r",end="")
+	print("                            ")
 				
-				
-	
 	#calculs of the measures boundarys	
 	a = np.max(data["lon"]) + 0.001
 	b = np.min(data["lon"]) - 0.001
@@ -295,6 +293,8 @@ def gen_description_line(line) :
 	text += f'<tr><td style="text-align: left;">{"Status"}</td><td style="text-align: left;">{csts.status_dict[line[0][0]]["name"]}</td></tr>\n'
 	text += '</table>'
 	return text
+
+
 
 
 
