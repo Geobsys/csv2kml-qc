@@ -25,6 +25,7 @@ if __name__ == "__main__":
     parser.add_argument('-is','--icon_scale',type=float,help="icon scale (Default=1)",default=1)
     parser.add_argument('-ih','--icon_href',type=str,help="icon href (Default=http://maps.google.com/mapfiles/kml/shapes/placemark_circle.png)",default="http://maps.google.com/mapfiles/kml/shapes/placemark_circle.png")
     parser.add_argument('-sn','--show_pt_name',type=bool,help="True : showing the label, False : Hiding it", default=False)
+    parser.add_argument('-am','--altitudemode',type=str,help="See simplekml .Altitudemode (absolute, relativeToGround, clampToGround)", default="absolute")
     args=parser.parse_args()
     
     tools.csv_to_kml(
@@ -39,4 +40,5 @@ if __name__ == "__main__":
                      args.icon_scale,
                      args.icon_href,
                      args.show_pt_name,
+                     args.altitudemode
                     )

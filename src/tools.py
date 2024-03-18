@@ -24,12 +24,12 @@ def custom_pt(
 			  label_scale=2,
 			  icon_scale=1,
 			  icon_href="http://maps.google.com/mapfiles/kml/shapes/placemark_circle.png",
-			  show_pt_name=False
+			  show_pt_name=False,
+			  altitudemode="absolute"
 			 ):
-
 	if(mode=="icon"):
 		#append a pt
-		pnt = kml.newpoint()
+		pnt = kml.newpoint(altitudemode = altitudemode)
 
 		#edit the point
 		if show_pt_name : 
@@ -41,8 +41,6 @@ def custom_pt(
 		pnt.style.iconstyle.color = csts.colors_dict[csts.status_dict[status]["color"]]
 		pnt.style.iconstyle.scale = icon_scale
 		pnt.style.iconstyle.icon.href = icon_href
-
-
 	return None
 
 
@@ -54,14 +52,45 @@ def custom_line(
 				name="",
 				description="",
 				width=1,
+				altitudemode="absolute"
 				):
 	if (mode=="line"):
 		#append a line
-		ls = kml.newlinestring(name=name, description=description)
+		ls = kml.newlinestring(name=name, description=description, altitudemode = altitudemode)
 		ls.coords = pts_coords
 		ls.extrude = 0
 		ls.style.linestyle.width = width
 		ls.style.linestyle.color = csts.colors_dict[csts.status_dict[status]["color"]]
+	return None
+
+def custom_int_conf(
+				kml,
+				pt,
+				mode="pyr",
+				name="",
+				description="",
+				altitudemode="absolute",
+				color=csts.colors_dict["green"]
+				):
+	if (mode=="pyr"):
+		#pt["incert_pla"] == 0.0001 temp
+		corners = np.array([(pt["lon"]-0.0001, pt["lat"], pt["h"]), 
+			 	   			(pt["lon"]       , pt["lat"]+0.0001, pt["h"]), 
+				   			(pt["lon"]+0.0001, pt["lat"], pt["h"]), 
+				   			(pt["lon"]       , pt["lat"]-0.0001, pt["h"]), 
+				   			(pt["lon"]       , pt["lat"],        pt["h"] + pt["incert_hig"]  )])
+		pol = kml.newpolygon(name=name, description=description, altitudemode=altitudemode, extrude = 0)
+		pol.outerboundaryis = [corners[0], corners[1], corners[-1], corners[0]]
+		pol.style.polystyle.color = color
+		pol = kml.newpolygon(name=name, description=description, altitudemode=altitudemode, extrude = 0)
+		pol.outerboundaryis = [corners[1], corners[2], corners[-1], corners[1]]
+		pol.style.polystyle.color = color
+		pol = kml.newpolygon(name=name, description=description, altitudemode=altitudemode, extrude = 0)
+		pol.outerboundaryis = [corners[2], corners[3], corners[-1], corners[2]]
+		pol.style.polystyle.color = color
+		pol = kml.newpolygon(name=name, description=description, altitudemode=altitudemode, extrude = 0)
+		pol.outerboundaryis = [corners[3], corners[0], corners[-1], corners[3]]
+		pol.style.polystyle.color = color
 	return None
 	
 
@@ -76,7 +105,8 @@ def csv_to_kml(
 			   label_scale=2,
 			   icon_scale=1,
 			   icon_href="http://maps.google.com/mapfiles/kml/shapes/placemark_circle.png",
-			   show_pt_name=False
+			   show_pt_name=False,
+			   altitudemode="absolute"
 			  ):
 	#my data
 	if input_type == "normal" :
@@ -85,7 +115,6 @@ def csv_to_kml(
 		labels = ["uk1", "GNSS", "uk2", "time", "date", "hour", "state", "lat", "lon", "h", "incert_pla", "incert_hig"]
 	data = pd.read_csv(input_file, sep=separator)
 	data.columns = labels
-
 	
 	print("\n################ csv to kml ################\n")
 
@@ -97,7 +126,7 @@ def csv_to_kml(
 	data = data.drop(empty)
 
 	#decimation of data for tests
-	#data = data[0:-1:100]
+	data = data[0:-1:100]
 	
 	#reorganise indexes without loosing previous
 	data = data.reset_index()
@@ -127,6 +156,13 @@ def csv_to_kml(
 	
 	data[['coordX', 'coordY', 'coordZ']] = coordRGF93.T.round(3)
 
+	# Coordinates transformation to Lambert 93
+	transformer = Transformer.from_crs(4326, 2154)
+	coordL93 = transformer.transform(data['lat'], data['lon'], data['h'])
+	coordL93 = np.array(coordL93)
+
+	data[['E', 'N', 'A']] = coordL93.T.round(3)
+
 	# Calculate distance between two points
 	data["dist"] = np.sqrt(data["coordX"].diff()**2 + data["coordY"].diff()**2 + data["coordZ"].diff()**2).round(3)
 	data.loc[data.index[0],"dist"] = 0.
@@ -148,7 +184,8 @@ def csv_to_kml(
 	
 	#insert the elements into the kml
 	points = kml.newfolder(name="Measured points")
-	lines = kml.newfolder(name="Trajectory")
+	lines = kml.newfolder(name="Trace")
+	int_conf = kml.newfolder(name="Confidence interval")
 	
 	line = []
 	index_line = 0
@@ -169,36 +206,47 @@ def csv_to_kml(
 				  label_scale=label_scale,
 				  icon_scale=icon_scale,
 				  icon_href=icon_href,
-				  show_pt_name=show_pt_name
+				  show_pt_name=show_pt_name,
+				  altitudemode=altitudemode
 				 )
+		
+		custom_int_conf(
+				int_conf,
+				pt,
+				mode="pyr",
+				name="Point n° " + str(index),
+				description="",
+				altitudemode=altitudemode
+				)
 		
 		#prepare a segmentation of the trajectory by GNSS status
 		if index+1 < len(data) :
 			if len(line) == 0 :
 				line = [[pt["state"]], 
 						[pt["index"]], 
-						[(pt["lon"], pt["lat"])]]
+						[(pt["lon"], pt["lat"], pt["h"])]]
 			elif line[0][0] == pt["state"] :
 				line[0].append(pt["state"])
 				line[1].append(pt["index"])
-				line[2].append((pt["lon"],pt["lat"]))
+				line[2].append((pt["lon"],pt["lat"], pt["h"]))
 			else :
 				description_line = gen_description_line(line)
 				if len(line[0]) > 1 :
 					#insert the lines into the kml
 					custom_line(
-						lines,
-						line[2],
-						status=line[0][0],
-						mode="line",
-						name="Segment n° " + str(index_line),
-						description=description_line,
-						width=5,
-						)
+								lines,
+								line[2],
+								status=line[0][0],
+								mode="line",
+								name="Segment n° " + str(index_line),
+								description=description_line,
+								width=5,
+								altitudemode=altitudemode
+								)
 					index_line+=1
 				line = [[pt["state"]], 
 						[pt["index"]], 
-						[(pt["lon"], pt["lat"])]]
+						[(pt["lon"], pt["lat"], pt["h"])]]
 				
 				
 	
