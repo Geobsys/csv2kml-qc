@@ -9,6 +9,19 @@ colors_dict={
              "red":"ff2f2fd3",
              "black":"ff000000"
             }
+colors_dict_2={
+    "green": "ff008000",
+    "light_green": "ff32cd32",
+    "lime": "ff00ff00",
+    "yellow_green": "ff9acd32",
+    "yellow": "ff00ffff",
+    "orange": "ffffa500",
+    "dark_orange": "ffff8c00",
+    "red": "ffff0000",
+    "dark_red": "ff8b0000",
+    "black": "ff000000"
+}
+colors_grade=("ff3c8e38","ff00ff00","ff00ffff","ff007cf5","ff2f2fd3")
 
 status_dict={
              "R":{"name":"RTK_Fix","color":"green"},
@@ -24,7 +37,7 @@ param_dict={
              "state":       {'unity' : ''   ,'name' : 'State'}, 
              "lat":         {'unity' : '°'  ,'name' : 'Latitude  (WGS84)'}, 
              "lon":         {'unity' : '°'  ,'name' : 'Longitude (WGS84)'}, 
-             "h":           {'unity' : 'm'  ,'name' : 'High'}, 
+             "h":           {'unity' : 'm'  ,'name' : 'Height'}, 
              "incert_pla":  {'unity' : 'm'  ,'name' : 'Uncertainties Lat-Lon'}, 
              "incert_hig":  {'unity' : 'm'  ,'name' : 'Uncertainty High'}, 
              "oX":          {'unity' : 'rad','name' : 'Orientation X'}, 
@@ -34,7 +47,7 @@ param_dict={
              "GNSS":        {'unity' : ''   ,'name' : 'GNSS'}, 
              "uk2":         {'unity' : ''   ,'name' : 'Unknown'}, 
              "date":        {'unity' : ''   ,'name' : 'Date'},
-             "hour":        {'unity' : ''  ,'name' : 'Hour'},
+             "hour":        {'unity' : ''   ,'name' : 'Hour'},
 
              "coordX":      {'unity' : 'm'  ,'name' : 'X (RGF93v1)'}, 
              "coordY":      {'unity' : 'm'  ,'name' : 'Y (RGF93v1)'}, 
@@ -44,4 +57,5 @@ param_dict={
              "time_elapsed":{'unity' : 's'  ,'name' : 'Elapsed time'},
              "velocity":    {'unity' : 'm/s','name' : 'Velocity'},
              "dist":        {'unity' : 'm'  ,'name' : 'Distance since prev pt'},
+             "altitude":    {'unity' : 'm'  ,'name' : 'Altitude'}
             }
