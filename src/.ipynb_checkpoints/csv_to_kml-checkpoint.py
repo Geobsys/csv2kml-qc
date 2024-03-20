@@ -18,7 +18,6 @@ if __name__ == "__main__":
     parser.add_argument('-it', '--input_type', type=str, help="input file type between 'normal' and 'special'", default="normal")
     parser.add_argument('-o','--output_file',type=str,help="output file in .kml format (Default=./input_file.kml)",default="")
     parser.add_argument('-sep','--separator',type=str,help="separator used in the .csv file (Default=,)",default=",")
-    parser.add_argument('-dr','--data_range',type=str, help="Range of data from start (s), to end (e), with a step (t) : (s,e,t). e and t are optionnal",default='(0,-1,100)')
     parser.add_argument('-name','--doc_name',type=str,help="kml document name",default="")
     parser.add_argument('--quiet',action="store_false",help="print some statistics")
     parser.add_argument('-m','--mode',type=str,help="representation mode",default="icon",choices=["icon"])
@@ -34,7 +33,6 @@ if __name__ == "__main__":
                      args.input_type,
                      args.output_file,
                      args.separator,
-                     args.data_range,
                      args.doc_name,
                      args.quiet,
                      args.mode,

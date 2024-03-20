@@ -101,7 +101,6 @@ def csv_to_kml(
 			   input_type,
 			   output_file="",
 			   separator=",",
-			   data_range=(),
 			   doc_name="",
 			   print_stats=True,
 			   mode="icon",
@@ -128,15 +127,8 @@ def csv_to_kml(
 	empty = np.union1d(data[np.isnan(lonlat[:,0])].index, data[np.isnan(lonlat[:,1])].index)
 	data = data.drop(empty)
 
-	data_range = np.array(data_range[1:-1].split(",")).astype(int)
-	#decimation of data with data_range
-	if len(data_range) == 3 :
-		data = data[data_range[0]: data_range[1]: data_range[2]]
-	elif len(data_range) == 2 :
-		data = data[data_range[0]: data_range[1]: 1]
-	elif len(data_range) == 1 :
-		data = data[data_range[0]: -1: 1]
-	
+	#decimation of data for tests
+	data = data[0:-1:100]
 	
 	#reorganise indexes without loosing previous
 	data = data.reset_index()
