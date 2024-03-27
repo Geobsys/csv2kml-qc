@@ -15,20 +15,20 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-def custom_pt(
-			  kml,
-			  lon,
-			  lat,
-			  h,
-			  status="None",
-			  mode="icon",
-			  name="",
-			  description="",
-			  label_scale=2,
-			  icon_scale=1,
-			  icon_href="http://maps.google.com/mapfiles/kml/shapes/placemark_circle.png",
-			  show_pt_name=False,
-			  altitudemode="absolute"
+def custom_pt( # Creation of a kml point
+			  kml, # simplekml object
+			  lon, # longitude (WGS84), float
+			  lat, # latitude  (WGS84), float
+			  h,   # altitude, float
+			  status="None", # GNSS measure status (R, F, N or None), string
+			  mode="icon", # point representation, string
+			  name="", # point name, string
+			  description="", # point description, string
+			  label_scale=2, # point name scale, int
+			  icon_scale=1, # point icon scale, int
+			  icon_href="http://maps.google.com/mapfiles/kml/shapes/placemark_circle.png", # point icon reference, string
+			  show_pt_name=False, # show the point name, bool
+			  altitudemode="absolute" # altitude mode in kml, string ("absolute", "relativeToGround", "clampToGround")
 			 ):
 	if(mode=="icon"):
 		#append a pt
@@ -47,15 +47,15 @@ def custom_pt(
 	return None
 
 
-def custom_line(
-				kml,
-				pts_coords,
-				status="None",
-				mode="line",
-				name="",
-				description="",
-				width=1,
-				altitudemode="absolute"
+def custom_line( # Creation of a kml line
+				kml, # simplekml object
+				pts_coords, # point coordinates, list (lenght 2 or more) of tuples (lenght 2 or 3) with floats
+				status="None", # GNSS measure status (R, F, N or None), string
+				mode="line", # line representation, string
+				name="", # line name, string
+				description="", # line description, string
+				width=1, # line width scale, int
+				altitudemode="absolute" # altitude mode in kml, string ("absolute", "relativeToGround", "clampToGround")
 				):
 	if (mode=="line"):
 		#append a line
@@ -66,15 +66,15 @@ def custom_line(
 		ls.style.linestyle.color = csts.colors_dict[csts.status_dict[status]["color"]]
 	return None
 
-def custom_int_conf(
-				kml,
-				pt,
-				mode="pyr",
-				name="",
-				description="",
-				altitudemode="absolute",
-				color=csts.colors_dict["green"],
-				incert_pla=2
+def custom_int_conf( # Creation of a kml line
+				kml, # simplekml object
+				pt,  # point object, pandas DataFrame
+				mode="pyr", # confidence interval representation, string
+				name="", # confidence interval name, string
+				description="", # confidence interval description, string
+				altitudemode="absolute", # altitude mode in kml, string ("absolute", "relativeToGround", "clampToGround")
+				color=csts.colors_dict["green"], # confidence interval color, string
+				incert_pla=2, # confidence interval scaled incertitude, float
 				):
 	if (mode=="pyr"):
 		corners = np.array([(pt["lon"]-incert_pla, pt["lat"]           , pt["altitude"]), 
@@ -98,24 +98,24 @@ def custom_int_conf(
 	return None
 	
 
-def csv_to_kml(
-			   input_file,
-			   input_type,
-			   output_file="",
-			   separator=",",
-			   data_range=(),
-			   doc_name="",
-			   quiet=False,
-			   mode="icon",
-			   label_scale=2,
-			   icon_scale=1,
-			   icon_href="http://maps.google.com/mapfiles/kml/shapes/placemark_circle.png",
-			   show_pt_name=False,
-			   altitudemode="absolute",
-			   show_point=True,
-			   show_line=True,
-			   show_confidence_interval=True,
-			   show_building=True
+def csv_to_kml( # Generate a kml, with an input file and some options
+			   input_file, # input path file, string
+			   input_type, # input type, string (normal, special)
+			   output_file="", # output path file, string
+			   separator=",", # input file separator, string
+			   data_range=(), # decimation parameters of input file, tuple
+			   doc_name="", # kml document name, string
+			   quiet=False, # printing parameter, boolean
+			   mode="icon", # point representation mode, string
+			   label_scale=2, # point name scale, int
+			   icon_scale=1, # point icon scale, int
+			   icon_href="http://maps.google.com/mapfiles/kml/shapes/placemark_circle.png", # point icon reference, string
+			   show_pt_name=False, # option hiding the points names, boolean
+			   altitudemode="absolute", # altitude mode in kml, string ("absolute", "relativeToGround", "clampToGround")
+			   show_point=True, # option don't generate points, boolean
+			   show_line=True, # option don't generate lines, boolean
+			   show_confidence_interval=True, # option don't generate confidences intervals, boolean
+			   show_building=True # option don't generate buildings, boolean
 			  ):
 	
 	#my data

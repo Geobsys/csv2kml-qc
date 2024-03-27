@@ -21,13 +21,13 @@ if __name__ == "__main__":
     parser.add_argument('-sep','--separator',type=str,help="separator used in the .csv file (Default=,)",default=",")
     parser.add_argument('-dr','--data_range',type=str, help="Range of data from start (s), to end (e), with a step (t) : (s,e,t). e and t are optionnal",default='(0,-1,100)')
     parser.add_argument('-name','--doc_name',type=str,help="kml document name",default="")
-    parser.add_argument('--quiet',action="store_true",help="print some statistics")
+    parser.add_argument('--quiet',action="store_true",help="hide the statistics")
     # style parameters
     parser.add_argument('-m' ,'--mode',type=str,help="representation mode",default="icon",choices=["icon"])
     parser.add_argument('-ls','--label_scale',type=float,help="label scale (Default=2)",default=2)
     parser.add_argument('-is','--icon_scale',type=float,help="icon scale (Default=1)",default=1)
     parser.add_argument('-ih','--icon_href',type=str,help="icon href (Default=http://maps.google.com/mapfiles/kml/shapes/placemark_circle.png)",default="http://maps.google.com/mapfiles/kml/shapes/placemark_circle.png")
-    parser.add_argument('-sn','--show_pt_name',type=bool,help="True : showing the label, False : Hiding it", default=False)
+    parser.add_argument('--show_pt_name',action="store_true",help="Hide the points names")
     parser.add_argument('-am','--altitudemode',type=str,help="See simplekml .Altitudemode (absolute, relativeToGround, clampToGround)", default="absolute",choices=["absolute", "relativeToGround", "clampToGround"])
     # processing options
     parser.add_argument('--show_point',action="store_false",help="Don't show points")
