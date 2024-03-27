@@ -1,0 +1,1772 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2" xmlns:gx="http://www.google.com/kml/ext/2.2">
+    <Document id="1">
+        <name>EXTENVENT.LOG</name>
+        <Folder id="2">
+            <Style id="7">
+                <IconStyle id="8">
+                    <color>ff3c8e38</color>
+                    <colorMode>normal</colorMode>
+                    <scale>1</scale>
+                    <heading>0</heading>
+                    <Icon id="9">
+                        <href>http://maps.google.com/mapfiles/kml/shapes/placemark_circle.png</href>
+                    </Icon>
+                </IconStyle>
+            </Style>
+            <Style id="44">
+                <IconStyle id="45">
+                    <color>ff3c8e38</color>
+                    <colorMode>normal</colorMode>
+                    <scale>1</scale>
+                    <heading>0</heading>
+                    <Icon id="46">
+                        <href>http://maps.google.com/mapfiles/kml/shapes/placemark_circle.png</href>
+                    </Icon>
+                </IconStyle>
+            </Style>
+            <Style id="81">
+                <IconStyle id="82">
+                    <color>ff3c8e38</color>
+                    <colorMode>normal</colorMode>
+                    <scale>1</scale>
+                    <heading>0</heading>
+                    <Icon id="83">
+                        <href>http://maps.google.com/mapfiles/kml/shapes/placemark_circle.png</href>
+                    </Icon>
+                </IconStyle>
+            </Style>
+            <Style id="118">
+                <IconStyle id="119">
+                    <color>ff3c8e38</color>
+                    <colorMode>normal</colorMode>
+                    <scale>1</scale>
+                    <heading>0</heading>
+                    <Icon id="120">
+                        <href>http://maps.google.com/mapfiles/kml/shapes/placemark_circle.png</href>
+                    </Icon>
+                </IconStyle>
+            </Style>
+            <Style id="155">
+                <IconStyle id="156">
+                    <color>ff007cf5</color>
+                    <colorMode>normal</colorMode>
+                    <scale>1</scale>
+                    <heading>0</heading>
+                    <Icon id="157">
+                        <href>http://maps.google.com/mapfiles/kml/shapes/placemark_circle.png</href>
+                    </Icon>
+                </IconStyle>
+            </Style>
+            <Style id="196">
+                <IconStyle id="197">
+                    <color>ff3c8e38</color>
+                    <colorMode>normal</colorMode>
+                    <scale>1</scale>
+                    <heading>0</heading>
+                    <Icon id="198">
+                        <href>http://maps.google.com/mapfiles/kml/shapes/placemark_circle.png</href>
+                    </Icon>
+                </IconStyle>
+            </Style>
+            <Style id="233">
+                <IconStyle id="234">
+                    <color>ff3c8e38</color>
+                    <colorMode>normal</colorMode>
+                    <scale>1</scale>
+                    <heading>0</heading>
+                    <Icon id="235">
+                        <href>http://maps.google.com/mapfiles/kml/shapes/placemark_circle.png</href>
+                    </Icon>
+                </IconStyle>
+            </Style>
+            <Style id="270">
+                <IconStyle id="271">
+                    <color>ff3c8e38</color>
+                    <colorMode>normal</colorMode>
+                    <scale>1</scale>
+                    <heading>0</heading>
+                    <Icon id="272">
+                        <href>http://maps.google.com/mapfiles/kml/shapes/placemark_circle.png</href>
+                    </Icon>
+                </IconStyle>
+            </Style>
+            <Style id="307">
+                <IconStyle id="308">
+                    <color>ff2f2fd3</color>
+                    <colorMode>normal</colorMode>
+                    <scale>1</scale>
+                    <heading>0</heading>
+                    <Icon id="309">
+                        <href>http://maps.google.com/mapfiles/kml/shapes/placemark_circle.png</href>
+                    </Icon>
+                </IconStyle>
+            </Style>
+            <Style id="348">
+                <IconStyle id="349">
+                    <color>ff3c8e38</color>
+                    <colorMode>normal</colorMode>
+                    <scale>1</scale>
+                    <heading>0</heading>
+                    <Icon id="350">
+                        <href>http://maps.google.com/mapfiles/kml/shapes/placemark_circle.png</href>
+                    </Icon>
+                </IconStyle>
+            </Style>
+            <Style id="385">
+                <IconStyle id="386">
+                    <color>ff3c8e38</color>
+                    <colorMode>normal</colorMode>
+                    <scale>1</scale>
+                    <heading>0</heading>
+                    <Icon id="387">
+                        <href>http://maps.google.com/mapfiles/kml/shapes/placemark_circle.png</href>
+                    </Icon>
+                </IconStyle>
+            </Style>
+            <Style id="422">
+                <IconStyle id="423">
+                    <color>ff2f2fd3</color>
+                    <colorMode>normal</colorMode>
+                    <scale>1</scale>
+                    <heading>0</heading>
+                    <Icon id="424">
+                        <href>http://maps.google.com/mapfiles/kml/shapes/placemark_circle.png</href>
+                    </Icon>
+                </IconStyle>
+            </Style>
+            <Style id="463">
+                <IconStyle id="464">
+                    <color>ff3c8e38</color>
+                    <colorMode>normal</colorMode>
+                    <scale>1</scale>
+                    <heading>0</heading>
+                    <Icon id="465">
+                        <href>http://maps.google.com/mapfiles/kml/shapes/placemark_circle.png</href>
+                    </Icon>
+                </IconStyle>
+            </Style>
+            <name>Measured points</name>
+            <Placemark id="6">
+                <description>&lt;table style=&quot;border: 1px solid black;&gt;&lt;tr&gt;&lt;td&quot;&gt; &lt;/td&gt;&lt;td&quot;&gt; &lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Index&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;0 &lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Time&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;61h 51min 56.363s&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Day&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;2285 &lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;State&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;RTK_Fix&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Latitude  (WGS84)&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;45.519925443 °&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Longitude (WGS84)&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;6.680454741 °&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Height&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;1738.727 m&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Uncertainties Lat-Lon&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;0.04 m&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Uncertainty High&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;0.05 m&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Orientation X&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;0.356953 rad&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Orientation Y&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;-0.0224424 rad&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Orientation Z&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;0.1067406 rad&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;X (RGF93v1)&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;4447363.371 m&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Y (RGF93v1)&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;520907.124 m&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Z (RGF93v1)&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;4529261.7 m&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Altitude&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;1738.727 m&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Distance since prev pt&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;0.0 m&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Time laps since prev pt&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;0h 0min 0.0s&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Elapsed time&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;0h 0min 0.0s&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Time left&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;18h 31min 23.173s&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Velocity&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;nan m/s&lt;/td&gt;&lt;/tr&gt;
+&lt;/table&gt;</description>
+                <styleUrl>#7</styleUrl>
+                <Point id="5">
+                    <coordinates>6.680454741,45.519925443,1738.727</coordinates>
+                    <altitudeMode>absolute</altitudeMode>
+                </Point>
+            </Placemark>
+            <Placemark id="43">
+                <description>&lt;table style=&quot;border: 1px solid black;&gt;&lt;tr&gt;&lt;td&quot;&gt; &lt;/td&gt;&lt;td&quot;&gt; &lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Index&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;100 &lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Time&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;62h 7min 3.178s&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Day&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;2285 &lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;State&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;RTK_Fix&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Latitude  (WGS84)&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;45.520167197 °&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Longitude (WGS84)&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;6.678140022 °&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Height&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;1719.023 m&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Uncertainties Lat-Lon&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;0.02 m&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Uncertainty High&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;0.04 m&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Orientation X&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;0.0317449 rad&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Orientation Y&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;0.3532945 rad&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Orientation Z&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;-0.928058 rad&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;X (RGF93v1)&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;4447351.653 m&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Y (RGF93v1)&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;520723.617 m&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Z (RGF93v1)&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;4529266.473 m&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Altitude&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;1719.023 m&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Distance since prev pt&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;183.943 m&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Time laps since prev pt&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;0h 15min 6.815s&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Elapsed time&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;0h 15min 6.815s&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Time left&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;18h 16min 16.358s&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Velocity&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;0.144 m/s&lt;/td&gt;&lt;/tr&gt;
+&lt;/table&gt;</description>
+                <styleUrl>#44</styleUrl>
+                <Point id="42">
+                    <coordinates>6.678140022,45.520167197,1719.023</coordinates>
+                    <altitudeMode>absolute</altitudeMode>
+                </Point>
+            </Placemark>
+            <Placemark id="80">
+                <description>&lt;table style=&quot;border: 1px solid black;&gt;&lt;tr&gt;&lt;td&quot;&gt; &lt;/td&gt;&lt;td&quot;&gt; &lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Index&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;200 &lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Time&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;62h 21min 1.621s&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Day&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;2285 &lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;State&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;RTK_Fix&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Latitude  (WGS84)&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;45.520566041 °&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Longitude (WGS84)&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;6.678849034 °&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Height&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;1706.765 m&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Uncertainties Lat-Lon&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;0.02 m&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Uncertainty High&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;0.04 m&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Orientation X&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;0.399375 rad&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Orientation Y&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;0.152608 rad&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Orientation Z&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;-0.3242794 rad&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;X (RGF93v1)&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;4447305.257 m&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Y (RGF93v1)&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;520773.972 m&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Z (RGF93v1)&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;4529288.794 m&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Altitude&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;1706.765 m&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Distance since prev pt&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;72.017 m&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Time laps since prev pt&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;0h 13min 58.443s&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Elapsed time&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;0h 29min 5.258s&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Time left&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;18h 2min 17.915s&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Velocity&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;0.06 m/s&lt;/td&gt;&lt;/tr&gt;
+&lt;/table&gt;</description>
+                <styleUrl>#81</styleUrl>
+                <Point id="79">
+                    <coordinates>6.678849034,45.520566041,1706.765</coordinates>
+                    <altitudeMode>absolute</altitudeMode>
+                </Point>
+            </Placemark>
+            <Placemark id="117">
+                <description>&lt;table style=&quot;border: 1px solid black;&gt;&lt;tr&gt;&lt;td&quot;&gt; &lt;/td&gt;&lt;td&quot;&gt; &lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Index&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;300 &lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Time&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;62h 46min 55.073s&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Day&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;2285 &lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;State&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;RTK_Fix&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Latitude  (WGS84)&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;45.520898323 °&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Longitude (WGS84)&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;6.67930212 °&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Height&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;1689.815 m&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Uncertainties Lat-Lon&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;0.03 m&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Uncertainty High&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;0.04 m&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Orientation X&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;-0.2212842 rad&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Orientation Y&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;0.2829463 rad&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Orientation Z&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;-0.7585835 rad&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;X (RGF93v1)&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;4447263.165 m&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Y (RGF93v1)&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;520804.694 m&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Z (RGF93v1)&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;4529302.582 m&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Altitude&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;1689.815 m&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Distance since prev pt&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;53.904 m&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Time laps since prev pt&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;0h 25min 53.452s&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Elapsed time&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;0h 54min 58.71s&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Time left&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;17h 36min 24.463s&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Velocity&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;0.074 m/s&lt;/td&gt;&lt;/tr&gt;
+&lt;/table&gt;</description>
+                <styleUrl>#118</styleUrl>
+                <Point id="116">
+                    <coordinates>6.67930212,45.520898323,1689.815</coordinates>
+                    <altitudeMode>absolute</altitudeMode>
+                </Point>
+            </Placemark>
+            <Placemark id="154">
+                <description>&lt;table style=&quot;border: 1px solid black;&gt;&lt;tr&gt;&lt;td&quot;&gt; &lt;/td&gt;&lt;td&quot;&gt; &lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Index&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;400 &lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Time&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;63h 8min 40.603s&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Day&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;2285 &lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;State&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;RTK_Float&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Latitude  (WGS84)&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;45.521049272 °&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Longitude (WGS84)&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;6.677416067 °&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Height&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;1674.056 m&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Uncertainties Lat-Lon&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;0.8 m&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Uncertainty High&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;0.63 m&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Orientation X&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;0.2545617 rad&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Orientation Y&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;0.1249867 rad&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Orientation Z&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;-0.3816199 rad&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;X (RGF93v1)&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;4447257.447 m&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Y (RGF93v1)&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;520655.623 m&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Z (RGF93v1)&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;4529303.096 m&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Altitude&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;1674.056 m&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Distance since prev pt&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;149.182 m&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Time laps since prev pt&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;0h 21min 45.53s&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Elapsed time&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;1h 16min 44.24s&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Time left&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;17h 14min 38.933s&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Velocity&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;0.105 m/s&lt;/td&gt;&lt;/tr&gt;
+&lt;/table&gt;</description>
+                <styleUrl>#155</styleUrl>
+                <Point id="153">
+                    <coordinates>6.677416067,45.521049272,1674.056</coordinates>
+                    <altitudeMode>absolute</altitudeMode>
+                </Point>
+            </Placemark>
+            <Placemark id="195">
+                <description>&lt;table style=&quot;border: 1px solid black;&gt;&lt;tr&gt;&lt;td&quot;&gt; &lt;/td&gt;&lt;td&quot;&gt; &lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Index&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;500 &lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Time&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;63h 27min 14.147s&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Day&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;2285 &lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;State&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;RTK_Fix&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Latitude  (WGS84)&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;45.521297466 °&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Longitude (WGS84)&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;6.678724401 °&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Height&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;1667.609 m&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Uncertainties Lat-Lon&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;0.06 m&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Uncertainty High&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;0.07 m&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Orientation X&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;-0.1535359 rad&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Orientation Y&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;0.2329689 rad&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Orientation Z&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;-0.8629302 rad&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;X (RGF93v1)&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;4447221.517 m&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Y (RGF93v1)&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;520754.36 m&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Z (RGF93v1)&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;4529317.828 m&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Altitude&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;1667.609 m&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Distance since prev pt&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;106.099 m&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Time laps since prev pt&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;0h 18min 33.544s&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Elapsed time&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;1h 35min 17.784s&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Time left&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;16h 56min 5.389s&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Velocity&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;0.081 m/s&lt;/td&gt;&lt;/tr&gt;
+&lt;/table&gt;</description>
+                <styleUrl>#196</styleUrl>
+                <Point id="194">
+                    <coordinates>6.678724401,45.521297466,1667.609</coordinates>
+                    <altitudeMode>absolute</altitudeMode>
+                </Point>
+            </Placemark>
+            <Placemark id="232">
+                <description>&lt;table style=&quot;border: 1px solid black;&gt;&lt;tr&gt;&lt;td&quot;&gt; &lt;/td&gt;&lt;td&quot;&gt; &lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Index&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;600 &lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Time&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;63h 48min 18.712s&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Day&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;2285 &lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;State&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;RTK_Fix&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Latitude  (WGS84)&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;45.52200357 °&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Longitude (WGS84)&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;6.678361602 °&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Height&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;1652.356 m&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Uncertainties Lat-Lon&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;0.03 m&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Uncertainty High&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;0.06 m&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Orientation X&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;0.2649218 rad&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Orientation Y&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;0.3015907 rad&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Orientation Z&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;-0.7023751 rad&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;X (RGF93v1)&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;4447158.57 m&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Y (RGF93v1)&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;520718.444 m&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Z (RGF93v1)&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;4529361.944 m&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Altitude&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;1652.356 m&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Distance since prev pt&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;84.844 m&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Time laps since prev pt&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;0h 21min 4.565s&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Elapsed time&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;1h 56min 22.349s&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Time left&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;16h 35min 0.824s&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Velocity&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;0.065 m/s&lt;/td&gt;&lt;/tr&gt;
+&lt;/table&gt;</description>
+                <styleUrl>#233</styleUrl>
+                <Point id="231">
+                    <coordinates>6.678361602,45.52200357,1652.356</coordinates>
+                    <altitudeMode>absolute</altitudeMode>
+                </Point>
+            </Placemark>
+            <Placemark id="269">
+                <description>&lt;table style=&quot;border: 1px solid black;&gt;&lt;tr&gt;&lt;td&quot;&gt; &lt;/td&gt;&lt;td&quot;&gt; &lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Index&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;700 &lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Time&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;64h 16min 25.255s&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Day&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;2285 &lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;State&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;RTK_Fix&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Latitude  (WGS84)&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;45.522559625 °&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Longitude (WGS84)&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;6.677269157 °&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Height&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;1635.61 m&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Uncertainties Lat-Lon&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;0.06 m&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Uncertainty High&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;0.14 m&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Orientation X&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;-0.3537805 rad&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Orientation Y&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;0.2235604 rad&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Orientation Z&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;-0.5080059 rad&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;X (RGF93v1)&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;4447113.036 m&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Y (RGF93v1)&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;520627.158 m&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Z (RGF93v1)&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;4529393.306 m&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Altitude&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;1635.61 m&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Distance since prev pt&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;106.724 m&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Time laps since prev pt&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;0h 28min 6.543s&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Elapsed time&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;2h 24min 28.892s&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Time left&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;16h 6min 54.281s&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Velocity&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;0.057 m/s&lt;/td&gt;&lt;/tr&gt;
+&lt;/table&gt;</description>
+                <styleUrl>#270</styleUrl>
+                <Point id="268">
+                    <coordinates>6.677269157,45.522559625,1635.61</coordinates>
+                    <altitudeMode>absolute</altitudeMode>
+                </Point>
+            </Placemark>
+            <Placemark id="306">
+                <description>&lt;table style=&quot;border: 1px solid black;&gt;&lt;tr&gt;&lt;td&quot;&gt; &lt;/td&gt;&lt;td&quot;&gt; &lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Index&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;800 &lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Time&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;64h 51min 2.716s&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Day&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;2285 &lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;State&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;DGNSS&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Latitude  (WGS84)&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;45.523481053 °&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Longitude (WGS84)&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;6.677582227 °&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Height&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;1628.499 m&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Uncertainties Lat-Lon&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;1.87 m&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Uncertainty High&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;2.35 m&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Orientation X&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;0.1405669 rad&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Orientation Y&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;0.0666365 rad&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Orientation Z&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;-0.4233406 rad&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;X (RGF93v1)&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;4447032.648 m&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Y (RGF93v1)&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;520642.379 m&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Z (RGF93v1)&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;4529460.001 m&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Altitude&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;1628.499 m&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Distance since prev pt&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;105.556 m&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Time laps since prev pt&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;0h 34min 37.461s&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Elapsed time&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;2h 59min 6.353s&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Time left&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;15h 32min 16.82s&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Velocity&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;0.026 m/s&lt;/td&gt;&lt;/tr&gt;
+&lt;/table&gt;</description>
+                <styleUrl>#307</styleUrl>
+                <Point id="305">
+                    <coordinates>6.677582227,45.523481053,1628.499</coordinates>
+                    <altitudeMode>absolute</altitudeMode>
+                </Point>
+            </Placemark>
+            <Placemark id="347">
+                <description>&lt;table style=&quot;border: 1px solid black;&gt;&lt;tr&gt;&lt;td&quot;&gt; &lt;/td&gt;&lt;td&quot;&gt; &lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Index&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;900 &lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Time&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;79h 40min 58.49s&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Day&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;2285 &lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;State&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;RTK_Fix&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Latitude  (WGS84)&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;45.523307436 °&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Longitude (WGS84)&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;6.677133695 °&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Height&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;1627.264 m&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Uncertainties Lat-Lon&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;0.03 m&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Uncertainty High&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;0.04 m&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Orientation X&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;0.3595513 rad&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Orientation Y&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;-0.0124296 rad&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Orientation Z&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;0.0816999 rad&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;X (RGF93v1)&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;4447049.543 m&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Y (RGF93v1)&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;520609.066 m&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Z (RGF93v1)&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;4529445.597 m&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Altitude&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;1627.264 m&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Distance since prev pt&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;40.033 m&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Time laps since prev pt&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;14h 49min 55.774s&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Elapsed time&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;17h 49min 2.127s&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Time left&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;0h 42min 21.046s&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Velocity&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;0.083 m/s&lt;/td&gt;&lt;/tr&gt;
+&lt;/table&gt;</description>
+                <styleUrl>#348</styleUrl>
+                <Point id="346">
+                    <coordinates>6.677133695,45.523307436,1627.264</coordinates>
+                    <altitudeMode>absolute</altitudeMode>
+                </Point>
+            </Placemark>
+            <Placemark id="384">
+                <description>&lt;table style=&quot;border: 1px solid black;&gt;&lt;tr&gt;&lt;td&quot;&gt; &lt;/td&gt;&lt;td&quot;&gt; &lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Index&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;1000 &lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Time&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;79h 53min 21.88s&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Day&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;2285 &lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;State&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;RTK_Fix&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Latitude  (WGS84)&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;45.522888142 °&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Longitude (WGS84)&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;6.675671026 °&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Height&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;1624.058 m&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Uncertainties Lat-Lon&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;0.03 m&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Uncertainty High&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;0.04 m&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Orientation X&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;-0.1741453 rad&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Orientation Y&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;0.328651 rad&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Orientation Z&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;-0.825748 rad&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;X (RGF93v1)&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;4447093.635 m&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Y (RGF93v1)&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;520499.145 m&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Z (RGF93v1)&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;4529410.651 m&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Altitude&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;1624.058 m&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Distance since prev pt&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;123.483 m&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Time laps since prev pt&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;0h 12min 23.39s&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Elapsed time&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;18h 1min 25.517s&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Time left&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;0h 29min 57.656s&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Velocity&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;0.138 m/s&lt;/td&gt;&lt;/tr&gt;
+&lt;/table&gt;</description>
+                <styleUrl>#385</styleUrl>
+                <Point id="383">
+                    <coordinates>6.675671026,45.522888142,1624.058</coordinates>
+                    <altitudeMode>absolute</altitudeMode>
+                </Point>
+            </Placemark>
+            <Placemark id="421">
+                <description>&lt;table style=&quot;border: 1px solid black;&gt;&lt;tr&gt;&lt;td&quot;&gt; &lt;/td&gt;&lt;td&quot;&gt; &lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Index&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;1100 &lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Time&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;80h 8min 9.325s&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Day&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;2285 &lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;State&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;DGNSS&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Latitude  (WGS84)&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;45.523739264 °&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Longitude (WGS84)&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;6.675370435 °&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Height&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;1619.322 m&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Uncertainties Lat-Lon&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;2.54 m&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Uncertainty High&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;2.94 m&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Orientation X&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;-0.1112034 rad&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Orientation Y&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;0.3900654 rad&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Orientation Z&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;-0.8741887 rad&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;X (RGF93v1)&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;4447026.013 m&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Y (RGF93v1)&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;520467.581 m&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Z (RGF93v1)&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;4529473.564 m&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Altitude&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;1619.322 m&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Distance since prev pt&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;97.607 m&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Time laps since prev pt&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;0h 14min 47.445s&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Elapsed time&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;18h 16min 12.962s&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Time left&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;0h 15min 10.211s&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Velocity&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;0.129 m/s&lt;/td&gt;&lt;/tr&gt;
+&lt;/table&gt;</description>
+                <styleUrl>#422</styleUrl>
+                <Point id="420">
+                    <coordinates>6.675370435,45.523739264,1619.322</coordinates>
+                    <altitudeMode>absolute</altitudeMode>
+                </Point>
+            </Placemark>
+            <Placemark id="462">
+                <description>&lt;table style=&quot;border: 1px solid black;&gt;&lt;tr&gt;&lt;td&quot;&gt; &lt;/td&gt;&lt;td&quot;&gt; &lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Index&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;1200 &lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Time&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;80h 23min 19.536s&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Day&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;2285 &lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;State&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;RTK_Fix&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Latitude  (WGS84)&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;45.522701683 °&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Longitude (WGS84)&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;6.676262746 °&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Height&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;1623.635 m&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Uncertainties Lat-Lon&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;0.03 m&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Uncertainty High&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;0.07 m&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Orientation X&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;-0.238886 rad&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Orientation Y&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;0.121534 rad&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Orientation Z&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;-0.4481953 rad&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;X (RGF93v1)&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;4447102.655 m&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Y (RGF93v1)&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;520546.758 m&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Z (RGF93v1)&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;4529395.826 m&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Altitude&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;1623.635 m&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Distance since prev pt&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;134.856 m&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Time laps since prev pt&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;0h 15min 10.211s&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Elapsed time&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;18h 31min 23.173s&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Time left&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;0h 0min 0.0s&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Velocity&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;nan m/s&lt;/td&gt;&lt;/tr&gt;
+&lt;/table&gt;</description>
+                <styleUrl>#463</styleUrl>
+                <Point id="461">
+                    <coordinates>6.676262746,45.522701683,1623.635</coordinates>
+                    <altitudeMode>absolute</altitudeMode>
+                </Point>
+            </Placemark>
+        </Folder>
+        <Folder id="3">
+            <Style id="192">
+                <LineStyle id="193">
+                    <color>ff3c8e38</color>
+                    <colorMode>normal</colorMode>
+                    <width>5</width>
+                </LineStyle>
+            </Style>
+            <Style id="344">
+                <LineStyle id="345">
+                    <color>ff3c8e38</color>
+                    <colorMode>normal</colorMode>
+                    <width>5</width>
+                </LineStyle>
+            </Style>
+            <Style id="459">
+                <LineStyle id="460">
+                    <color>ff3c8e38</color>
+                    <colorMode>normal</colorMode>
+                    <width>5</width>
+                </LineStyle>
+            </Style>
+            <name>Trace</name>
+            <Placemark id="191">
+                <name>Segment n° 0</name>
+                <description>&lt;table style=&quot;border: 1px solid black;&gt;&lt;tr&gt;&lt;td&quot;&gt; &lt;/td&gt;&lt;td&quot;&gt; &lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Start&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;0&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;End&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;300&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Status&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;RTK_Fix&lt;/td&gt;&lt;/tr&gt;
+&lt;/table&gt;</description>
+                <styleUrl>#192</styleUrl>
+                <LineString id="190">
+                    <extrude>0</extrude>
+                    <altitudeMode>absolute</altitudeMode>
+                    <coordinates>6.680454741,45.519925443,1738.727 6.678140022,45.520167197,1719.023 6.678849034,45.520566041,1706.765 6.67930212,45.520898323,1689.815</coordinates>
+                </LineString>
+            </Placemark>
+            <Placemark id="343">
+                <name>Segment n° 1</name>
+                <description>&lt;table style=&quot;border: 1px solid black;&gt;&lt;tr&gt;&lt;td&quot;&gt; &lt;/td&gt;&lt;td&quot;&gt; &lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Start&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;500&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;End&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;700&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Status&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;RTK_Fix&lt;/td&gt;&lt;/tr&gt;
+&lt;/table&gt;</description>
+                <styleUrl>#344</styleUrl>
+                <LineString id="342">
+                    <extrude>0</extrude>
+                    <altitudeMode>absolute</altitudeMode>
+                    <coordinates>6.678724401,45.521297466,1667.609 6.678361602,45.52200357,1652.356 6.677269157,45.522559625,1635.61</coordinates>
+                </LineString>
+            </Placemark>
+            <Placemark id="458">
+                <name>Segment n° 2</name>
+                <description>&lt;table style=&quot;border: 1px solid black;&gt;&lt;tr&gt;&lt;td&quot;&gt; &lt;/td&gt;&lt;td&quot;&gt; &lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Start&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;900&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;End&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;1000&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td style=&quot;text-align: left;&quot;&gt;Status&lt;/td&gt;&lt;td style=&quot;text-align: left;&quot;&gt;RTK_Fix&lt;/td&gt;&lt;/tr&gt;
+&lt;/table&gt;</description>
+                <styleUrl>#459</styleUrl>
+                <LineString id="457">
+                    <extrude>0</extrude>
+                    <altitudeMode>absolute</altitudeMode>
+                    <coordinates>6.677133695,45.523307436,1627.264 6.675671026,45.522888142,1624.058</coordinates>
+                </LineString>
+            </Placemark>
+        </Folder>
+        <Folder id="4">
+            <Style id="16">
+                <PolyStyle id="17">
+                    <color>ff3c8e38</color>
+                    <colorMode>normal</colorMode>
+                    <fill>1</fill>
+                    <outline>1</outline>
+                </PolyStyle>
+            </Style>
+            <Style id="24">
+                <PolyStyle id="25">
+                    <color>ff3c8e38</color>
+                    <colorMode>normal</colorMode>
+                    <fill>1</fill>
+                    <outline>1</outline>
+                </PolyStyle>
+            </Style>
+            <Style id="32">
+                <PolyStyle id="33">
+                    <color>ff3c8e38</color>
+                    <colorMode>normal</colorMode>
+                    <fill>1</fill>
+                    <outline>1</outline>
+                </PolyStyle>
+            </Style>
+            <Style id="40">
+                <PolyStyle id="41">
+                    <color>ff3c8e38</color>
+                    <colorMode>normal</colorMode>
+                    <fill>1</fill>
+                    <outline>1</outline>
+                </PolyStyle>
+            </Style>
+            <Style id="53">
+                <PolyStyle id="54">
+                    <color>ff3c8e38</color>
+                    <colorMode>normal</colorMode>
+                    <fill>1</fill>
+                    <outline>1</outline>
+                </PolyStyle>
+            </Style>
+            <Style id="61">
+                <PolyStyle id="62">
+                    <color>ff3c8e38</color>
+                    <colorMode>normal</colorMode>
+                    <fill>1</fill>
+                    <outline>1</outline>
+                </PolyStyle>
+            </Style>
+            <Style id="69">
+                <PolyStyle id="70">
+                    <color>ff3c8e38</color>
+                    <colorMode>normal</colorMode>
+                    <fill>1</fill>
+                    <outline>1</outline>
+                </PolyStyle>
+            </Style>
+            <Style id="77">
+                <PolyStyle id="78">
+                    <color>ff3c8e38</color>
+                    <colorMode>normal</colorMode>
+                    <fill>1</fill>
+                    <outline>1</outline>
+                </PolyStyle>
+            </Style>
+            <Style id="90">
+                <PolyStyle id="91">
+                    <color>ff3c8e38</color>
+                    <colorMode>normal</colorMode>
+                    <fill>1</fill>
+                    <outline>1</outline>
+                </PolyStyle>
+            </Style>
+            <Style id="98">
+                <PolyStyle id="99">
+                    <color>ff3c8e38</color>
+                    <colorMode>normal</colorMode>
+                    <fill>1</fill>
+                    <outline>1</outline>
+                </PolyStyle>
+            </Style>
+            <Style id="106">
+                <PolyStyle id="107">
+                    <color>ff3c8e38</color>
+                    <colorMode>normal</colorMode>
+                    <fill>1</fill>
+                    <outline>1</outline>
+                </PolyStyle>
+            </Style>
+            <Style id="114">
+                <PolyStyle id="115">
+                    <color>ff3c8e38</color>
+                    <colorMode>normal</colorMode>
+                    <fill>1</fill>
+                    <outline>1</outline>
+                </PolyStyle>
+            </Style>
+            <Style id="127">
+                <PolyStyle id="128">
+                    <color>ff3c8e38</color>
+                    <colorMode>normal</colorMode>
+                    <fill>1</fill>
+                    <outline>1</outline>
+                </PolyStyle>
+            </Style>
+            <Style id="135">
+                <PolyStyle id="136">
+                    <color>ff3c8e38</color>
+                    <colorMode>normal</colorMode>
+                    <fill>1</fill>
+                    <outline>1</outline>
+                </PolyStyle>
+            </Style>
+            <Style id="143">
+                <PolyStyle id="144">
+                    <color>ff3c8e38</color>
+                    <colorMode>normal</colorMode>
+                    <fill>1</fill>
+                    <outline>1</outline>
+                </PolyStyle>
+            </Style>
+            <Style id="151">
+                <PolyStyle id="152">
+                    <color>ff3c8e38</color>
+                    <colorMode>normal</colorMode>
+                    <fill>1</fill>
+                    <outline>1</outline>
+                </PolyStyle>
+            </Style>
+            <Style id="164">
+                <PolyStyle id="165">
+                    <color>ff007cf5</color>
+                    <colorMode>normal</colorMode>
+                    <fill>1</fill>
+                    <outline>1</outline>
+                </PolyStyle>
+            </Style>
+            <Style id="172">
+                <PolyStyle id="173">
+                    <color>ff007cf5</color>
+                    <colorMode>normal</colorMode>
+                    <fill>1</fill>
+                    <outline>1</outline>
+                </PolyStyle>
+            </Style>
+            <Style id="180">
+                <PolyStyle id="181">
+                    <color>ff007cf5</color>
+                    <colorMode>normal</colorMode>
+                    <fill>1</fill>
+                    <outline>1</outline>
+                </PolyStyle>
+            </Style>
+            <Style id="188">
+                <PolyStyle id="189">
+                    <color>ff007cf5</color>
+                    <colorMode>normal</colorMode>
+                    <fill>1</fill>
+                    <outline>1</outline>
+                </PolyStyle>
+            </Style>
+            <Style id="205">
+                <PolyStyle id="206">
+                    <color>ff00ff00</color>
+                    <colorMode>normal</colorMode>
+                    <fill>1</fill>
+                    <outline>1</outline>
+                </PolyStyle>
+            </Style>
+            <Style id="213">
+                <PolyStyle id="214">
+                    <color>ff00ff00</color>
+                    <colorMode>normal</colorMode>
+                    <fill>1</fill>
+                    <outline>1</outline>
+                </PolyStyle>
+            </Style>
+            <Style id="221">
+                <PolyStyle id="222">
+                    <color>ff00ff00</color>
+                    <colorMode>normal</colorMode>
+                    <fill>1</fill>
+                    <outline>1</outline>
+                </PolyStyle>
+            </Style>
+            <Style id="229">
+                <PolyStyle id="230">
+                    <color>ff00ff00</color>
+                    <colorMode>normal</colorMode>
+                    <fill>1</fill>
+                    <outline>1</outline>
+                </PolyStyle>
+            </Style>
+            <Style id="242">
+                <PolyStyle id="243">
+                    <color>ff3c8e38</color>
+                    <colorMode>normal</colorMode>
+                    <fill>1</fill>
+                    <outline>1</outline>
+                </PolyStyle>
+            </Style>
+            <Style id="250">
+                <PolyStyle id="251">
+                    <color>ff3c8e38</color>
+                    <colorMode>normal</colorMode>
+                    <fill>1</fill>
+                    <outline>1</outline>
+                </PolyStyle>
+            </Style>
+            <Style id="258">
+                <PolyStyle id="259">
+                    <color>ff3c8e38</color>
+                    <colorMode>normal</colorMode>
+                    <fill>1</fill>
+                    <outline>1</outline>
+                </PolyStyle>
+            </Style>
+            <Style id="266">
+                <PolyStyle id="267">
+                    <color>ff3c8e38</color>
+                    <colorMode>normal</colorMode>
+                    <fill>1</fill>
+                    <outline>1</outline>
+                </PolyStyle>
+            </Style>
+            <Style id="279">
+                <PolyStyle id="280">
+                    <color>ff00ff00</color>
+                    <colorMode>normal</colorMode>
+                    <fill>1</fill>
+                    <outline>1</outline>
+                </PolyStyle>
+            </Style>
+            <Style id="287">
+                <PolyStyle id="288">
+                    <color>ff00ff00</color>
+                    <colorMode>normal</colorMode>
+                    <fill>1</fill>
+                    <outline>1</outline>
+                </PolyStyle>
+            </Style>
+            <Style id="295">
+                <PolyStyle id="296">
+                    <color>ff00ff00</color>
+                    <colorMode>normal</colorMode>
+                    <fill>1</fill>
+                    <outline>1</outline>
+                </PolyStyle>
+            </Style>
+            <Style id="303">
+                <PolyStyle id="304">
+                    <color>ff00ff00</color>
+                    <colorMode>normal</colorMode>
+                    <fill>1</fill>
+                    <outline>1</outline>
+                </PolyStyle>
+            </Style>
+            <Style id="316">
+                <PolyStyle id="317">
+                    <color>ff2f2fd3</color>
+                    <colorMode>normal</colorMode>
+                    <fill>1</fill>
+                    <outline>1</outline>
+                </PolyStyle>
+            </Style>
+            <Style id="324">
+                <PolyStyle id="325">
+                    <color>ff2f2fd3</color>
+                    <colorMode>normal</colorMode>
+                    <fill>1</fill>
+                    <outline>1</outline>
+                </PolyStyle>
+            </Style>
+            <Style id="332">
+                <PolyStyle id="333">
+                    <color>ff2f2fd3</color>
+                    <colorMode>normal</colorMode>
+                    <fill>1</fill>
+                    <outline>1</outline>
+                </PolyStyle>
+            </Style>
+            <Style id="340">
+                <PolyStyle id="341">
+                    <color>ff2f2fd3</color>
+                    <colorMode>normal</colorMode>
+                    <fill>1</fill>
+                    <outline>1</outline>
+                </PolyStyle>
+            </Style>
+            <Style id="357">
+                <PolyStyle id="358">
+                    <color>ff3c8e38</color>
+                    <colorMode>normal</colorMode>
+                    <fill>1</fill>
+                    <outline>1</outline>
+                </PolyStyle>
+            </Style>
+            <Style id="365">
+                <PolyStyle id="366">
+                    <color>ff3c8e38</color>
+                    <colorMode>normal</colorMode>
+                    <fill>1</fill>
+                    <outline>1</outline>
+                </PolyStyle>
+            </Style>
+            <Style id="373">
+                <PolyStyle id="374">
+                    <color>ff3c8e38</color>
+                    <colorMode>normal</colorMode>
+                    <fill>1</fill>
+                    <outline>1</outline>
+                </PolyStyle>
+            </Style>
+            <Style id="381">
+                <PolyStyle id="382">
+                    <color>ff3c8e38</color>
+                    <colorMode>normal</colorMode>
+                    <fill>1</fill>
+                    <outline>1</outline>
+                </PolyStyle>
+            </Style>
+            <Style id="394">
+                <PolyStyle id="395">
+                    <color>ff3c8e38</color>
+                    <colorMode>normal</colorMode>
+                    <fill>1</fill>
+                    <outline>1</outline>
+                </PolyStyle>
+            </Style>
+            <Style id="402">
+                <PolyStyle id="403">
+                    <color>ff3c8e38</color>
+                    <colorMode>normal</colorMode>
+                    <fill>1</fill>
+                    <outline>1</outline>
+                </PolyStyle>
+            </Style>
+            <Style id="410">
+                <PolyStyle id="411">
+                    <color>ff3c8e38</color>
+                    <colorMode>normal</colorMode>
+                    <fill>1</fill>
+                    <outline>1</outline>
+                </PolyStyle>
+            </Style>
+            <Style id="418">
+                <PolyStyle id="419">
+                    <color>ff3c8e38</color>
+                    <colorMode>normal</colorMode>
+                    <fill>1</fill>
+                    <outline>1</outline>
+                </PolyStyle>
+            </Style>
+            <Style id="431">
+                <PolyStyle id="432">
+                    <color>ff2f2fd3</color>
+                    <colorMode>normal</colorMode>
+                    <fill>1</fill>
+                    <outline>1</outline>
+                </PolyStyle>
+            </Style>
+            <Style id="439">
+                <PolyStyle id="440">
+                    <color>ff2f2fd3</color>
+                    <colorMode>normal</colorMode>
+                    <fill>1</fill>
+                    <outline>1</outline>
+                </PolyStyle>
+            </Style>
+            <Style id="447">
+                <PolyStyle id="448">
+                    <color>ff2f2fd3</color>
+                    <colorMode>normal</colorMode>
+                    <fill>1</fill>
+                    <outline>1</outline>
+                </PolyStyle>
+            </Style>
+            <Style id="455">
+                <PolyStyle id="456">
+                    <color>ff2f2fd3</color>
+                    <colorMode>normal</colorMode>
+                    <fill>1</fill>
+                    <outline>1</outline>
+                </PolyStyle>
+            </Style>
+            <Style id="472">
+                <PolyStyle id="473">
+                    <color>ff3c8e38</color>
+                    <colorMode>normal</colorMode>
+                    <fill>1</fill>
+                    <outline>1</outline>
+                </PolyStyle>
+            </Style>
+            <Style id="480">
+                <PolyStyle id="481">
+                    <color>ff3c8e38</color>
+                    <colorMode>normal</colorMode>
+                    <fill>1</fill>
+                    <outline>1</outline>
+                </PolyStyle>
+            </Style>
+            <Style id="488">
+                <PolyStyle id="489">
+                    <color>ff3c8e38</color>
+                    <colorMode>normal</colorMode>
+                    <fill>1</fill>
+                    <outline>1</outline>
+                </PolyStyle>
+            </Style>
+            <Style id="496">
+                <PolyStyle id="497">
+                    <color>ff3c8e38</color>
+                    <colorMode>normal</colorMode>
+                    <fill>1</fill>
+                    <outline>1</outline>
+                </PolyStyle>
+            </Style>
+            <name>Confidence interval</name>
+            <Placemark id="11">
+                <name>Point n° 0</name>
+                <description/>
+                <styleUrl>#16</styleUrl>
+                <Polygon id="10">
+                    <extrude>0</extrude>
+                    <altitudeMode>absolute</altitudeMode>
+                    <outerBoundaryIs>
+                        <LinearRing id="14">
+                            <coordinates>6.680417586577925,45.519925443,1738.727 6.680454741,45.51996259742207,1738.727 6.680454741,45.519925443,1738.777 6.680417586577925,45.519925443,1738.727</coordinates>
+                        </LinearRing>
+                    </outerBoundaryIs>
+                </Polygon>
+            </Placemark>
+            <Placemark id="19">
+                <name>Point n° 0</name>
+                <description/>
+                <styleUrl>#24</styleUrl>
+                <Polygon id="18">
+                    <extrude>0</extrude>
+                    <altitudeMode>absolute</altitudeMode>
+                    <outerBoundaryIs>
+                        <LinearRing id="22">
+                            <coordinates>6.680454741,45.51996259742207,1738.727 6.680491895422075,45.519925443,1738.727 6.680454741,45.519925443,1738.777 6.680454741,45.51996259742207,1738.727</coordinates>
+                        </LinearRing>
+                    </outerBoundaryIs>
+                </Polygon>
+            </Placemark>
+            <Placemark id="27">
+                <name>Point n° 0</name>
+                <description/>
+                <styleUrl>#32</styleUrl>
+                <Polygon id="26">
+                    <extrude>0</extrude>
+                    <altitudeMode>absolute</altitudeMode>
+                    <outerBoundaryIs>
+                        <LinearRing id="30">
+                            <coordinates>6.680491895422075,45.519925443,1738.727 6.680454741,45.519888288577924,1738.727 6.680454741,45.519925443,1738.777 6.680491895422075,45.519925443,1738.727</coordinates>
+                        </LinearRing>
+                    </outerBoundaryIs>
+                </Polygon>
+            </Placemark>
+            <Placemark id="35">
+                <name>Point n° 0</name>
+                <description/>
+                <styleUrl>#40</styleUrl>
+                <Polygon id="34">
+                    <extrude>0</extrude>
+                    <altitudeMode>absolute</altitudeMode>
+                    <outerBoundaryIs>
+                        <LinearRing id="38">
+                            <coordinates>6.680454741,45.519888288577924,1738.727 6.680417586577925,45.519925443,1738.727 6.680454741,45.519925443,1738.777 6.680454741,45.519888288577924,1738.727</coordinates>
+                        </LinearRing>
+                    </outerBoundaryIs>
+                </Polygon>
+            </Placemark>
+            <Placemark id="48">
+                <name>Point n° 1</name>
+                <description/>
+                <styleUrl>#53</styleUrl>
+                <Polygon id="47">
+                    <extrude>0</extrude>
+                    <altitudeMode>absolute</altitudeMode>
+                    <outerBoundaryIs>
+                        <LinearRing id="51">
+                            <coordinates>6.678110022,45.520167197,1719.023 6.678140022,45.520197197,1719.023 6.678140022,45.520167197,1719.0629999999999 6.678110022,45.520167197,1719.023</coordinates>
+                        </LinearRing>
+                    </outerBoundaryIs>
+                </Polygon>
+            </Placemark>
+            <Placemark id="56">
+                <name>Point n° 1</name>
+                <description/>
+                <styleUrl>#61</styleUrl>
+                <Polygon id="55">
+                    <extrude>0</extrude>
+                    <altitudeMode>absolute</altitudeMode>
+                    <outerBoundaryIs>
+                        <LinearRing id="59">
+                            <coordinates>6.678140022,45.520197197,1719.023 6.678170022,45.520167197,1719.023 6.678140022,45.520167197,1719.0629999999999 6.678140022,45.520197197,1719.023</coordinates>
+                        </LinearRing>
+                    </outerBoundaryIs>
+                </Polygon>
+            </Placemark>
+            <Placemark id="64">
+                <name>Point n° 1</name>
+                <description/>
+                <styleUrl>#69</styleUrl>
+                <Polygon id="63">
+                    <extrude>0</extrude>
+                    <altitudeMode>absolute</altitudeMode>
+                    <outerBoundaryIs>
+                        <LinearRing id="67">
+                            <coordinates>6.678170022,45.520167197,1719.023 6.678140022,45.520137197,1719.023 6.678140022,45.520167197,1719.0629999999999 6.678170022,45.520167197,1719.023</coordinates>
+                        </LinearRing>
+                    </outerBoundaryIs>
+                </Polygon>
+            </Placemark>
+            <Placemark id="72">
+                <name>Point n° 1</name>
+                <description/>
+                <styleUrl>#77</styleUrl>
+                <Polygon id="71">
+                    <extrude>0</extrude>
+                    <altitudeMode>absolute</altitudeMode>
+                    <outerBoundaryIs>
+                        <LinearRing id="75">
+                            <coordinates>6.678140022,45.520137197,1719.023 6.678110022,45.520167197,1719.023 6.678140022,45.520167197,1719.0629999999999 6.678140022,45.520137197,1719.023</coordinates>
+                        </LinearRing>
+                    </outerBoundaryIs>
+                </Polygon>
+            </Placemark>
+            <Placemark id="85">
+                <name>Point n° 2</name>
+                <description/>
+                <styleUrl>#90</styleUrl>
+                <Polygon id="84">
+                    <extrude>0</extrude>
+                    <altitudeMode>absolute</altitudeMode>
+                    <outerBoundaryIs>
+                        <LinearRing id="88">
+                            <coordinates>6.678819034,45.520566041,1706.765 6.678849034,45.520596041000005,1706.765 6.678849034,45.520566041,1706.805 6.678819034,45.520566041,1706.765</coordinates>
+                        </LinearRing>
+                    </outerBoundaryIs>
+                </Polygon>
+            </Placemark>
+            <Placemark id="93">
+                <name>Point n° 2</name>
+                <description/>
+                <styleUrl>#98</styleUrl>
+                <Polygon id="92">
+                    <extrude>0</extrude>
+                    <altitudeMode>absolute</altitudeMode>
+                    <outerBoundaryIs>
+                        <LinearRing id="96">
+                            <coordinates>6.678849034,45.520596041000005,1706.765 6.6788790339999995,45.520566041,1706.765 6.678849034,45.520566041,1706.805 6.678849034,45.520596041000005,1706.765</coordinates>
+                        </LinearRing>
+                    </outerBoundaryIs>
+                </Polygon>
+            </Placemark>
+            <Placemark id="101">
+                <name>Point n° 2</name>
+                <description/>
+                <styleUrl>#106</styleUrl>
+                <Polygon id="100">
+                    <extrude>0</extrude>
+                    <altitudeMode>absolute</altitudeMode>
+                    <outerBoundaryIs>
+                        <LinearRing id="104">
+                            <coordinates>6.6788790339999995,45.520566041,1706.765 6.678849034,45.520536041,1706.765 6.678849034,45.520566041,1706.805 6.6788790339999995,45.520566041,1706.765</coordinates>
+                        </LinearRing>
+                    </outerBoundaryIs>
+                </Polygon>
+            </Placemark>
+            <Placemark id="109">
+                <name>Point n° 2</name>
+                <description/>
+                <styleUrl>#114</styleUrl>
+                <Polygon id="108">
+                    <extrude>0</extrude>
+                    <altitudeMode>absolute</altitudeMode>
+                    <outerBoundaryIs>
+                        <LinearRing id="112">
+                            <coordinates>6.678849034,45.520536041,1706.765 6.678819034,45.520566041,1706.765 6.678849034,45.520566041,1706.805 6.678849034,45.520536041,1706.765</coordinates>
+                        </LinearRing>
+                    </outerBoundaryIs>
+                </Polygon>
+            </Placemark>
+            <Placemark id="122">
+                <name>Point n° 3</name>
+                <description/>
+                <styleUrl>#127</styleUrl>
+                <Polygon id="121">
+                    <extrude>0</extrude>
+                    <altitudeMode>absolute</altitudeMode>
+                    <outerBoundaryIs>
+                        <LinearRing id="125">
+                            <coordinates>6.679267934931372,45.520898323,1689.815 6.67930212,45.520932508068626,1689.815 6.67930212,45.520898323,1689.855 6.679267934931372,45.520898323,1689.815</coordinates>
+                        </LinearRing>
+                    </outerBoundaryIs>
+                </Polygon>
+            </Placemark>
+            <Placemark id="130">
+                <name>Point n° 3</name>
+                <description/>
+                <styleUrl>#135</styleUrl>
+                <Polygon id="129">
+                    <extrude>0</extrude>
+                    <altitudeMode>absolute</altitudeMode>
+                    <outerBoundaryIs>
+                        <LinearRing id="133">
+                            <coordinates>6.67930212,45.520932508068626,1689.815 6.679336305068628,45.520898323,1689.815 6.67930212,45.520898323,1689.855 6.67930212,45.520932508068626,1689.815</coordinates>
+                        </LinearRing>
+                    </outerBoundaryIs>
+                </Polygon>
+            </Placemark>
+            <Placemark id="138">
+                <name>Point n° 3</name>
+                <description/>
+                <styleUrl>#143</styleUrl>
+                <Polygon id="137">
+                    <extrude>0</extrude>
+                    <altitudeMode>absolute</altitudeMode>
+                    <outerBoundaryIs>
+                        <LinearRing id="141">
+                            <coordinates>6.679336305068628,45.520898323,1689.815 6.67930212,45.52086413793137,1689.815 6.67930212,45.520898323,1689.855 6.679336305068628,45.520898323,1689.815</coordinates>
+                        </LinearRing>
+                    </outerBoundaryIs>
+                </Polygon>
+            </Placemark>
+            <Placemark id="146">
+                <name>Point n° 3</name>
+                <description/>
+                <styleUrl>#151</styleUrl>
+                <Polygon id="145">
+                    <extrude>0</extrude>
+                    <altitudeMode>absolute</altitudeMode>
+                    <outerBoundaryIs>
+                        <LinearRing id="149">
+                            <coordinates>6.67930212,45.52086413793137,1689.815 6.679267934931372,45.520898323,1689.815 6.67930212,45.520898323,1689.855 6.67930212,45.52086413793137,1689.815</coordinates>
+                        </LinearRing>
+                    </outerBoundaryIs>
+                </Polygon>
+            </Placemark>
+            <Placemark id="159">
+                <name>Point n° 4</name>
+                <description/>
+                <styleUrl>#164</styleUrl>
+                <Polygon id="158">
+                    <extrude>0</extrude>
+                    <altitudeMode>absolute</altitudeMode>
+                    <outerBoundaryIs>
+                        <LinearRing id="162">
+                            <coordinates>6.677347991680155,45.521049272,1674.056 6.677416067,45.521117347319844,1674.056 6.677416067,45.521049272,1674.6860000000001 6.677347991680155,45.521049272,1674.056</coordinates>
+                        </LinearRing>
+                    </outerBoundaryIs>
+                </Polygon>
+            </Placemark>
+            <Placemark id="167">
+                <name>Point n° 4</name>
+                <description/>
+                <styleUrl>#172</styleUrl>
+                <Polygon id="166">
+                    <extrude>0</extrude>
+                    <altitudeMode>absolute</altitudeMode>
+                    <outerBoundaryIs>
+                        <LinearRing id="170">
+                            <coordinates>6.677416067,45.521117347319844,1674.056 6.677484142319845,45.521049272,1674.056 6.677416067,45.521049272,1674.6860000000001 6.677416067,45.521117347319844,1674.056</coordinates>
+                        </LinearRing>
+                    </outerBoundaryIs>
+                </Polygon>
+            </Placemark>
+            <Placemark id="175">
+                <name>Point n° 4</name>
+                <description/>
+                <styleUrl>#180</styleUrl>
+                <Polygon id="174">
+                    <extrude>0</extrude>
+                    <altitudeMode>absolute</altitudeMode>
+                    <outerBoundaryIs>
+                        <LinearRing id="178">
+                            <coordinates>6.677484142319845,45.521049272,1674.056 6.677416067,45.520981196680154,1674.056 6.677416067,45.521049272,1674.6860000000001 6.677484142319845,45.521049272,1674.056</coordinates>
+                        </LinearRing>
+                    </outerBoundaryIs>
+                </Polygon>
+            </Placemark>
+            <Placemark id="183">
+                <name>Point n° 4</name>
+                <description/>
+                <styleUrl>#188</styleUrl>
+                <Polygon id="182">
+                    <extrude>0</extrude>
+                    <altitudeMode>absolute</altitudeMode>
+                    <outerBoundaryIs>
+                        <LinearRing id="186">
+                            <coordinates>6.677416067,45.520981196680154,1674.056 6.677347991680155,45.521049272,1674.056 6.677416067,45.521049272,1674.6860000000001 6.677416067,45.520981196680154,1674.056</coordinates>
+                        </LinearRing>
+                    </outerBoundaryIs>
+                </Polygon>
+            </Placemark>
+            <Placemark id="200">
+                <name>Point n° 5</name>
+                <description/>
+                <styleUrl>#205</styleUrl>
+                <Polygon id="199">
+                    <extrude>0</extrude>
+                    <altitudeMode>absolute</altitudeMode>
+                    <outerBoundaryIs>
+                        <LinearRing id="203">
+                            <coordinates>6.678683061509297,45.521297466,1667.609 6.678724401,45.52133880549071,1667.609 6.678724401,45.521297466,1667.6789999999999 6.678683061509297,45.521297466,1667.609</coordinates>
+                        </LinearRing>
+                    </outerBoundaryIs>
+                </Polygon>
+            </Placemark>
+            <Placemark id="208">
+                <name>Point n° 5</name>
+                <description/>
+                <styleUrl>#213</styleUrl>
+                <Polygon id="207">
+                    <extrude>0</extrude>
+                    <altitudeMode>absolute</altitudeMode>
+                    <outerBoundaryIs>
+                        <LinearRing id="211">
+                            <coordinates>6.678724401,45.52133880549071,1667.609 6.678765740490704,45.521297466,1667.609 6.678724401,45.521297466,1667.6789999999999 6.678724401,45.52133880549071,1667.609</coordinates>
+                        </LinearRing>
+                    </outerBoundaryIs>
+                </Polygon>
+            </Placemark>
+            <Placemark id="216">
+                <name>Point n° 5</name>
+                <description/>
+                <styleUrl>#221</styleUrl>
+                <Polygon id="215">
+                    <extrude>0</extrude>
+                    <altitudeMode>absolute</altitudeMode>
+                    <outerBoundaryIs>
+                        <LinearRing id="219">
+                            <coordinates>6.678765740490704,45.521297466,1667.609 6.678724401,45.52125612650929,1667.609 6.678724401,45.521297466,1667.6789999999999 6.678765740490704,45.521297466,1667.609</coordinates>
+                        </LinearRing>
+                    </outerBoundaryIs>
+                </Polygon>
+            </Placemark>
+            <Placemark id="224">
+                <name>Point n° 5</name>
+                <description/>
+                <styleUrl>#229</styleUrl>
+                <Polygon id="223">
+                    <extrude>0</extrude>
+                    <altitudeMode>absolute</altitudeMode>
+                    <outerBoundaryIs>
+                        <LinearRing id="227">
+                            <coordinates>6.678724401,45.52125612650929,1667.609 6.678683061509297,45.521297466,1667.609 6.678724401,45.521297466,1667.6789999999999 6.678724401,45.52125612650929,1667.609</coordinates>
+                        </LinearRing>
+                    </outerBoundaryIs>
+                </Polygon>
+            </Placemark>
+            <Placemark id="237">
+                <name>Point n° 6</name>
+                <description/>
+                <styleUrl>#242</styleUrl>
+                <Polygon id="236">
+                    <extrude>0</extrude>
+                    <altitudeMode>absolute</altitudeMode>
+                    <outerBoundaryIs>
+                        <LinearRing id="240">
+                            <coordinates>6.6783274169313716,45.52200357,1652.356 6.678361602,45.52203775506863,1652.356 6.678361602,45.52200357,1652.416 6.6783274169313716,45.52200357,1652.356</coordinates>
+                        </LinearRing>
+                    </outerBoundaryIs>
+                </Polygon>
+            </Placemark>
+            <Placemark id="245">
+                <name>Point n° 6</name>
+                <description/>
+                <styleUrl>#250</styleUrl>
+                <Polygon id="244">
+                    <extrude>0</extrude>
+                    <altitudeMode>absolute</altitudeMode>
+                    <outerBoundaryIs>
+                        <LinearRing id="248">
+                            <coordinates>6.678361602,45.52203775506863,1652.356 6.678395787068628,45.52200357,1652.356 6.678361602,45.52200357,1652.416 6.678361602,45.52203775506863,1652.356</coordinates>
+                        </LinearRing>
+                    </outerBoundaryIs>
+                </Polygon>
+            </Placemark>
+            <Placemark id="253">
+                <name>Point n° 6</name>
+                <description/>
+                <styleUrl>#258</styleUrl>
+                <Polygon id="252">
+                    <extrude>0</extrude>
+                    <altitudeMode>absolute</altitudeMode>
+                    <outerBoundaryIs>
+                        <LinearRing id="256">
+                            <coordinates>6.678395787068628,45.52200357,1652.356 6.678361602,45.521969384931374,1652.356 6.678361602,45.52200357,1652.416 6.678395787068628,45.52200357,1652.356</coordinates>
+                        </LinearRing>
+                    </outerBoundaryIs>
+                </Polygon>
+            </Placemark>
+            <Placemark id="261">
+                <name>Point n° 6</name>
+                <description/>
+                <styleUrl>#266</styleUrl>
+                <Polygon id="260">
+                    <extrude>0</extrude>
+                    <altitudeMode>absolute</altitudeMode>
+                    <outerBoundaryIs>
+                        <LinearRing id="264">
+                            <coordinates>6.678361602,45.521969384931374,1652.356 6.6783274169313716,45.52200357,1652.356 6.678361602,45.52200357,1652.416 6.678361602,45.521969384931374,1652.356</coordinates>
+                        </LinearRing>
+                    </outerBoundaryIs>
+                </Polygon>
+            </Placemark>
+            <Placemark id="274">
+                <name>Point n° 7</name>
+                <description/>
+                <styleUrl>#279</styleUrl>
+                <Polygon id="273">
+                    <extrude>0</extrude>
+                    <altitudeMode>absolute</altitudeMode>
+                    <outerBoundaryIs>
+                        <LinearRing id="277">
+                            <coordinates>6.677227817509296,45.522559625,1635.61 6.677269157,45.52260096449071,1635.61 6.677269157,45.522559625,1635.75 6.677227817509296,45.522559625,1635.61</coordinates>
+                        </LinearRing>
+                    </outerBoundaryIs>
+                </Polygon>
+            </Placemark>
+            <Placemark id="282">
+                <name>Point n° 7</name>
+                <description/>
+                <styleUrl>#287</styleUrl>
+                <Polygon id="281">
+                    <extrude>0</extrude>
+                    <altitudeMode>absolute</altitudeMode>
+                    <outerBoundaryIs>
+                        <LinearRing id="285">
+                            <coordinates>6.677269157,45.52260096449071,1635.61 6.677310496490703,45.522559625,1635.61 6.677269157,45.522559625,1635.75 6.677269157,45.52260096449071,1635.61</coordinates>
+                        </LinearRing>
+                    </outerBoundaryIs>
+                </Polygon>
+            </Placemark>
+            <Placemark id="290">
+                <name>Point n° 7</name>
+                <description/>
+                <styleUrl>#295</styleUrl>
+                <Polygon id="289">
+                    <extrude>0</extrude>
+                    <altitudeMode>absolute</altitudeMode>
+                    <outerBoundaryIs>
+                        <LinearRing id="293">
+                            <coordinates>6.677310496490703,45.522559625,1635.61 6.677269157,45.52251828550929,1635.61 6.677269157,45.522559625,1635.75 6.677310496490703,45.522559625,1635.61</coordinates>
+                        </LinearRing>
+                    </outerBoundaryIs>
+                </Polygon>
+            </Placemark>
+            <Placemark id="298">
+                <name>Point n° 7</name>
+                <description/>
+                <styleUrl>#303</styleUrl>
+                <Polygon id="297">
+                    <extrude>0</extrude>
+                    <altitudeMode>absolute</altitudeMode>
+                    <outerBoundaryIs>
+                        <LinearRing id="301">
+                            <coordinates>6.677269157,45.52251828550929,1635.61 6.677227817509296,45.522559625,1635.61 6.677269157,45.522559625,1635.75 6.677269157,45.52251828550929,1635.61</coordinates>
+                        </LinearRing>
+                    </outerBoundaryIs>
+                </Polygon>
+            </Placemark>
+            <Placemark id="311">
+                <name>Point n° 8</name>
+                <description/>
+                <styleUrl>#316</styleUrl>
+                <Polygon id="310">
+                    <extrude>0</extrude>
+                    <altitudeMode>absolute</altitudeMode>
+                    <outerBoundaryIs>
+                        <LinearRing id="314">
+                            <coordinates>6.677505387753752,45.523481053,1628.499 6.677582227,45.523557892246245,1628.499 6.677582227,45.523481053,1630.849 6.677505387753752,45.523481053,1628.499</coordinates>
+                        </LinearRing>
+                    </outerBoundaryIs>
+                </Polygon>
+            </Placemark>
+            <Placemark id="319">
+                <name>Point n° 8</name>
+                <description/>
+                <styleUrl>#324</styleUrl>
+                <Polygon id="318">
+                    <extrude>0</extrude>
+                    <altitudeMode>absolute</altitudeMode>
+                    <outerBoundaryIs>
+                        <LinearRing id="322">
+                            <coordinates>6.677582227,45.523557892246245,1628.499 6.677659066246249,45.523481053,1628.499 6.677582227,45.523481053,1630.849 6.677582227,45.523557892246245,1628.499</coordinates>
+                        </LinearRing>
+                    </outerBoundaryIs>
+                </Polygon>
+            </Placemark>
+            <Placemark id="327">
+                <name>Point n° 8</name>
+                <description/>
+                <styleUrl>#332</styleUrl>
+                <Polygon id="326">
+                    <extrude>0</extrude>
+                    <altitudeMode>absolute</altitudeMode>
+                    <outerBoundaryIs>
+                        <LinearRing id="330">
+                            <coordinates>6.677659066246249,45.523481053,1628.499 6.677582227,45.52340421375375,1628.499 6.677582227,45.523481053,1630.849 6.677659066246249,45.523481053,1628.499</coordinates>
+                        </LinearRing>
+                    </outerBoundaryIs>
+                </Polygon>
+            </Placemark>
+            <Placemark id="335">
+                <name>Point n° 8</name>
+                <description/>
+                <styleUrl>#340</styleUrl>
+                <Polygon id="334">
+                    <extrude>0</extrude>
+                    <altitudeMode>absolute</altitudeMode>
+                    <outerBoundaryIs>
+                        <LinearRing id="338">
+                            <coordinates>6.677582227,45.52340421375375,1628.499 6.677505387753752,45.523481053,1628.499 6.677582227,45.523481053,1630.849 6.677582227,45.52340421375375,1628.499</coordinates>
+                        </LinearRing>
+                    </outerBoundaryIs>
+                </Polygon>
+            </Placemark>
+            <Placemark id="352">
+                <name>Point n° 9</name>
+                <description/>
+                <styleUrl>#357</styleUrl>
+                <Polygon id="351">
+                    <extrude>0</extrude>
+                    <altitudeMode>absolute</altitudeMode>
+                    <outerBoundaryIs>
+                        <LinearRing id="355">
+                            <coordinates>6.677099509931372,45.523307436,1627.264 6.677133695,45.52334162106863,1627.264 6.677133695,45.523307436,1627.3039999999999 6.677099509931372,45.523307436,1627.264</coordinates>
+                        </LinearRing>
+                    </outerBoundaryIs>
+                </Polygon>
+            </Placemark>
+            <Placemark id="360">
+                <name>Point n° 9</name>
+                <description/>
+                <styleUrl>#365</styleUrl>
+                <Polygon id="359">
+                    <extrude>0</extrude>
+                    <altitudeMode>absolute</altitudeMode>
+                    <outerBoundaryIs>
+                        <LinearRing id="363">
+                            <coordinates>6.677133695,45.52334162106863,1627.264 6.6771678800686285,45.523307436,1627.264 6.677133695,45.523307436,1627.3039999999999 6.677133695,45.52334162106863,1627.264</coordinates>
+                        </LinearRing>
+                    </outerBoundaryIs>
+                </Polygon>
+            </Placemark>
+            <Placemark id="368">
+                <name>Point n° 9</name>
+                <description/>
+                <styleUrl>#373</styleUrl>
+                <Polygon id="367">
+                    <extrude>0</extrude>
+                    <altitudeMode>absolute</altitudeMode>
+                    <outerBoundaryIs>
+                        <LinearRing id="371">
+                            <coordinates>6.6771678800686285,45.523307436,1627.264 6.677133695,45.523273250931375,1627.264 6.677133695,45.523307436,1627.3039999999999 6.6771678800686285,45.523307436,1627.264</coordinates>
+                        </LinearRing>
+                    </outerBoundaryIs>
+                </Polygon>
+            </Placemark>
+            <Placemark id="376">
+                <name>Point n° 9</name>
+                <description/>
+                <styleUrl>#381</styleUrl>
+                <Polygon id="375">
+                    <extrude>0</extrude>
+                    <altitudeMode>absolute</altitudeMode>
+                    <outerBoundaryIs>
+                        <LinearRing id="379">
+                            <coordinates>6.677133695,45.523273250931375,1627.264 6.677099509931372,45.523307436,1627.264 6.677133695,45.523307436,1627.3039999999999 6.677133695,45.523273250931375,1627.264</coordinates>
+                        </LinearRing>
+                    </outerBoundaryIs>
+                </Polygon>
+            </Placemark>
+            <Placemark id="389">
+                <name>Point n° 10</name>
+                <description/>
+                <styleUrl>#394</styleUrl>
+                <Polygon id="388">
+                    <extrude>0</extrude>
+                    <altitudeMode>absolute</altitudeMode>
+                    <outerBoundaryIs>
+                        <LinearRing id="392">
+                            <coordinates>6.6756368409313716,45.522888142,1624.058 6.675671026,45.52292232706863,1624.058 6.675671026,45.522888142,1624.098 6.6756368409313716,45.522888142,1624.058</coordinates>
+                        </LinearRing>
+                    </outerBoundaryIs>
+                </Polygon>
+            </Placemark>
+            <Placemark id="397">
+                <name>Point n° 10</name>
+                <description/>
+                <styleUrl>#402</styleUrl>
+                <Polygon id="396">
+                    <extrude>0</extrude>
+                    <altitudeMode>absolute</altitudeMode>
+                    <outerBoundaryIs>
+                        <LinearRing id="400">
+                            <coordinates>6.675671026,45.52292232706863,1624.058 6.675705211068628,45.522888142,1624.058 6.675671026,45.522888142,1624.098 6.675671026,45.52292232706863,1624.058</coordinates>
+                        </LinearRing>
+                    </outerBoundaryIs>
+                </Polygon>
+            </Placemark>
+            <Placemark id="405">
+                <name>Point n° 10</name>
+                <description/>
+                <styleUrl>#410</styleUrl>
+                <Polygon id="404">
+                    <extrude>0</extrude>
+                    <altitudeMode>absolute</altitudeMode>
+                    <outerBoundaryIs>
+                        <LinearRing id="408">
+                            <coordinates>6.675705211068628,45.522888142,1624.058 6.675671026,45.52285395693137,1624.058 6.675671026,45.522888142,1624.098 6.675705211068628,45.522888142,1624.058</coordinates>
+                        </LinearRing>
+                    </outerBoundaryIs>
+                </Polygon>
+            </Placemark>
+            <Placemark id="413">
+                <name>Point n° 10</name>
+                <description/>
+                <styleUrl>#418</styleUrl>
+                <Polygon id="412">
+                    <extrude>0</extrude>
+                    <altitudeMode>absolute</altitudeMode>
+                    <outerBoundaryIs>
+                        <LinearRing id="416">
+                            <coordinates>6.675671026,45.52285395693137,1624.058 6.6756368409313716,45.522888142,1624.058 6.675671026,45.522888142,1624.098 6.675671026,45.52285395693137,1624.058</coordinates>
+                        </LinearRing>
+                    </outerBoundaryIs>
+                </Polygon>
+            </Placemark>
+            <Placemark id="426">
+                <name>Point n° 11</name>
+                <description/>
+                <styleUrl>#431</styleUrl>
+                <Polygon id="425">
+                    <extrude>0</extrude>
+                    <altitudeMode>absolute</altitudeMode>
+                    <outerBoundaryIs>
+                        <LinearRing id="429">
+                            <coordinates>6.675290435,45.523739264,1619.322 6.675370435,45.523819264,1619.322 6.675370435,45.523739264,1622.262 6.675290435,45.523739264,1619.322</coordinates>
+                        </LinearRing>
+                    </outerBoundaryIs>
+                </Polygon>
+            </Placemark>
+            <Placemark id="434">
+                <name>Point n° 11</name>
+                <description/>
+                <styleUrl>#439</styleUrl>
+                <Polygon id="433">
+                    <extrude>0</extrude>
+                    <altitudeMode>absolute</altitudeMode>
+                    <outerBoundaryIs>
+                        <LinearRing id="437">
+                            <coordinates>6.675370435,45.523819264,1619.322 6.675450434999999,45.523739264,1619.322 6.675370435,45.523739264,1622.262 6.675370435,45.523819264,1619.322</coordinates>
+                        </LinearRing>
+                    </outerBoundaryIs>
+                </Polygon>
+            </Placemark>
+            <Placemark id="442">
+                <name>Point n° 11</name>
+                <description/>
+                <styleUrl>#447</styleUrl>
+                <Polygon id="441">
+                    <extrude>0</extrude>
+                    <altitudeMode>absolute</altitudeMode>
+                    <outerBoundaryIs>
+                        <LinearRing id="445">
+                            <coordinates>6.675450434999999,45.523739264,1619.322 6.675370435,45.523659264,1619.322 6.675370435,45.523739264,1622.262 6.675450434999999,45.523739264,1619.322</coordinates>
+                        </LinearRing>
+                    </outerBoundaryIs>
+                </Polygon>
+            </Placemark>
+            <Placemark id="450">
+                <name>Point n° 11</name>
+                <description/>
+                <styleUrl>#455</styleUrl>
+                <Polygon id="449">
+                    <extrude>0</extrude>
+                    <altitudeMode>absolute</altitudeMode>
+                    <outerBoundaryIs>
+                        <LinearRing id="453">
+                            <coordinates>6.675370435,45.523659264,1619.322 6.675290435,45.523739264,1619.322 6.675370435,45.523739264,1622.262 6.675370435,45.523659264,1619.322</coordinates>
+                        </LinearRing>
+                    </outerBoundaryIs>
+                </Polygon>
+            </Placemark>
+            <Placemark id="467">
+                <name>Point n° 12</name>
+                <description/>
+                <styleUrl>#472</styleUrl>
+                <Polygon id="466">
+                    <extrude>0</extrude>
+                    <altitudeMode>absolute</altitudeMode>
+                    <outerBoundaryIs>
+                        <LinearRing id="470">
+                            <coordinates>6.676228560931372,45.522701683,1623.635 6.676262746,45.52273586806863,1623.635 6.676262746,45.522701683,1623.705 6.676228560931372,45.522701683,1623.635</coordinates>
+                        </LinearRing>
+                    </outerBoundaryIs>
+                </Polygon>
+            </Placemark>
+            <Placemark id="475">
+                <name>Point n° 12</name>
+                <description/>
+                <styleUrl>#480</styleUrl>
+                <Polygon id="474">
+                    <extrude>0</extrude>
+                    <altitudeMode>absolute</altitudeMode>
+                    <outerBoundaryIs>
+                        <LinearRing id="478">
+                            <coordinates>6.676262746,45.52273586806863,1623.635 6.676296931068628,45.522701683,1623.635 6.676262746,45.522701683,1623.705 6.676262746,45.52273586806863,1623.635</coordinates>
+                        </LinearRing>
+                    </outerBoundaryIs>
+                </Polygon>
+            </Placemark>
+            <Placemark id="483">
+                <name>Point n° 12</name>
+                <description/>
+                <styleUrl>#488</styleUrl>
+                <Polygon id="482">
+                    <extrude>0</extrude>
+                    <altitudeMode>absolute</altitudeMode>
+                    <outerBoundaryIs>
+                        <LinearRing id="486">
+                            <coordinates>6.676296931068628,45.522701683,1623.635 6.676262746,45.52266749793137,1623.635 6.676262746,45.522701683,1623.705 6.676296931068628,45.522701683,1623.635</coordinates>
+                        </LinearRing>
+                    </outerBoundaryIs>
+                </Polygon>
+            </Placemark>
+            <Placemark id="491">
+                <name>Point n° 12</name>
+                <description/>
+                <styleUrl>#496</styleUrl>
+                <Polygon id="490">
+                    <extrude>0</extrude>
+                    <altitudeMode>absolute</altitudeMode>
+                    <outerBoundaryIs>
+                        <LinearRing id="494">
+                            <coordinates>6.676262746,45.52266749793137,1623.635 6.676228560931372,45.522701683,1623.635 6.676262746,45.522701683,1623.705 6.676262746,45.52266749793137,1623.635</coordinates>
+                        </LinearRing>
+                    </outerBoundaryIs>
+                </Polygon>
+            </Placemark>
+        </Folder>
+        <Placemark id="499">
+            <name>A Polygon</name>
+            <Polygon id="498">
+                <extrude>0</extrude>
+                <altitudeMode>relativeToGround</altitudeMode>
+                <outerBoundaryIs>
+                    <LinearRing id="502">
+                        <coordinates>6.6814547410000005,45.524739264,0.0 6.6814547410000005,45.518925443,0.0 6.674370434999999,45.518925443,0.0 6.674370434999999,45.524739264,0.0 6.6814547410000005,45.524739264,0.0</coordinates>
+                    </LinearRing>
+                </outerBoundaryIs>
+                <innerBoundaryIs>
+                    <LinearRing id="504">
+                        <coordinates>6.6814547410000005,45.524739264,0.0 6.6814547410000005,45.518925443,0.0 6.674370434999999,45.518925443,0.0 6.674370434999999,45.524739264,0.0 6.6814547410000005,45.524739264,0.0</coordinates>
+                    </LinearRing>
+                </innerBoundaryIs>
+            </Polygon>
+        </Placemark>
+    </Document>
+</kml>

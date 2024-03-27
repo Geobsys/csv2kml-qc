@@ -15,14 +15,36 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description="*************** csv_to_kml ***************")
     parser.add_argument('input_file',type=str,help="input file from the Geostix in .csv format")
+<<<<<<< Updated upstream
     parser.add_argument('-o','--output_file',type=str,help="output file in .kml format (Default=./input_file.kml)",default="")
+=======
+    parser.add_argument('-it', '--input_type', type=str, help="input file type between 'normal' and 'special'", default="normal",choices=["normal", "special"])
+    parser.add_argument('-o' ,'--output_file',type=str,help="output file in .kml format (Default=./input_file.kml)",default="")
+>>>>>>> Stashed changes
     parser.add_argument('-sep','--separator',type=str,help="separator used in the .csv file (Default=,)",default=",")
     parser.add_argument('-name','--doc_name',type=str,help="kml document name",default="")
+<<<<<<< Updated upstream
     parser.add_argument('--quiet',action="store_false",help="print some statistics")
     parser.add_argument('-m','--mode',type=str,help="representation mode",default="icon",choices=["icon"])
     parser.add_argument('-ls','--label_scale',type=float,help="label scale (Default=2)",default=2)
     parser.add_argument('-is','--icon_scale',type=float,help="icon scale (Default=1)",default=1)
     parser.add_argument('-ih','--icon_href',type=str,help="icon href (Default=http://maps.google.com/mapfiles/kml/shapes/placemark_circle.png)",default="http://maps.google.com/mapfiles/kml/shapes/placemark_circle.png")
+=======
+    parser.add_argument('--quiet',action="store_true",help="print some statistics")
+    # style parameters
+    parser.add_argument('-m' ,'--mode',type=str,help="representation mode",default="icon",choices=["icon"])
+    parser.add_argument('-ls','--label_scale',type=float,help="label scale (Default=2)",default=2)
+    parser.add_argument('-is','--icon_scale',type=float,help="icon scale (Default=1)",default=1)
+    parser.add_argument('-ih','--icon_href',type=str,help="icon href (Default=http://maps.google.com/mapfiles/kml/shapes/placemark_circle.png)",default="http://maps.google.com/mapfiles/kml/shapes/placemark_circle.png")
+    parser.add_argument('-sn','--show_pt_name',type=bool,help="True : showing the label, False : Hiding it", default=False)
+    parser.add_argument('-am','--altitudemode',type=str,help="See simplekml .Altitudemode (absolute, relativeToGround, clampToGround)", default="absolute",choices=["absolute", "relativeToGround", "clampToGround"])
+    # processing options
+    parser.add_argument('--show_point',action="store_false",help="Don't show points")
+    parser.add_argument('--show_line',action="store_false",help="Don't show  the lines between points")
+    parser.add_argument('--show_confidence_interval',action="store_false",help="Don't show  the confidences intervals of points")
+    parser.add_argument('--show_building',action="store_false",help="Don't show  the buildings around thes points")
+
+>>>>>>> Stashed changes
     args=parser.parse_args()
     
     tools.csv_to_kml(
@@ -34,5 +56,15 @@ if __name__ == "__main__":
                      args.mode,
                      args.label_scale,
                      args.icon_scale,
+<<<<<<< Updated upstream
                      args.icon_href
+=======
+                     args.icon_href,
+                     args.show_pt_name,
+                     args.altitudemode,
+                     args.show_point,
+                     args.show_line,
+                     args.show_confidence_interval,
+                     args.show_building
+>>>>>>> Stashed changes
                     )
