@@ -7,12 +7,10 @@ import csts,os,simplekml
 import numpy as np
 import pandas as pd
 from pyproj import Transformer
-import matplotlib.pyplot as plt
 
 # exemple line :
 # python3 src/csv_to_kml.py test/EXTENVENT.LOG
-# python3 src/csv_to_kml.py test/20240223.LOG -it 'special' -dr '(0,-1,100)'
-import numpy as np
+# python3 src/csv_to_kml.py test/20240223.LOG -it 'special'    
 
 
 def custom_pt(
@@ -73,15 +71,15 @@ def custom_int_conf(
 				name="",
 				description="",
 				altitudemode="absolute",
-				color=csts.colors_dict["green"],
-				incert_pla=2
+				color=csts.colors_dict["green"]
 				):
 	if (mode=="pyr"):
-		corners = np.array([(pt["lon"]-incert_pla, pt["lat"]           , pt["altitude"]), 
-			 	   			(pt["lon"]       	 , pt["lat"]+incert_pla, pt["altitude"]), 
-				   			(pt["lon"]+incert_pla, pt["lat"]           , pt["altitude"]), 
-				   			(pt["lon"]           , pt["lat"]-incert_pla, pt["altitude"]), 
-				   			(pt["lon"]           , pt["lat"]           , pt["altitude"] + pt["incert_hig"]  )])
+		incert_pla = np.log10(pt["incert_pla"])/10000
+		corners = np.array([(pt["lon"]-incert_pla, pt["lat"]           , pt["h"]), 
+			 	   			(pt["lon"]       	 , pt["lat"]+incert_pla, pt["h"]), 
+				   			(pt["lon"]+incert_pla, pt["lat"]           , pt["h"]), 
+				   			(pt["lon"]           , pt["lat"]-incert_pla, pt["h"]), 
+				   			(pt["lon"]           , pt["lat"]           , pt["h"] + pt["incert_hig"]  )])
 		#append the four faces of the pyramid
 		pol = kml.newpolygon(name=name, description=description, altitudemode=altitudemode, extrude = 0)
 		pol.outerboundaryis = [corners[0], corners[1], corners[-1], corners[0]]
@@ -103,9 +101,8 @@ def csv_to_kml(
 			   input_type,
 			   output_file="",
 			   separator=",",
-			   data_range=(),
 			   doc_name="",
-			   quiet=False,
+			   print_stats=True,
 			   mode="icon",
 			   label_scale=2,
 			   icon_scale=1,
@@ -121,29 +118,23 @@ def csv_to_kml(
 	data = pd.read_csv(input_file, sep=separator)
 	data.columns = labels
 	
+	print("\n################ csv to kml ################\n")
+
+	print("==> Input File : %s\n"%input_file)
 
 	#clear empty coordinates
 	lonlat = data[['lon', 'lat']].values
 	empty = np.union1d(data[np.isnan(lonlat[:,0])].index, data[np.isnan(lonlat[:,1])].index)
 	data = data.drop(empty)
 
-	data_range = np.array(data_range[1:-1].split(",")).astype(int)
-	#decimation of data with data_range
-	if len(data_range) == 3 :
-		data = data[data_range[0]: data_range[1]: data_range[2]]
-	elif len(data_range) == 2 :
-		data = data[data_range[0]: data_range[1]: 1]
-	elif len(data_range) == 1 :
-		data = data[data_range[0]: -1: 1]
-	
+	#decimation of data for tests
+	data = data[0:-1:100]
 	
 	#reorganise indexes without loosing previous
 	data = data.reset_index()
 
 	#show some statistics
-	if not quiet:
-		print("\n################ csv to kml ################\n")
-		print("==> Input File : %s\n"%input_file)
+	if(print_stats):
 		print("(#) samples \t = %d" % len(data))
 		print("(#) %s \t = %d (%.1f%%)" % (csts.status_dict["R"]["name"],[pt["state"] for index, pt in data.iterrows()].count("R"),100*[pt["state"] for index, pt in data.iterrows()].count("R")/len(data)))
 		print("(#) %s \t = %d (%.1f%%)" % (csts.status_dict["F"]["name"],[pt["state"] for index, pt in data.iterrows()].count("F"),100*[pt["state"] for index, pt in data.iterrows()].count("F")/len(data)))
@@ -166,13 +157,6 @@ def csv_to_kml(
 	coordRGF93 = np.array(coordRGF93)
 	
 	data[['coordX', 'coordY', 'coordZ']] = coordRGF93.T.round(3)
-
-	# Altitude from ellispoidal height
-	transformer = Transformer.from_crs(4326, 2154)
-	coordL93 = transformer.transform(data['lat'], data['lon'], data['h'])
-	coordL93 = np.array(coordL93)
-
-	data["altitude"] = coordL93[2].round(3)
 
 	# Calculate distance between two points
 	data["dist"] = np.sqrt(data["coordX"].diff()**2 + data["coordY"].diff()**2 + data["coordZ"].diff()**2).round(3)
@@ -197,21 +181,7 @@ def csv_to_kml(
 	points = kml.newfolder(name="Measured points")
 	lines = kml.newfolder(name="Trace")
 	int_conf = kml.newfolder(name="Confidence interval")
-
-	# Calcul of a scaled version of incertainty
-	y = np.log(data["incert_pla"].values)
-	y = y+np.abs(np.min(y))
-	y = y/(2*np.max(y))
-	incert_pla_normalised = y/10000 + 0.00003
-
-	index_color = np.zeros(len(data)).astype(int)
-	    
-	index_color[:]            = 4
-	index_color[y<4*max(y)/5] = 3
-	index_color[y<3*max(y)/5] = 2
-	index_color[y<2*max(y)/5] = 1
-	index_color[y<1*max(y)/5] = 0
-
+	
 	line = []
 	index_line = 0
 	for index, pt in data.iterrows():
@@ -223,7 +193,7 @@ def csv_to_kml(
 				  points,
 				  float(pt["lon"]),
 				  float(pt["lat"]),
-				  float(pt["altitude"]),
+				  float(pt["h"]),
 				  name="Point n° " + str(index),
 				  status=pt["state"],
 				  mode=mode,
@@ -236,9 +206,6 @@ def csv_to_kml(
 				 )
 		
 		#insert the confidence intervals in the kml
-		#color choose
-		color = csts.colors_grade[index_color[index]]
-		incert_pla = incert_pla_normalised[index]
 		custom_int_conf(
 				int_conf,
 				pt,
@@ -246,8 +213,7 @@ def csv_to_kml(
 				name="Point n° " + str(index),
 				description="",
 				altitudemode=altitudemode,
-				color=color,
-				incert_pla=incert_pla
+				color='green'
 				)
 		
 		#prepare a segmentation of the trajectory by GNSS status
@@ -255,11 +221,11 @@ def csv_to_kml(
 			if len(line) == 0 :
 				line = [[pt["state"]], 
 						[pt["index"]], 
-						[(pt["lon"], pt["lat"], pt["altitude"])]]
+						[(pt["lon"], pt["lat"], pt["h"])]]
 			elif line[0][0] == pt["state"] :
 				line[0].append(pt["state"])
 				line[1].append(pt["index"])
-				line[2].append((pt["lon"],pt["lat"], pt["altitude"]))
+				line[2].append((pt["lon"],pt["lat"], pt["h"]))
 			else :
 				description_line = gen_description_line(line)
 				if len(line[0]) > 1 :
@@ -277,10 +243,10 @@ def csv_to_kml(
 					index_line+=1
 				line = [[pt["state"]], 
 						[pt["index"]], 
-						[(pt["lon"], pt["lat"], pt["altitude"])]]
-		if not quiet:
-			print(f"Loading {100*index//len(data)} % \r",end="")
-	
+						[(pt["lon"], pt["lat"], pt["h"])]]
+		print(f"Loading {100*index//len(data)} % \r",end="")
+	print("                            ")
+				
 	#calculs of the measures boundarys	
 	a = np.max(data["lon"]) + 0.001
 	b = np.min(data["lon"]) - 0.001
@@ -295,11 +261,10 @@ def csv_to_kml(
 	#save kml
 	kml.save(output_file)
 
-	if not quiet:
-		print("                            ")		
-		print("\n==> Job done")
-		print("==> Saved as", output_file)
-		print("\n############################################\n")
+	
+	print("\n==> Job done")
+	print("==> Saved as", output_file)
+	print("\n############################################\n")
 	return None
 
 def gen_description_pt(pt) :
