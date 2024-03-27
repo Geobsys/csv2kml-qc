@@ -105,7 +105,7 @@ def csv_to_kml(
 			   separator=",",
 			   data_range=(),
 			   doc_name="",
-			   print_stats=True,
+			   quiet=False,
 			   mode="icon",
 			   label_scale=2,
 			   icon_scale=1,
@@ -121,9 +121,6 @@ def csv_to_kml(
 	data = pd.read_csv(input_file, sep=separator)
 	data.columns = labels
 	
-	print("\n################ csv to kml ################\n")
-
-	print("==> Input File : %s\n"%input_file)
 
 	#clear empty coordinates
 	lonlat = data[['lon', 'lat']].values
@@ -144,7 +141,9 @@ def csv_to_kml(
 	data = data.reset_index()
 
 	#show some statistics
-	if(print_stats):
+	if not quiet:
+		print("\n################ csv to kml ################\n")
+		print("==> Input File : %s\n"%input_file)
 		print("(#) samples \t = %d" % len(data))
 		print("(#) %s \t = %d (%.1f%%)" % (csts.status_dict["R"]["name"],[pt["state"] for index, pt in data.iterrows()].count("R"),100*[pt["state"] for index, pt in data.iterrows()].count("R")/len(data)))
 		print("(#) %s \t = %d (%.1f%%)" % (csts.status_dict["F"]["name"],[pt["state"] for index, pt in data.iterrows()].count("F"),100*[pt["state"] for index, pt in data.iterrows()].count("F")/len(data)))
@@ -279,9 +278,9 @@ def csv_to_kml(
 				line = [[pt["state"]], 
 						[pt["index"]], 
 						[(pt["lon"], pt["lat"], pt["altitude"])]]
-		print(f"Loading {100*index//len(data)} % \r",end="")
-	print("                            ")
-				
+		if not quiet:
+			print(f"Loading {100*index//len(data)} % \r",end="")
+	
 	#calculs of the measures boundarys	
 	a = np.max(data["lon"]) + 0.001
 	b = np.min(data["lon"]) - 0.001
@@ -296,10 +295,11 @@ def csv_to_kml(
 	#save kml
 	kml.save(output_file)
 
-	
-	print("\n==> Job done")
-	print("==> Saved as", output_file)
-	print("\n############################################\n")
+	if not quiet:
+		print("                            ")		
+		print("\n==> Job done")
+		print("==> Saved as", output_file)
+		print("\n############################################\n")
 	return None
 
 def gen_description_pt(pt) :

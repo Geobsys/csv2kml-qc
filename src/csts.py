@@ -9,18 +9,7 @@ colors_dict={
              "red":"ff2f2fd3",
              "black":"ff000000"
             }
-colors_dict_2={
-    "green": "ff008000",
-    "light_green": "ff32cd32",
-    "lime": "ff00ff00",
-    "yellow_green": "ff9acd32",
-    "yellow": "ff00ffff",
-    "orange": "ffffa500",
-    "dark_orange": "ffff8c00",
-    "red": "ffff0000",
-    "dark_red": "ff8b0000",
-    "black": "ff000000"
-}
+
 colors_grade=("ff3c8e38","ff00ff00","ff00ffff","ff007cf5","ff2f2fd3")
 
 status_dict={
