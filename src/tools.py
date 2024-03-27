@@ -111,8 +111,13 @@ def csv_to_kml(
 			   icon_scale=1,
 			   icon_href="http://maps.google.com/mapfiles/kml/shapes/placemark_circle.png",
 			   show_pt_name=False,
-			   altitudemode="absolute"
+			   altitudemode="absolute",
+			   show_point=True,
+			   show_line=True,
+			   show_confidence_interval=True,
+			   show_building=True
 			  ):
+	
 	#my data
 	if input_type == "normal" :
 		labels = ["time", "day", "state", "lat", "lon", "h", "incert_pla", "incert_hig", "oX", "oY", "oZ"]
@@ -193,10 +198,13 @@ def csv_to_kml(
 	data["velocity"] = data["velocity"].round(3)	
 	
 	
-	#insert the elements into the kml
-	points = kml.newfolder(name="Measured points")
-	lines = kml.newfolder(name="Trace")
-	int_conf = kml.newfolder(name="Confidence interval")
+	#insert the elements into the kml	
+	if show_point :
+		points = kml.newfolder(name="Measured points")
+	if show_line :
+		lines = kml.newfolder(name="Trace")
+	if show_confidence_interval :
+		int_conf = kml.newfolder(name="Confidence interval")
 
 	# Calcul of a scaled version of incertainty
 	y = np.log(data["incert_pla"].values)
@@ -215,82 +223,82 @@ def csv_to_kml(
 	line = []
 	index_line = 0
 	for index, pt in data.iterrows():
+		if show_point : 
+			#insert the points into the kml
+			description_pt = gen_description_pt(pt)
 
-		#insert the points into the kml
-		description_pt = gen_description_pt(pt)
-
-		custom_pt(
-				  points,
-				  float(pt["lon"]),
-				  float(pt["lat"]),
-				  float(pt["altitude"]),
-				  name="Point n° " + str(index),
-				  status=pt["state"],
-				  mode=mode,
-				  description=description_pt,
-				  label_scale=label_scale,
-				  icon_scale=icon_scale,
-				  icon_href=icon_href,
-				  show_pt_name=show_pt_name,
-				  altitudemode=altitudemode
-				 )
-		
-		#insert the confidence intervals in the kml
-		#color choose
-		color = csts.colors_grade[index_color[index]]
-		incert_pla = incert_pla_normalised[index]
-		custom_int_conf(
-				int_conf,
-				pt,
-				mode="pyr",
-				name="Point n° " + str(index),
-				description="",
-				altitudemode=altitudemode,
-				color=color,
-				incert_pla=incert_pla
-				)
-		
-		#prepare a segmentation of the trajectory by GNSS status
-		if index+1 < len(data) :
-			if len(line) == 0 :
-				line = [[pt["state"]], 
-						[pt["index"]], 
-						[(pt["lon"], pt["lat"], pt["altitude"])]]
-			elif line[0][0] == pt["state"] :
-				line[0].append(pt["state"])
-				line[1].append(pt["index"])
-				line[2].append((pt["lon"],pt["lat"], pt["altitude"]))
-			else :
-				description_line = gen_description_line(line)
-				if len(line[0]) > 1 :
-					#insert the lines into the kml
-					custom_line(
-								lines,
-								line[2],
-								status=line[0][0],
-								mode="line",
-								name="Segment n° " + str(index_line),
-								description=description_line,
-								width=5,
-								altitudemode=altitudemode
-								)
-					index_line+=1
-				line = [[pt["state"]], 
-						[pt["index"]], 
-						[(pt["lon"], pt["lat"], pt["altitude"])]]
+			custom_pt(
+					points,
+					float(pt["lon"]),
+					float(pt["lat"]),
+					float(pt["altitude"]),
+					name="Point n° " + str(index),
+					status=pt["state"],
+					mode=mode,
+					description=description_pt,
+					label_scale=label_scale,
+					icon_scale=icon_scale,
+					icon_href=icon_href,
+					show_pt_name=show_pt_name,
+					altitudemode=altitudemode
+					)
+		if show_confidence_interval :
+			#insert the confidence intervals in the kml
+			#color choose
+			color = csts.colors_grade[index_color[index]]
+			incert_pla = incert_pla_normalised[index]
+			custom_int_conf(
+					int_conf,
+					pt,
+					mode="pyr",
+					name="Point n° " + str(index),
+					description="",
+					altitudemode=altitudemode,
+					color=color,
+					incert_pla=incert_pla
+					)
+		if show_line :
+			#prepare a segmentation of the trajectory by GNSS status
+			if index+1 < len(data) :
+				if len(line) == 0 :
+					line = [[pt["state"]], 
+							[pt["index"]], 
+							[(pt["lon"], pt["lat"], pt["altitude"])]]
+				elif line[0][0] == pt["state"] :
+					line[0].append(pt["state"])
+					line[1].append(pt["index"])
+					line[2].append((pt["lon"],pt["lat"], pt["altitude"]))
+				else :
+					description_line = gen_description_line(line)
+					if len(line[0]) > 1 :
+						#insert the lines into the kml
+						custom_line(
+									lines,
+									line[2],
+									status=line[0][0],
+									mode="line",
+									name="Segment n° " + str(index_line),
+									description=description_line,
+									width=5,
+									altitudemode=altitudemode
+									)
+						index_line+=1
+					line = [[pt["state"]], 
+							[pt["index"]], 
+							[(pt["lon"], pt["lat"], pt["altitude"])]]
 		if not quiet:
 			print(f"Loading {100*index//len(data)} % \r",end="")
-	
-	#calculs of the measures boundarys	
-	a = np.max(data["lon"]) + 0.001
-	b = np.min(data["lon"]) - 0.001
-	c = np.max(data["lat"]) + 0.001
-	d = np.min(data["lat"]) - 0.001
+	if show_building :
+		#calculs of the measures boundarys	
+		a = np.max(data["lon"]) + 0.001
+		b = np.min(data["lon"]) - 0.001
+		c = np.max(data["lat"]) + 0.001
+		d = np.min(data["lat"]) - 0.001
 
-	pol = kml.newpolygon(name='A Polygon', altitudemode='relativeToGround')
-	pol.outerboundaryis = [(a,c), (a,d), (b,d), (b,c), (a,c)]
-	pol.innerboundaryis = [(a,c), (a,d), (b,d), (b,c), (a,c)]
-	pol.extrude = 0
+		pol = kml.newpolygon(name='A Polygon', altitudemode='relativeToGround')
+		pol.outerboundaryis = [(a,c), (a,d), (b,d), (b,c), (a,c)]
+		pol.innerboundaryis = [(a,c), (a,d), (b,d), (b,c), (a,c)]
+		pol.extrude = 0
 
 	#save kml
 	kml.save(output_file)
