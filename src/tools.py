@@ -51,9 +51,6 @@ def csv_to_kml(
 			   mode="icon",
 			   label_scale=2,
 			   icon_scale=1,
-<<<<<<< Updated upstream
-			   icon_href="http://maps.google.com/mapfiles/kml/shapes/placemark_circle.png"
-=======
 			   icon_href="http://maps.google.com/mapfiles/kml/shapes/placemark_circle.png",
 			   show_pt_name=False,
 			   altitudemode="absolute",
@@ -61,7 +58,6 @@ def csv_to_kml(
 			   show_line=True,
 			   show_confidence_interval=True,
 			   show_building=True
->>>>>>> Stashed changes
 			  ):
 	
 	#my data
@@ -114,24 +110,6 @@ def csv_to_kml(
 	print(data["velocity"])
 	
 	
-<<<<<<< Updated upstream
-	
-	#iterate over the pts	
-	for index, pt in data.iterrows():
-		description = gen_description(pt)
-		custom_pt(
-				  kml,
-				  float(pt["lon"]),
-				  float(pt["lat"]),
-				  float(pt["h"]),
-				  status=pt["state"],
-				  mode=mode,
-				  description = description,
-				  label_scale=label_scale,
-				  icon_scale=icon_scale,
-				  icon_href=icon_href
-				 )
-=======
 	#insert the elements into the kml	
 	if show_point :
 		points = kml.newfolder(name="Measured points")
@@ -234,7 +212,6 @@ def csv_to_kml(
 		pol.innerboundaryis = [(a,c), (a,d), (b,d), (b,c), (a,c)]
 		pol.extrude = 0
 
->>>>>>> Stashed changes
 	#save kml
 	kml.save(output_file)
 
