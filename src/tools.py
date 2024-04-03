@@ -69,7 +69,9 @@ def csv_to_kml(
                icon_scale=1,
                icon_href="http://maps.google.com/mapfiles/kml/shapes/placemark_circle.png",
 			   show_pt_name=False,
-			   altitudemode="absolute"
+			   altitudemode="absolute",
+			   show_point=True,
+			   show_line=True, 
               ):
 
 	#my data
@@ -147,52 +149,53 @@ def csv_to_kml(
 	index_line = 0
 	#iterate over the pts
 	for index, pt in data.iterrows():
-		description_pt = gen_description_pt(pt)
-		custom_pt(
-                  kml_points,
-                  float(pt["lon"]),
-				  float(pt["lat"]),
-				  float(pt["altitude"]),
-                  status=pt["state"],
-                  mode=mode,
-				  name="Point n° " + str(index),
-				  description=description_pt,
-                  label_scale=label_scale,
-                  icon_scale=icon_scale,
-                  icon_href=icon_href,
-				  show_pt_name=show_pt_name,
-				  altitudemode=altitudemode
-                 )
+		if show_point :
+			description_pt = gen_description_pt(pt)
+			custom_pt(
+					kml_points,
+					float(pt["lon"]),
+					float(pt["lat"]),
+					float(pt["altitude"]),
+					status=pt["state"],
+					mode=mode,
+					name="Point n° " + str(index),
+					description=description_pt,
+					label_scale=label_scale,
+					icon_scale=icon_scale,
+					icon_href=icon_href,
+					show_pt_name=show_pt_name,
+					altitudemode=altitudemode
+					)
 		
-
-		#prepare a segmentation of the trajectory by GNSS status
-		if index+1 < len(data) :
-			if len(line) == 0 :
-				line = [[pt["state"]], 
-						[pt["index"]], 
-						[(pt["lon"], pt["lat"], pt["altitude"])]]
-			elif line[0][0] == pt["state"] :
-				line[0].append(pt["state"])
-				line[1].append(pt["index"])
-				line[2].append((pt["lon"],pt["lat"], pt["altitude"]))
-			else :
-				if len(line[0]) > 1 :
-					#insert the lines into the kml
-					description_line = gen_description_line(line)
-					custom_line(
-								kml_lines,
-								line[2],
-								status=line[0][0],
-								mode="line",
-								name="Segment n° " + str(index_line),
-								description=description_line,
-								width=5,
-								altitudemode=altitudemode
-								)
-					index_line+=1
-				line = [[pt["state"]], 
-						[pt["index"]], 
-						[(pt["lon"], pt["lat"], pt["altitude"])]]
+		if show_line :
+			#prepare a segmentation of the trajectory by GNSS status
+			if index+1 < len(data) :
+				if len(line) == 0 :
+					line = [[pt["state"]], 
+							[pt["index"]], 
+							[(pt["lon"], pt["lat"], pt["altitude"])]]
+				elif line[0][0] == pt["state"] :
+					line[0].append(pt["state"])
+					line[1].append(pt["index"])
+					line[2].append((pt["lon"],pt["lat"], pt["altitude"]))
+				else :
+					if len(line[0]) > 1 :
+						#insert the lines into the kml
+						description_line = gen_description_line(line)
+						custom_line(
+									kml_lines,
+									line[2],
+									status=line[0][0],
+									mode="line",
+									name="Segment n° " + str(index_line),
+									description=description_line,
+									width=5,
+									altitudemode=altitudemode
+									)
+						index_line+=1
+					line = [[pt["state"]], 
+							[pt["index"]], 
+							[(pt["lon"], pt["lat"], pt["altitude"])]]
 	#save kml
 	kml.save(output_file)
 
