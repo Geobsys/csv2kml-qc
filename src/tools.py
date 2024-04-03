@@ -166,6 +166,26 @@ def csv_to_kml(
 	# Separation of data type in the kml
 	kml_points = kml.newfolder(name="Measured points")
 	kml_lines = kml.newfolder(name="Trace")
+	kml_buildings = kml.newfolder(name='Buildings')
+    
+    #adding buildings
+	margin = 0.001
+	departement = 94
+	transformer = Transformer.from_crs(4326, 2154)  
+    
+	Nmax = np.max(data["lat"]) + margin
+	Nmin = np.min(data["lat"]) - margin
+	Emax = np.max(data["lon"]) + margin
+	Emin = np.min(data["lon"]) - margin
+	E = np.array([[Emin, Emax]])
+	N = np.array([[Nmin, Nmax]])
+    
+	coordLambert = transformer.transform(N,E)
+
+	Emin = coordLambert[0][0][0]
+	Emax = coordLambert[0][0][1]
+	Nmin = coordLambert[1][0][0]
+	Nmax = coordLambert[1][0][1]
 
 	line = []
 	index_line = 0
