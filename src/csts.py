@@ -30,6 +30,11 @@ param_dict={
              "oX":          {'unity' : 'rad','name' : 'Orientation X'}, 
              "oY":          {'unity' : 'rad','name' : 'Orientation Y'}, 
              "oZ":          {'unity' : 'rad','name' : 'Orientation Z'},
+             "uk1":         {'unity' : ''   ,'name' : 'Unknown'}, 
+             "GNSS":        {'unity' : ''   ,'name' : 'GNSS'}, 
+             "uk2":         {'unity' : ''   ,'name' : 'Unknown'}, 
+             "date":        {'unity' : ''   ,'name' : 'Date'},
+             "hour":        {'unity' : ''   ,'name' : 'Hour'},
 
              "coordX":      {'unity' : 'm'  ,'name' : 'X (RGF93v1)'}, 
              "coordY":      {'unity' : 'm'  ,'name' : 'Y (RGF93v1)'}, 

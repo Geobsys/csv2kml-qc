@@ -60,6 +60,7 @@ def custom_line( # Creation of a kml line
 
 def csv_to_kml(
                input_file,
+			   input_type,
                output_file="",
                separator=",",
                doc_name="",
@@ -75,7 +76,10 @@ def csv_to_kml(
               ):
 
 	#my data
-	labels = ["time", "day", "state", "lat", "lon", "h", "incert_pla", "incert_hig", "oX", "oY", "oZ"]
+	if input_type == "extevent" :
+		labels = ["time", "day", "state", "lat", "lon", "h", "incert_pla", "incert_hig", "oX", "oY", "oZ"]
+	elif input_type == "log" :
+		labels = ["uk1", "GNSS", "uk2", "time", "date", "hour", "state", "lat", "lon", "h", "incert_pla", "incert_hig"]	
 	data = pd.read_csv(input_file, sep=separator)
 	data.columns = labels
 
