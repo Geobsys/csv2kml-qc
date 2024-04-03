@@ -57,10 +57,6 @@ def csv_to_kml(
 
 	#show some statistics
 	if(print_stats):
-		#print("(#) samples \t = %d" % len(data))
-		#print("(#) %s \t = %d (%.1f%%)" % (csts.status_dict["R"]["name"],[elem[2] for elem in data].count("R"),100*[elem[2] for elem in data].count("R")/len(data)))
-		#print("(#) %s \t = %d (%.1f%%)" % (csts.status_dict["F"]["name"],[elem[2] for elem in data].count("F"),100*[elem[2] for elem in data].count("F")/len(data)))
-		#print("(#) %s \t = %d (%.1f%%)" % (csts.status_dict["N"]["name"],[elem[2] for elem in data].count("N"),100*[elem[2] for elem in data].count("N")/len(data)))
 		print("\n################ csv to kml ################\n")
 		print("==> Input File : %s\n"%input_file)
 		print("(#) samples \t = %d" % len(data))
