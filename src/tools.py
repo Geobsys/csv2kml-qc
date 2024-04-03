@@ -8,22 +8,21 @@ import numpy as np
 import pandas as pd
 from pyproj import Transformer
 
-def custom_pt(
-              kml,
-              lon,
-              lat,
-              h,
-              status="None",
-              mode="icon",
-              name="",
-              description="",
-              label_scale=2,
-              icon_scale=1,
-              icon_href="http://maps.google.com/mapfiles/kml/shapes/placemark_circle.png",
-			  show_pt_name=False,
-			  altitudemode="absolute"
-             ):
-
+def custom_pt( # Creation of a kml point
+			  kml, # simplekml object
+			  lon, # longitude (WGS84), float
+			  lat, # latitude  (WGS84), float
+			  h,   # altitude, float
+			  status="None", # GNSS measure status (R, F, N or None), string
+			  mode="icon", # point representation, string
+			  name="", # point name, string
+			  description="", # point description, string
+			  label_scale=2, # point name scale, int
+			  icon_scale=1, # point icon scale, int
+			  icon_href="http://maps.google.com/mapfiles/kml/shapes/placemark_circle.png", # point icon reference, string
+			  show_pt_name=False, # show the point name, bool
+			  altitudemode="absolute" # altitude mode in kml, string ("absolute", "relativeToGround", "clampToGround")
+			 ):
 	if(mode=="icon"):
 		#append a pt
 		pnt = kml.newpoint(altitudemode = altitudemode)
@@ -35,12 +34,9 @@ def custom_pt(
 			pnt.style.labelstyle.scale = label_scale
 		pnt.description = description
 		pnt.coords = [(lon,lat,h)]
-		pnt.style.labelstyle.color = csts.colors_dict[csts.status_dict[status]["color"]]
-		pnt.style.labelstyle.scale = label_scale
 		pnt.style.iconstyle.color = csts.colors_dict[csts.status_dict[status]["color"]]
 		pnt.style.iconstyle.scale = icon_scale
 		pnt.style.iconstyle.icon.href = icon_href
-
 	return None
 
 def csv_to_kml(
