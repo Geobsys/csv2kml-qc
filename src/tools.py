@@ -60,6 +60,9 @@ def csv_to_kml(
 	empty = np.union1d(data[np.isnan(lonlat[:,0])].index, data[np.isnan(lonlat[:,1])].index)
 	data = data.drop(empty)
 
+	#reorganise indexes without loosing previous
+	data = data.reset_index()
+
 
 	#show some statistics
 	if(print_stats):
@@ -122,7 +125,7 @@ def csv_to_kml(
                   float(pt["lon"]),
 				  float(pt["lat"]),
 				  float(pt["h"]),
-                  status=pt[2],
+                  status=pt["state"],
                   mode=mode,
 				  description=description_pt,
                   label_scale=label_scale,
@@ -135,4 +138,9 @@ def csv_to_kml(
 	return None
 
 def gen_description_pt(pt) :
-	return ""
+	# generate a description for a point based on the dataframes columns
+	index = pt.index
+	text = ""
+	for i in index :
+		text += f"{i} : {pt[i]}\n"
+	return text
