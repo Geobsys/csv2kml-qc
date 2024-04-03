@@ -39,6 +39,25 @@ def custom_pt( # Creation of a kml point
 		pnt.style.iconstyle.icon.href = icon_href
 	return None
 
+def custom_line( # Creation of a kml line
+				kml, # simplekml object
+				pts_coords, # point coordinates, list (lenght 2 or more) of tuples (lenght 2 or 3) with floats
+				status="None", # GNSS measure status (R, F, N or None), string
+				mode="line", # line representation, string
+				name="", # line name, string
+				description="", # line description, string
+				width=1, # line width scale, int
+				altitudemode="absolute" # altitude mode in kml, string ("absolute", "relativeToGround", "clampToGround")
+				):
+	if (mode=="line"):
+		#append a line
+		ls = kml.newlinestring(name=name, description=description, altitudemode = altitudemode)
+		ls.coords = pts_coords
+		ls.extrude = 0
+		ls.style.linestyle.width = width
+		ls.style.linestyle.color = csts.colors_dict[csts.status_dict[status]["color"]]
+	return None
+
 def csv_to_kml(
                input_file,
                output_file="",
