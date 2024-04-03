@@ -139,7 +139,8 @@ def csv_to_kml(
 	data["velocity"] = (data["velocity"].shift(-1) + data["velocity"])/2
 	data["velocity"] = data["velocity"].round(3)	
 
-
+	line = []
+	index_line = 0
 	#iterate over the pts
 	for index, pt in data.iterrows():
 		description_pt = gen_description_pt(pt)
@@ -158,6 +159,35 @@ def csv_to_kml(
 				  show_pt_name=show_pt_name,
 				  altitudemode=altitudemode
                  )
+		
+
+		#prepare a segmentation of the trajectory by GNSS status
+		if index+1 < len(data) :
+			if len(line) == 0 :
+				line = [[pt["state"]], 
+						[pt["index"]], 
+						[(pt["lon"], pt["lat"], pt["altitude"])]]
+			elif line[0][0] == pt["state"] :
+				line[0].append(pt["state"])
+				line[1].append(pt["index"])
+				line[2].append((pt["lon"],pt["lat"], pt["altitude"]))
+			else :
+				if len(line[0]) > 1 :
+					#insert the lines into the kml
+					custom_line(
+								kml,
+								line[2],
+								status=line[0][0],
+								mode="line",
+								name="Segment n° " + str(index_line),
+								description="",
+								width=5,
+								altitudemode=altitudemode
+								)
+					index_line+=1
+				line = [[pt["state"]], 
+						[pt["index"]], 
+						[(pt["lon"], pt["lat"], pt["altitude"])]]
 	#save kml
 	kml.save(output_file)
 
