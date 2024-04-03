@@ -178,13 +178,14 @@ def csv_to_kml(
 			else :
 				if len(line[0]) > 1 :
 					#insert the lines into the kml
+					description_line = gen_description_line(line)
 					custom_line(
 								kml_lines,
 								line[2],
 								status=line[0][0],
 								mode="line",
 								name="Segment n° " + str(index_line),
-								description="",
+								description=description_line,
 								width=5,
 								altitudemode=altitudemode
 								)
@@ -210,5 +211,15 @@ def gen_description_pt(pt) :
 		else :
 			value = f"{int(pt[i]//3600)}h {int((pt[i]%3600)//60)}min {round((pt[i]%3600)%60,3)}s"
 		text += f'<tr><td style="text-align: left;">{csts.param_dict[i]["name"]}</td><td style="text-align: left;">{value}</td></tr>\n'
+	text += '</table>'
+	return text
+
+def gen_description_line(line) :
+	# generate a description for a line based on the line points
+	text = '<table style="border: 1px solid black;>'
+	text += f'<tr><td">{" "}</td><td">{" "}</td></tr>\n'
+	text += f'<tr><td style="text-align: left;">{"Start"}</td><td style="text-align: left;">{line[1][0]}</td></tr>\n'
+	text += f'<tr><td style="text-align: left;">{"End"}</td><td style="text-align: left;">{line[1][-1]}</td></tr>\n'
+	text += f'<tr><td style="text-align: left;">{"Status"}</td><td style="text-align: left;">{csts.status_dict[line[0][0]]["name"]}</td></tr>\n'
 	text += '</table>'
 	return text
