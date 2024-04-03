@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-@author: mehdi daakir
+@author: mehdi daakir, gabin bourlon, axel debock, felix mercier, clement cambours
 """
 
 #todo:

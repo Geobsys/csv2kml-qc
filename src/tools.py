@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-@author: mehdi daakir
+@author: mehdi daakir, gabin bourlon, axel debock, felix mercier, clement cambours
 """
 
 import csts,os,simplekml
@@ -75,6 +75,9 @@ def csv_to_kml(
 			   show_point=True,
 			   show_line=True, 
               ):
+	if not quiet :
+		print("\n################ csv to kml ################\n")
+		print("==> Input File : %s\n"%input_file)
 
 	#my data
 	if input_type == "extevent" :
@@ -82,7 +85,11 @@ def csv_to_kml(
 	elif input_type == "log" :
 		labels = ["uk1", "GNSS", "uk2", "time", "date", "hour", "state", "lat", "lon", "h", "incert_pla", "incert_hig"]	
 	data = pd.read_csv(input_file, sep=separator)
-	data.columns = labels
+	try :
+		data.columns = labels
+	except :
+		print("The input type isn't the right one, or isn't supported. \nYou can change the input type by using the command -it.")
+		return None
 
 	#clear empty coordinates
 	data_range = np.array(data_range[1:-1].split(",")).astype(int)
@@ -104,8 +111,6 @@ def csv_to_kml(
 
 	#show some statistics
 	if(not quiet):
-		print("\n################ csv to kml ################\n")
-		print("==> Input File : %s\n"%input_file)
 		print("(#) samples \t = %d" % len(data))
 		print("(#) %s \t = %d (%.1f%%)" % (csts.status_dict["R"]["name"],[pt["state"] for index, pt in data.iterrows()].count("R"),100*[pt["state"] for index, pt in data.iterrows()].count("R")/len(data)))
 		print("(#) %s \t = %d (%.1f%%)" % (csts.status_dict["F"]["name"],[pt["state"] for index, pt in data.iterrows()].count("F"),100*[pt["state"] for index, pt in data.iterrows()].count("F")/len(data)))
