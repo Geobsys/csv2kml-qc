@@ -19,7 +19,8 @@ def custom_pt(
               description="",
               label_scale=2,
               icon_scale=1,
-              icon_href="http://maps.google.com/mapfiles/kml/shapes/placemark_circle.png"
+              icon_href="http://maps.google.com/mapfiles/kml/shapes/placemark_circle.png",
+			  show_pt_name=False
              ):
 
 	if(mode=="icon"):
@@ -27,7 +28,10 @@ def custom_pt(
 		pnt = kml.newpoint()
 
 		#edit the point
-		pnt.name = name
+		if show_pt_name : 
+			pnt.name = name
+			pnt.style.labelstyle.color = csts.colors_dict[csts.status_dict[status]["color"]]
+			pnt.style.labelstyle.scale = label_scale
 		pnt.description = description
 		pnt.coords = [(lon,lat,h)]
 		pnt.style.labelstyle.color = csts.colors_dict[csts.status_dict[status]["color"]]
@@ -47,7 +51,8 @@ def csv_to_kml(
                mode="icon",
                label_scale=2,
                icon_scale=1,
-               icon_href="http://maps.google.com/mapfiles/kml/shapes/placemark_circle.png"
+               icon_href="http://maps.google.com/mapfiles/kml/shapes/placemark_circle.png",
+			   show_pt_name=False
               ):
 
 	#my data
@@ -132,7 +137,8 @@ def csv_to_kml(
 				  description=description_pt,
                   label_scale=label_scale,
                   icon_scale=icon_scale,
-                  icon_href=icon_href
+                  icon_href=icon_href,
+				  show_pt_name=show_pt_name
                  )
 	#save kml
 	kml.save(output_file)

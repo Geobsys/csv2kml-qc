@@ -23,6 +23,7 @@ if __name__ == "__main__":
     parser.add_argument('-ls','--label_scale',type=float,help="label scale (Default=2)",default=2)
     parser.add_argument('-is','--icon_scale',type=float,help="icon scale (Default=1)",default=1)
     parser.add_argument('-ih','--icon_href',type=str,help="icon href (Default=http://maps.google.com/mapfiles/kml/shapes/placemark_circle.png)",default="http://maps.google.com/mapfiles/kml/shapes/placemark_circle.png")
+    parser.add_argument('--show_pt_name',action="store_true",help="Hide the points names")
     args=parser.parse_args()
     
     tools.csv_to_kml(
@@ -34,5 +35,6 @@ if __name__ == "__main__":
                      args.mode,
                      args.label_scale,
                      args.icon_scale,
-                     args.icon_href
+                     args.icon_href,
+                     args.show_pt_name
                     )
