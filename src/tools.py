@@ -4,6 +4,8 @@
 """
 
 import csts,os,simplekml
+import numpy as np
+import pandas as pd
 
 def custom_pt(
               kml,
@@ -48,20 +50,23 @@ def csv_to_kml(
               ):
 
 	#my data
-	data=[]
+	labels = ["time", "day", "state", "lat", "lon", "h", "incert_pla", "incert_hig", "oX", "oY", "oZ"]
+	data = pd.read_csv(input_file, sep=separator)
+	data.columns = labels
 
-	#load input file
-	f = open(input_file, 'r')
-	for line in f:
-		data.append(line.strip().split(separator))
-	f.close()
 
 	#show some statistics
 	if(print_stats):
+		#print("(#) samples \t = %d" % len(data))
+		#print("(#) %s \t = %d (%.1f%%)" % (csts.status_dict["R"]["name"],[elem[2] for elem in data].count("R"),100*[elem[2] for elem in data].count("R")/len(data)))
+		#print("(#) %s \t = %d (%.1f%%)" % (csts.status_dict["F"]["name"],[elem[2] for elem in data].count("F"),100*[elem[2] for elem in data].count("F")/len(data)))
+		#print("(#) %s \t = %d (%.1f%%)" % (csts.status_dict["N"]["name"],[elem[2] for elem in data].count("N"),100*[elem[2] for elem in data].count("N")/len(data)))
+		print("\n################ csv to kml ################\n")
+		print("==> Input File : %s\n"%input_file)
 		print("(#) samples \t = %d" % len(data))
-		print("(#) %s \t = %d (%.1f%%)" % (csts.status_dict["R"]["name"],[elem[2] for elem in data].count("R"),100*[elem[2] for elem in data].count("R")/len(data)))
-		print("(#) %s \t = %d (%.1f%%)" % (csts.status_dict["F"]["name"],[elem[2] for elem in data].count("F"),100*[elem[2] for elem in data].count("F")/len(data)))
-		print("(#) %s \t = %d (%.1f%%)" % (csts.status_dict["N"]["name"],[elem[2] for elem in data].count("N"),100*[elem[2] for elem in data].count("N")/len(data)))
+		print("(#) %s \t = %d (%.1f%%)" % (csts.status_dict["R"]["name"],[pt["state"] for index, pt in data.iterrows()].count("R"),100*[pt["state"] for index, pt in data.iterrows()].count("R")/len(data)))
+		print("(#) %s \t = %d (%.1f%%)" % (csts.status_dict["F"]["name"],[pt["state"] for index, pt in data.iterrows()].count("F"),100*[pt["state"] for index, pt in data.iterrows()].count("F")/len(data)))
+		print("(#) %s \t = %d (%.1f%%)" % (csts.status_dict["N"]["name"],[pt["state"] for index, pt in data.iterrows()].count("N"),100*[pt["state"] for index, pt in data.iterrows()].count("N")/len(data)))
 
 	#instance class
 	kml=simplekml.Kml()
@@ -74,12 +79,12 @@ def csv_to_kml(
 	if(output_file==""): output_file="".join([os.path.splitext(input_file)[0],".kml"])
 
 	#iterate over the pts
-	for pt in data:
+	for index, pt in data.iterrows():
 		custom_pt(
                   kml,
-                  float(pt[4]),
-                  float(pt[3]),
-                  float(pt[5]),
+                  float(pt["lon"]),
+				  float(pt["lat"]),
+				  float(pt["h"]),
                   status=pt[2],
                   mode=mode,
                   label_scale=label_scale,
