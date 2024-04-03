@@ -54,6 +54,11 @@ def csv_to_kml(
 	data = pd.read_csv(input_file, sep=separator)
 	data.columns = labels
 
+	#clear empty coordinates
+	lonlat = data[['lon', 'lat']].values
+	empty = np.union1d(data[np.isnan(lonlat[:,0])].index, data[np.isnan(lonlat[:,1])].index)
+	data = data.drop(empty)
+
 
 	#show some statistics
 	if(print_stats):
