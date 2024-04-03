@@ -117,6 +117,7 @@ def csv_to_kml(
 	data["velocity"] = (data["velocity"].shift(-1) + data["velocity"])/2
 	data["velocity"] = data["velocity"].round(3)	
 
+
 	#iterate over the pts
 	for index, pt in data.iterrows():
 		description_pt = gen_description_pt(pt)
@@ -140,7 +141,15 @@ def csv_to_kml(
 def gen_description_pt(pt) :
 	# generate a description for a point based on the dataframes columns
 	index = pt.index
-	text = ""
+	text = '<table style="border: 1px solid black;>'
+	text += f'<tr><td">{" "}</td><td">{" "}</td></tr>\n'
 	for i in index :
-		text += f"{i} : {pt[i]}\n"
+		if i == "state" :
+			value = f"{csts.status_dict[pt[i]]['name']}"
+		elif csts.param_dict[i]["unity"] != 's' :
+			value = f"{pt[i]} {csts.param_dict[i]['unity']}"
+		else :
+			value = f"{int(pt[i]//3600)}h {int((pt[i]%3600)//60)}min {round((pt[i]%3600)%60,3)}s"
+		text += f'<tr><td style="text-align: left;">{csts.param_dict[i]["name"]}</td><td style="text-align: left;">{value}</td></tr>\n'
+	text += '</table>'
 	return text
