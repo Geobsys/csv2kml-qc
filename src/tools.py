@@ -63,7 +63,7 @@ def csv_to_kml(
                output_file="",
                separator=",",
                doc_name="",
-               print_stats=True,
+               quiet=False,
                mode="icon",
                label_scale=2,
                icon_scale=1,
@@ -89,7 +89,7 @@ def csv_to_kml(
 
 
 	#show some statistics
-	if(print_stats):
+	if(not quiet):
 		print("\n################ csv to kml ################\n")
 		print("==> Input File : %s\n"%input_file)
 		print("(#) samples \t = %d" % len(data))
@@ -196,8 +196,16 @@ def csv_to_kml(
 					line = [[pt["state"]], 
 							[pt["index"]], 
 							[(pt["lon"], pt["lat"], pt["altitude"])]]
+		if not quiet :
+			print(f"Loading {100*index//len(data)} % \r",end="")
 	#save kml
 	kml.save(output_file)
+
+	if not quiet:
+		print("                            ")		
+		print("\n==> Job done")
+		print("==> Saved as", output_file)
+		print("\n############################################\n")
 
 	return None
 

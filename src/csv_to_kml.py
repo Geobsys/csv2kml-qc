@@ -18,7 +18,7 @@ if __name__ == "__main__":
     parser.add_argument('-o','--output_file',type=str,help="output file in .kml format (Default=./input_file.kml)",default="")
     parser.add_argument('-sep','--separator',type=str,help="separator used in the .csv file (Default=,)",default=",")
     parser.add_argument('-name','--doc_name',type=str,help="kml document name",default="")
-    parser.add_argument('--quiet',action="store_false",help="print some statistics")
+    parser.add_argument('--quiet',action="store_true",help="print some statistics")
     parser.add_argument('-m','--mode',type=str,help="representation mode",default="icon",choices=["icon"])
     parser.add_argument('-ls','--label_scale',type=float,help="label scale (Default=2)",default=2)
     parser.add_argument('-is','--icon_scale',type=float,help="icon scale (Default=1)",default=1)
