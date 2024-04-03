@@ -20,12 +20,13 @@ def custom_pt(
               label_scale=2,
               icon_scale=1,
               icon_href="http://maps.google.com/mapfiles/kml/shapes/placemark_circle.png",
-			  show_pt_name=False
+			  show_pt_name=False,
+			  altitudemode="absolute"
              ):
 
 	if(mode=="icon"):
 		#append a pt
-		pnt = kml.newpoint()
+		pnt = kml.newpoint(altitudemode = altitudemode)
 
 		#edit the point
 		if show_pt_name : 
@@ -52,7 +53,8 @@ def csv_to_kml(
                label_scale=2,
                icon_scale=1,
                icon_href="http://maps.google.com/mapfiles/kml/shapes/placemark_circle.png",
-			   show_pt_name=False
+			   show_pt_name=False,
+			   altitudemode="absolute"
               ):
 
 	#my data
@@ -130,7 +132,7 @@ def csv_to_kml(
                   kml,
                   float(pt["lon"]),
 				  float(pt["lat"]),
-				  float(pt["h"]),
+				  float(pt["altitude"]),
                   status=pt["state"],
                   mode=mode,
 				  name="Point n° " + str(index),
@@ -138,7 +140,8 @@ def csv_to_kml(
                   label_scale=label_scale,
                   icon_scale=icon_scale,
                   icon_href=icon_href,
-				  show_pt_name=show_pt_name
+				  show_pt_name=show_pt_name,
+				  altitudemode=altitudemode
                  )
 	#save kml
 	kml.save(output_file)
