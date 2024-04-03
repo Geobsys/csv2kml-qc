@@ -6,6 +6,7 @@
 import csts,os,simplekml
 import numpy as np
 import pandas as pd
+from pyproj import Transformer
 
 def custom_pt(
               kml,
@@ -78,6 +79,14 @@ def csv_to_kml(
 
 	#assign a name
 	if(output_file==""): output_file="".join([os.path.splitext(input_file)[0],".kml"])
+
+	### Adding attributes
+	# Coordinates transformation to cartesian geocentric 
+	transformer = Transformer.from_crs(4326, 4964)
+	coordRGF93 = transformer.transform(data['lon'], data['lat'], data['h'])
+	coordRGF93 = np.array(coordRGF93)
+	
+	data[['coordX', 'coordY', 'coordZ']] = coordRGF93.T.round(3)
 
 	#iterate over the pts
 	for index, pt in data.iterrows():
