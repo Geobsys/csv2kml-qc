@@ -139,13 +139,17 @@ def csv_to_kml(
 	data["velocity"] = (data["velocity"].shift(-1) + data["velocity"])/2
 	data["velocity"] = data["velocity"].round(3)	
 
+	# Separation of data type in the kml
+	kml_points = kml.newfolder(name="Measured points")
+	kml_lines = kml.newfolder(name="Trace")
+
 	line = []
 	index_line = 0
 	#iterate over the pts
 	for index, pt in data.iterrows():
 		description_pt = gen_description_pt(pt)
 		custom_pt(
-                  kml,
+                  kml_points,
                   float(pt["lon"]),
 				  float(pt["lat"]),
 				  float(pt["altitude"]),
@@ -175,7 +179,7 @@ def csv_to_kml(
 				if len(line[0]) > 1 :
 					#insert the lines into the kml
 					custom_line(
-								kml,
+								kml_lines,
 								line[2],
 								status=line[0][0],
 								mode="line",
