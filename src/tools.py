@@ -62,22 +62,25 @@ def custom_line( # Creation of a kml line
 	return None
 
 def csv_to_kml(
-               input_file,
+			   input_file,
 			   input_type,
-               output_file="",
-               separator=",",
+			   output_file="",
+			   separator=",",
 			   data_range=(),
-               doc_name="",
-               quiet=False,
-               mode="icon",
-               label_scale=2,
-               icon_scale=1,
-               icon_href="http://maps.google.com/mapfiles/kml/shapes/placemark_circle.png",
+			   doc_name="",
+			   quiet=False,
+			   mode="icon",
+			   label_scale=2,
+			   icon_scale=1,
+			   icon_href="http://maps.google.com/mapfiles/kml/shapes/placemark_circle.png",
 			   show_pt_name=False,
 			   altitudemode="absolute",
 			   show_point=True,
 			   show_line=True, 
-              ):
+			   show_buildings=True,
+			   margin=0.001,
+			   departments=[]
+			  ):
 	if not quiet :
 		print("\n################ csv to kml ################\n")
 		print("==> Input File : %s\n"%input_file)
@@ -118,7 +121,7 @@ def csv_to_kml(
 		print("(#) %s \t = %d (%.1f%%)" % (csts.status_dict["R"]["name"],[pt["state"] for index, pt in data.iterrows()].count("R"),100*[pt["state"] for index, pt in data.iterrows()].count("R")/len(data)))
 		print("(#) %s \t = %d (%.1f%%)" % (csts.status_dict["F"]["name"],[pt["state"] for index, pt in data.iterrows()].count("F"),100*[pt["state"] for index, pt in data.iterrows()].count("F")/len(data)))
 		print("(#) %s \t = %d (%.1f%%)" % (csts.status_dict["N"]["name"],[pt["state"] for index, pt in data.iterrows()].count("N"),100*[pt["state"] for index, pt in data.iterrows()].count("N")/len(data)))
-
+		print()
 	#instance class
 	kml=simplekml.Kml()
 
@@ -164,28 +167,60 @@ def csv_to_kml(
 	data["velocity"] = data["velocity"].round(3)	
 
 	# Separation of data type in the kml
-	kml_points = kml.newfolder(name="Measured points")
-	kml_lines = kml.newfolder(name="Trace")
-	kml_buildings = kml.newfolder(name='Buildings')
-    
-    #adding buildings
-	margin = 0.001
-	departement = 94
-	transformer = Transformer.from_crs(4326, 2154)  
-    
-	Nmax = np.max(data["lat"]) + margin
-	Nmin = np.min(data["lat"]) - margin
-	Emax = np.max(data["lon"]) + margin
-	Emin = np.min(data["lon"]) - margin
-	E = np.array([[Emin, Emax]])
-	N = np.array([[Nmin, Nmax]])
-    
-	coordLambert = transformer.transform(N,E)
+	if show_point :
+		kml_points = kml.newfolder(name="Measured points")
+	if show_line :
+		kml_lines = kml.newfolder(name="Trace")
+	if show_buildings :
+		kml_buildings = kml.newfolder(name='Buildings')
+	
+	departments = departments.split(',')
+	if show_buildings and len(departments) != 0 :
+		#adding buildings
+		#Outside box determination
+		transformer = Transformer.from_crs(4326, 2154)  
+		Nmax = np.max(data["lat"]) + margin
+		Nmin = np.min(data["lat"]) - margin
+		Emax = np.max(data["lon"]) + margin
+		Emin = np.min(data["lon"]) - margin
+		E = np.array([[Emin, Emax]])
+		N = np.array([[Nmin, Nmax]])
+		
+		coordLambert = transformer.transform(N,E)
 
-	Emin = coordLambert[0][0][0]
-	Emax = coordLambert[0][0][1]
-	Nmin = coordLambert[1][0][0]
-	Nmax = coordLambert[1][0][1]
+		Emin = coordLambert[0][0][0]
+		Emax = coordLambert[0][0][1]
+		Nmin = coordLambert[1][0][0]
+		Nmax = coordLambert[1][0][1]
+
+		frame = [(Emin, Nmin), (Emin, Nmax), (Emax, Nmax), (Emax, Nmin), (Emin, Nmin)]
+		polygon = Polygon(frame)
+
+		#intersection between buildings and workfield
+		res_file = "shapefiles/intersection/"
+		for dep in departments:
+			res_file += f"D0{dep}_"
+		res_file += f"{output_file.split('/')[1][:-4]}.shp"
+
+		for dep in departments:
+			bat_folder = f"shapefiles/D0{dep}"
+			with fiona.open(bat_folder + '/BATIMENT.shp', 'r') as couche:
+				with fiona.open(res_file, 'w', 'ESRI Shapefile', couche.schema) as output:
+					i = 0
+					for batiment in couche:
+						if batiment['geometry']['type'] == 'Polygon':
+							coords = batiment['geometry']['coordinates']						
+							bat_polygon = Polygon(coords[0])
+							if intersects(bat_polygon, polygon):
+								output.write(batiment)
+						if not quiet :
+							i+=1
+							print(f"Intersection {100*i//len(couche)} % \r",end="")
+		if not quiet :
+			print("Intersection done.")
+
+		#transformation to kml
+		shp2kml(res_file, kml_buildings, quiet)
 
 	line = []
 	index_line = 0
@@ -239,12 +274,13 @@ def csv_to_kml(
 							[pt["index"]], 
 							[(pt["lon"], pt["lat"], pt["altitude"])]]
 		if not quiet :
-			print(f"Loading {100*index//len(data)} % \r",end="")
+			print(f"Generating kml objects {100*index//len(data)} % \r",end="")
+	if not quiet :
+		print("Generating kml objects done.")
 	#save kml
 	kml.save(output_file)
 
 	if not quiet:
-		print("                            ")		
 		print("\n==> Job done")
 		print("==> Saved as", output_file)
 		print("\n############################################\n")
@@ -276,3 +312,31 @@ def gen_description_line(line) :
 	text += f'<tr><td style="text-align: left;">{"Status"}</td><td style="text-align: left;">{csts.status_dict[line[0][0]]["name"]}</td></tr>\n'
 	text += '</table>'
 	return text
+
+def shp2kml(shp_file, kml, quiet=False):
+	# for each building in the shp, the coords are used to create a kml polygon
+	if shp_file.endswith('.shp'):
+		with fiona.open(shp_file, 'r') as shp:
+			i = 0
+			for batiment in shp : 
+				hbat = batiment['properties']['HAUTEUR']
+				coords_gr = batiment['geometry']['coordinates'][0]
+				coords_gr = np.array(coords_gr).reshape((len(coords_gr), 3))[:,:2]
+				
+				transformer = Transformer.from_crs(2154, 4326)
+				coordsWGS = transformer.transform(coords_gr[:,:1], coords_gr[:,1:2])
+				coords = []
+				for i in range(len(coords_gr)):
+					coords.append((coordsWGS[1][i][0], coordsWGS[0][i][0], hbat))
+				pol = kml.newpolygon(name='Batiment', altitudemode = "relativeToGround")
+				pol.outerboundaryis = coords
+				pol.extrude = 1
+				if not quiet :
+					i+=1
+					print(f"Conversion shp to kml {100*i//len(shp)} % \r",end="")
+
+					
+	else : 
+		print("Le format de fichier ne correspond pas")
+		return None
+	return None
