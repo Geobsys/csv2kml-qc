@@ -96,6 +96,10 @@ def csv_to_kml(
 
 	data["altitude"] = coordalt[2].round(3)
 
+	# Calculate distance between two points
+	data["dist"] = np.sqrt(data["coordX"].diff()**2 + data["coordY"].diff()**2 + data["coordZ"].diff()**2).round(3)
+	data.loc[data.index[0],"dist"] = 0.
+
 	#iterate over the pts
 	for index, pt in data.iterrows():
 		custom_pt(
