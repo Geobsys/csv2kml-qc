@@ -116,6 +116,7 @@ def csv_to_kml(
 
 	#iterate over the pts
 	for index, pt in data.iterrows():
+		description_pt = gen_description_pt(pt)
 		custom_pt(
                   kml,
                   float(pt["lon"]),
@@ -123,6 +124,7 @@ def csv_to_kml(
 				  float(pt["h"]),
                   status=pt[2],
                   mode=mode,
+				  description=description_pt,
                   label_scale=label_scale,
                   icon_scale=icon_scale,
                   icon_href=icon_href
@@ -131,3 +133,6 @@ def csv_to_kml(
 	kml.save(output_file)
 
 	return None
+
+def gen_description_pt(pt) :
+	return ""
