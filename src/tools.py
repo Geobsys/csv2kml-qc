@@ -100,6 +100,10 @@ def csv_to_kml(
 	data["dist"] = np.sqrt(data["coordX"].diff()**2 + data["coordY"].diff()**2 + data["coordZ"].diff()**2).round(3)
 	data.loc[data.index[0],"dist"] = 0.
 
+	# Calculate time between to measures
+	data["time_laps"] = data["time"].diff().round(3)
+	data.loc[data.index[0],"time_laps"] = 0.
+
 	#iterate over the pts
 	for index, pt in data.iterrows():
 		custom_pt(
