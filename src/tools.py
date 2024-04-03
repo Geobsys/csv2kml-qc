@@ -109,6 +109,11 @@ def csv_to_kml(
 	data["time_left"] = data["time_elapsed"].values[-1] - data["time_elapsed"]
 	data["time_left"] = data["time_left"].round(3)
 
+	# Calculate instantaneous velocity
+	data["velocity"] = data["dist"]/data["time_laps"]
+	data["velocity"] = (data["velocity"].shift(-1) + data["velocity"])/2
+	data["velocity"] = data["velocity"].round(3)	
+
 	#iterate over the pts
 	for index, pt in data.iterrows():
 		custom_pt(
