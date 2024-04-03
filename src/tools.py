@@ -10,7 +10,7 @@ from pyproj import Transformer
 
 # exemple line :
 # python3 src/csv_to_kml.py test/EXTENVENT.LOG
-# python3 src/csv_to_kml.py test/20240223.LOG -it 'special' -dr '(0,-1,100)'
+# python3 src/csv_to_kml.py test/20240223.LOG -it 'log' -dr '(0,-1,100)'
 
 def custom_pt( # Creation of a kml point
 			  kml, # simplekml object
