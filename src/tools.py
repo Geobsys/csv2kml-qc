@@ -128,6 +128,7 @@ def csv_to_kml(
 				  float(pt["h"]),
                   status=pt["state"],
                   mode=mode,
+				  name="Point n° " + str(index),
 				  description=description_pt,
                   label_scale=label_scale,
                   icon_scale=icon_scale,
