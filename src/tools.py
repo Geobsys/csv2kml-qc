@@ -7,6 +7,9 @@ import csts,os,simplekml
 import numpy as np
 import pandas as pd
 from pyproj import Transformer
+from shapely.geometry import Polygon, shape, mapping
+from shapely import intersects
+import fiona
 
 def custom_pt( # Creation of a kml point
 			  kml, # simplekml object
