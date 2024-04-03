@@ -173,11 +173,27 @@ def csv_to_kml(
 	# Separation of data type in the kml
 	kml_points = kml.newfolder(name="Measured points")
 	kml_lines = kml.newfolder(name="Trace")
+	kml_int_conf = kml.newfolder(name="Confidence interval")
+
+	# Calcul of a scaled version of incertainty
+	y = np.log(data["incert_pla"].values)
+	y = y+np.abs(np.min(y))
+	y = y/(2*np.max(y))
+	incert_pla_normalised = y/10000 + 0.00003
+
+	index_color = np.zeros(len(data)).astype(int)
+	    
+	index_color[:]            = 4
+	index_color[y<4*max(y)/5] = 3
+	index_color[y<3*max(y)/5] = 2
+	index_color[y<2*max(y)/5] = 1
+	index_color[y<1*max(y)/5] = 0
 
 	line = []
 	index_line = 0
 	#iterate over the pts
 	for index, pt in data.iterrows():
+		# insert points into the kml
 		description_pt = gen_description_pt(pt)
 		custom_pt(
                   kml_points,
@@ -194,6 +210,20 @@ def csv_to_kml(
 				  show_pt_name=show_pt_name,
 				  altitudemode=altitudemode
                  )
+		#insert the confidences intervals into the kml
+  		#color choose
+		color = csts.colors_grade[index_color[index]]
+		incert_pla = incert_pla_normalised[index]
+		custom_int_conf(
+					kml_int_conf,
+					pt,
+					mode="pyr",
+					name="Point n° " + str(index),
+					description="",
+					altitudemode=altitudemode,
+					color=color,
+					incert_pla=incert_pla
+					)
 		
 
 		#prepare a segmentation of the trajectory by GNSS status

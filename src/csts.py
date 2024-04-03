@@ -17,6 +17,8 @@ status_dict={
              "None":{"name":"Unknown","color":"black"}
              }
 
+colors_grade=("ff3c8e38","ff00ff00","ff00ffff","ff007cf5","ff2f2fd3")
+
 param_dict={
              "index":       {'unity' : ''   ,'name' : 'Index'},
              "time":        {'unity' : 's'  ,'name' : 'Time'}, 
