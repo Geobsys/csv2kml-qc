@@ -58,6 +58,37 @@ def custom_line( # Creation of a kml line
 		ls.style.linestyle.color = csts.colors_dict[csts.status_dict[status]["color"]]
 	return None
 
+def custom_int_conf( # Creation of a kml line
+				kml, # simplekml object
+				pt,  # point object, pandas DataFrame
+				mode="pyr", # confidence interval representation, string
+				name="", # confidence interval name, string
+				description="", # confidence interval description, string
+				altitudemode="absolute", # altitude mode in kml, string ("absolute", "relativeToGround", "clampToGround")
+				color=csts.colors_dict["green"], # confidence interval color, string
+				incert_pla=2, # confidence interval scaled incertitude, float
+				):
+	if (mode=="pyr"):
+		corners = np.array([(pt["lon"]-incert_pla, pt["lat"]           , pt["altitude"]), 
+			 	   			(pt["lon"]       	 , pt["lat"]+incert_pla, pt["altitude"]), 
+				   			(pt["lon"]+incert_pla, pt["lat"]           , pt["altitude"]), 
+				   			(pt["lon"]           , pt["lat"]-incert_pla, pt["altitude"]), 
+				   			(pt["lon"]           , pt["lat"]           , pt["altitude"] + pt["incert_hig"]  )])
+		#append the four faces of the pyramid
+		pol = kml.newpolygon(name=name, description=description, altitudemode=altitudemode, extrude = 0)
+		pol.outerboundaryis = [corners[0], corners[1], corners[-1], corners[0]]
+		pol.style.polystyle.color = color
+		pol = kml.newpolygon(name=name, description=description, altitudemode=altitudemode, extrude = 0)
+		pol.outerboundaryis = [corners[1], corners[2], corners[-1], corners[1]]
+		pol.style.polystyle.color = color
+		pol = kml.newpolygon(name=name, description=description, altitudemode=altitudemode, extrude = 0)
+		pol.outerboundaryis = [corners[2], corners[3], corners[-1], corners[2]]
+		pol.style.polystyle.color = color
+		pol = kml.newpolygon(name=name, description=description, altitudemode=altitudemode, extrude = 0)
+		pol.outerboundaryis = [corners[3], corners[0], corners[-1], corners[3]]
+		pol.style.polystyle.color = color
+	return None
+
 def csv_to_kml(
                input_file,
                output_file="",
