@@ -31,7 +31,7 @@ if __name__ == "__main__":
 	parser.add_argument('--show_line',action="store_false",help="Don't show the lines between points")
 	parser.add_argument('--show_buildings',action="store_false",help="Don't show the show_buildings")
 	parser.add_argument('-margin',type=float,help="margin (in geographical degres) around the workfield for building modelisation",default=0.001)
-	parser.add_argument('-departments',type=str,help="list of the numbers of the workfield departments (example : 94,97 )",default='')
+	parser.add_argument('-departments',type=str,help="input shp buildings file path",default='')
 
 
 

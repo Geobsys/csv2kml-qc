@@ -174,8 +174,8 @@ def csv_to_kml(
 	if show_buildings :
 		kml_buildings = kml.newfolder(name='Buildings')
 	
-	departments = departments.split(',')
-	if show_buildings and len(departments) != 0 :
+	
+	if show_buildings and departments != '' :
 		#adding buildings
 		#Outside box determination
 		transformer = Transformer.from_crs(4326, 2154)  
@@ -197,25 +197,25 @@ def csv_to_kml(
 		polygon = Polygon(frame)
 
 		#intersection between buildings and workfield
-		res_file = "shapefiles/intersection/"
-		for dep in departments:
-			res_file += f"D0{dep}_"
-		res_file += f"{output_file.split('/')[1][:-4]}.shp"
+		res_fold = departments.split('/')[:-1]
+		res_file = ''
+		for e in res_fold :
+			res_file += e +"/"
+		res_file += "intersection.shp"
 
-		for dep in departments:
-			bat_folder = f"shapefiles/D0{dep}"
-			with fiona.open(bat_folder + '/BATIMENT.shp', 'r') as couche:
-				with fiona.open(res_file, 'w', 'ESRI Shapefile', couche.schema) as output:
-					i = 0
-					for batiment in couche:
-						if batiment['geometry']['type'] == 'Polygon':
-							coords = batiment['geometry']['coordinates']						
-							bat_polygon = Polygon(coords[0])
-							if intersects(bat_polygon, polygon):
-								output.write(batiment)
-						if not quiet :
-							i+=1
-							print(f"Intersection {100*i//len(couche)} % \r",end="")
+
+		with fiona.open(departments, 'r') as couche:
+			with fiona.open(res_file, 'w', 'ESRI Shapefile', couche.schema) as output:
+				i = 0
+				for batiment in couche:
+					if batiment['geometry']['type'] == 'Polygon':
+						coords = batiment['geometry']['coordinates']						
+						bat_polygon = Polygon(coords[0])
+						if intersects(bat_polygon, polygon):
+							output.write(batiment)
+					if not quiet :
+						i+=1
+						print(f"Intersection {100*i//len(couche)} % \r",end="")
 		if not quiet :
 			print("Intersection done.")
 
