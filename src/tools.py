@@ -63,6 +63,7 @@ def csv_to_kml(
 			   input_type,
                output_file="",
                separator=",",
+			   data_range=(),
                doc_name="",
                quiet=False,
                mode="icon",
@@ -84,9 +85,18 @@ def csv_to_kml(
 	data.columns = labels
 
 	#clear empty coordinates
+	data_range = np.array(data_range[1:-1].split(",")).astype(int)
 	lonlat = data[['lon', 'lat']].values
 	empty = np.union1d(data[np.isnan(lonlat[:,0])].index, data[np.isnan(lonlat[:,1])].index)
 	data = data.drop(empty)
+
+	#decimation of data with data_range
+	if len(data_range) == 3 :
+		data = data[data_range[0]: data_range[1]: data_range[2]]
+	elif len(data_range) == 2 :
+		data = data[data_range[0]: data_range[1]: 1]
+	elif len(data_range) == 1 :
+		data = data[data_range[0]: -1: 1]
 
 	#reorganise indexes without loosing previous
 	data = data.reset_index()
