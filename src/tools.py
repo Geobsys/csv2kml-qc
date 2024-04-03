@@ -88,6 +88,14 @@ def csv_to_kml(
 	
 	data[['coordX', 'coordY', 'coordZ']] = coordRGF93.T.round(3)
 
+	# Altitude from ellispoidal height
+	grid_path = "fr_ign_RAF20.tif" 
+	transformer = Transformer.from_pipeline("cct +proj=vgridshift +grids=" + grid_path)
+	coordalt = transformer.transform(data['lon'], data['lat'], data['h'])
+	coordalt = np.array(coordalt)
+
+	data["altitude"] = coordalt[2].round(3)
+
 	#iterate over the pts
 	for index, pt in data.iterrows():
 		custom_pt(
