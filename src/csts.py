@@ -10,14 +10,14 @@ colors_dict={
              "black":"ff000000"
             }
 
+colors_list = ["ff3c8e38","ff007cf5","ff2f2fd3","ff000000"]
+
 status_dict={
              "R":{"name":"RTK_Fix","color":"green"},
              "F":{"name":"RTK_Float","color":"orange"},
              "N":{"name":"DGNSS","color":"red"},
              "None":{"name":"Unknown","color":"black"}
              }
-
-colors_grade=("ff3c8e38","ff00ff00","ff00ffff","ff007cf5","ff2f2fd3")
 
 param_dict={
              "index":       {'unity' : ''   ,'name' : 'Index'},
