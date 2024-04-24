@@ -65,6 +65,67 @@ def custom_line( # Creation of a kml line
 		ls.style.linestyle.color = csts.colors_dict[csts.status_dict[status]["color"]]
 	return None
 
+def custom_int_conf( # Creation of a kml line
+				kml, # simplekml object
+				pt,  # point object, pandas DataFrame
+				mode="pyr", # confidence interval representation, string
+				name="", # confidence interval name, string
+				description="", # confidence interval description, string
+				altitudemode="absolute", # altitude mode in kml, string ("absolute", "relativeToGround", "clampToGround")
+				color=csts.colors_dict["green"], # confidence interval color, string
+				incert_pla_factor_E=1e5, 
+				incert_pla_factor_N=1e5,
+				scale_factor_pla=1,
+				incert_pla_max=np.nan,
+				scale_factor_hig=1,
+				incert_hig_max=np.nan
+				):
+	if (mode=="pyr"):
+		if pt["incert_pla"] > incert_pla_max :
+			pt["incert_pla"] = incert_pla_max
+		pt["incert_pla"] *= scale_factor_pla
+		if pt["incert_hig"] > incert_hig_max :
+			pt["incert_hig"] = incert_hig_max
+		pt["incert_hig"] *= scale_factor_hig
+		incert_E = pt["incert_pla"]*incert_pla_factor_E
+		incert_N = pt["incert_pla"]*incert_pla_factor_N
+		corners = np.array([(pt["lon"]-incert_E, pt["lat"]		   , pt["altitude"]), 
+			 	   			(pt["lon"]	   	   , pt["lat"]+incert_N, pt["altitude"]), 
+				   			(pt["lon"]+incert_E, pt["lat"]		   , pt["altitude"]), 
+				   			(pt["lon"]		   , pt["lat"]-incert_N, pt["altitude"]), 
+				   			(pt["lon"]		   , pt["lat"]		   , pt["altitude"] + pt["incert_hig"] )])
+		#append the four faces of the pyramid
+		pol = kml.newpolygon(name=name, description=description, altitudemode=altitudemode, extrude = 0)
+		pol.outerboundaryis = [corners[0], corners[1], corners[-1], corners[0]]
+		pol.style.polystyle.color = color
+		pol = kml.newpolygon(name=name, description=description, altitudemode=altitudemode, extrude = 0)
+		pol.outerboundaryis = [corners[1], corners[2], corners[-1], corners[1]]
+		pol.style.polystyle.color = color
+		pol = kml.newpolygon(name=name, description=description, altitudemode=altitudemode, extrude = 0)
+		pol.outerboundaryis = [corners[2], corners[3], corners[-1], corners[2]]
+		pol.style.polystyle.color = color
+		pol = kml.newpolygon(name=name, description=description, altitudemode=altitudemode, extrude = 0)
+		pol.outerboundaryis = [corners[3], corners[0], corners[-1], corners[3]]
+		pol.style.polystyle.color = color
+	return None
+
+def calcul_incert_pla_factor(data, size):
+	transformer1 = Transformer.from_crs(4326, 2154)
+	transformer2 = Transformer.from_crs(2154, 4326)
+	
+	point93 = transformer1.transform(np.mean(data['lat']), np.mean(data['lon']), np.mean(data['h']))
+	E = point93[0] 
+	N = point93[1] 
+	h = point93[2]
+	point1 = transformer2.transform(E       , N	   , h)
+	point2 = transformer2.transform(E + size, N + size, h)
+	sigmaLon = point2[1] - point1[1]
+	sigmaLat = point2[0] - point1[0]
+
+	incert_pla_factor_E = sigmaLon / size
+	incert_pla_factor_N = sigmaLat / size
+	return incert_pla_factor_E, incert_pla_factor_N
+
 def csv_to_kml(
 			   input_file,
 			   input_type,
@@ -83,7 +144,11 @@ def csv_to_kml(
 			   show_line=True, 
 			   show_buildings=True,
 			   margin=0.001,
-			   departments=[]
+			   departments='',
+			   scale_factor_pla=1,
+               incert_pla_max=np.nan,
+               scale_factor_hig=1,
+               incert_hig_max=np.nan
 			  ):
 	if not quiet :
 		print("\n################ csv to kml ################\n")
@@ -175,6 +240,11 @@ def csv_to_kml(
 		kml_points = kml.newfolder(name="Measured points")
 	if show_line :
 		kml_lines = kml.newfolder(name="Trace")
+	kml_int_conf = kml.newfolder(name="Confidence interval")
+
+	# Calcul of a factor for incertainty
+	size = 1000
+	incert_pla_factor_E, incert_pla_factor_N = calcul_incert_pla_factor(data, size)
 	if show_buildings :
 		kml_buildings = kml.newfolder(name='Buildings')
 	
@@ -201,6 +271,7 @@ def csv_to_kml(
 		polygon = Polygon(frame)
 
 		#intersection between buildings and workfield
+		print(departments)
 		res_fold = departments.split('/')[:-1]
 		res_file = ''
 		for e in res_fold :
@@ -246,6 +317,25 @@ def csv_to_kml(
 					icon_href=icon_href,
 					show_pt_name=show_pt_name,
 					altitudemode=altitudemode
+					)
+		#insert the confidences intervals into the kml
+  		#color choose
+		#color = csts.colors_grade[index_color[index]]
+		#incert_pla = incert_pla_normalised[index]
+		custom_int_conf(
+					kml_int_conf,
+					pt,
+					mode="pyr",
+					name="Point n° " + str(index),
+					description="",
+					altitudemode=altitudemode,
+					#color=color,
+					incert_pla_factor_E=incert_pla_factor_E, 
+					incert_pla_factor_N=incert_pla_factor_N,
+					scale_factor_pla=scale_factor_pla,
+					incert_pla_max=incert_pla_max,
+					scale_factor_hig=scale_factor_hig,
+					incert_hig_max=incert_hig_max
 					)
 		
 		if show_line :
