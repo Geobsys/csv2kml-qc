@@ -69,9 +69,9 @@ def custom_int_conf( # Creation of a kml line
 				incert_pla_factor_E=1e5, 
 				incert_pla_factor_N=1e5,
 				scale_factor_pla=1,
-				incert_pla_max=1,
+				incert_pla_max=np.nan,
 				scale_factor_hig=1,
-				incert_hig_max=1
+				incert_hig_max=np.nan
 				):
 	if (mode=="pyr"):
 		if pt["incert_pla"] > incert_pla_max :
@@ -130,7 +130,11 @@ def csv_to_kml(
 			   icon_scale=1,
 			   icon_href="http://maps.google.com/mapfiles/kml/shapes/placemark_circle.png",
 			   show_pt_name=False,
-			   altitudemode="absolute"
+			   altitudemode="absolute",
+			   scale_factor_pla=1,
+               incert_pla_max=np.nan,
+               scale_factor_hig=1,
+               incert_hig_max=np.nan,
 			  ):
 
 	#my data
@@ -244,10 +248,10 @@ def csv_to_kml(
 					#color=color,
 					incert_pla_factor_E=incert_pla_factor_E, 
 					incert_pla_factor_N=incert_pla_factor_N,
-					scale_factor_pla=1,
-					incert_pla_max=1,
-					scale_factor_hig=1,
-					incert_hig_max=1
+					scale_factor_pla=scale_factor_pla,
+					incert_pla_max=incert_pla_max,
+					scale_factor_hig=scale_factor_hig,
+					incert_hig_max=incert_hig_max
 					)
 		
 

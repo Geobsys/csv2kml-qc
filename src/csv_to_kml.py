@@ -10,6 +10,7 @@
 
 
 import tools,argparse
+import numpy as np
 
 if __name__ == "__main__":
 
@@ -25,6 +26,10 @@ if __name__ == "__main__":
     parser.add_argument('-ih','--icon_href',type=str,help="icon href (Default=http://maps.google.com/mapfiles/kml/shapes/placemark_circle.png)",default="http://maps.google.com/mapfiles/kml/shapes/placemark_circle.png")
     parser.add_argument('--show_pt_name',action="store_true",help="Hide the points names")
     parser.add_argument('-am','--altitudemode',type=str,help="See simplekml .Altitudemode (absolute, relativeToGround, clampToGround)", default="absolute",choices=["absolute", "relativeToGround", "clampToGround"])
+    parser.add_argument('-sp','--scale_factor_pla',type=float,help="Scale factor for planimetric uncertainty.", default=1)
+    parser.add_argument('-mp','--incert_pla_max',type=float,help="Maximum planimetric uncertainty.", default=np.nan)
+    parser.add_argument('-sh','--scale_factor_hig',type=float,help="Scale factor for altimetric uncertainty.", default=1)
+    parser.add_argument('-mh','--incert_hig_max',type=float,help="Maximum altimetric uncertainty.", default=np.nan)
 
     args=parser.parse_args()
     
@@ -39,5 +44,9 @@ if __name__ == "__main__":
                      args.icon_scale,
                      args.icon_href,
                      args.show_pt_name,
-                     args.altitudemode
+                     args.altitudemode,
+                     args.scale_factor_pla,
+                     args.incert_pla_max,
+                     args.scale_factor_hig,
+                     args.incert_hig_max,
                     )
