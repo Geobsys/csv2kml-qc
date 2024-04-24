@@ -47,6 +47,9 @@ if __name__ == "__main__":
 	parser.add_argument('-margin',type=float,help="margin (in geographical degres) around the workfield for building modelisation",default=0.001)
 	parser.add_argument('-departments',type=str,help="input shp buildings file path",default='')
 	parser.add_argument('--save_buildings',action="store_true",help="If you want to save the shp file of your buildings")
+	# Ephemerids
+	parser.add_argument('--calc_ephemerids',action="store_false",help="Don't calculate the ephemerids")
+	parser.add_argument('-rn','--rinex_name',type=str,help="name of the observation and rinex file (without the extension)",default='')
 
 	args=parser.parse_args()
 	
@@ -75,4 +78,6 @@ if __name__ == "__main__":
 					 args.margin,
 					 args.departments,
 					 args.save_buildings,
+					 args.calc_ephemerids,
+					 args.rinex_name
                     )

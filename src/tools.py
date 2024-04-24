@@ -163,6 +163,8 @@ def csv_to_kml(
 			   margin=0.001,
 			   departments='',
 			   save_buildings=False,
+			   calc_ephemerids=True,
+			   rinex_name=''
 			  ):
 	if not quiet :
 		print("\n################ csv to kml ################\n")
