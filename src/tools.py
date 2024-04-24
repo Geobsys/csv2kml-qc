@@ -66,14 +66,17 @@ def custom_int_conf( # Creation of a kml line
 				description="", # confidence interval description, string
 				altitudemode="absolute", # altitude mode in kml, string ("absolute", "relativeToGround", "clampToGround")
 				color=csts.colors_dict["green"], # confidence interval color, string
-				incert_pla=2, # confidence interval scaled incertitude, float
+				incert_pla_factor_E=1e5, 
+				incert_pla_factor_N=1e5
 				):
 	if (mode=="pyr"):
-		corners = np.array([(pt["lon"]-incert_pla, pt["lat"]           , pt["altitude"]), 
-			 	   			(pt["lon"]       	 , pt["lat"]+incert_pla, pt["altitude"]), 
-				   			(pt["lon"]+incert_pla, pt["lat"]           , pt["altitude"]), 
-				   			(pt["lon"]           , pt["lat"]-incert_pla, pt["altitude"]), 
-				   			(pt["lon"]           , pt["lat"]           , pt["altitude"] + pt["incert_hig"]  )])
+		incert_E = pt["incert_pla"]*incert_pla_factor_E
+		incert_N = pt["incert_pla"]*incert_pla_factor_N
+		corners = np.array([(pt["lon"]-incert_E, pt["lat"]		   , pt["altitude"]), 
+			 	   			(pt["lon"]	   	   , pt["lat"]+incert_N, pt["altitude"]), 
+				   			(pt["lon"]+incert_E, pt["lat"]		   , pt["altitude"]), 
+				   			(pt["lon"]		   , pt["lat"]-incert_N, pt["altitude"]), 
+				   			(pt["lon"]		   , pt["lat"]		   , pt["altitude"] + pt["incert_hig"]  )])
 		#append the four faces of the pyramid
 		pol = kml.newpolygon(name=name, description=description, altitudemode=altitudemode, extrude = 0)
 		pol.outerboundaryis = [corners[0], corners[1], corners[-1], corners[0]]
@@ -89,19 +92,36 @@ def custom_int_conf( # Creation of a kml line
 		pol.style.polystyle.color = color
 	return None
 
+def calcul_incert_pla_factor(data, size):
+	transformer1 = Transformer.from_crs(4326, 2154)
+	transformer2 = Transformer.from_crs(2154, 4326)
+	
+	point93 = transformer1.transform(np.mean(data['lat']), np.mean(data['lon']), np.mean(data['h']))
+	E = point93[0] 
+	N = point93[1] 
+	h = point93[2]
+	point1 = transformer2.transform(E  + size, N	   , h)
+	point2 = transformer2.transform(E		 , N + size, h)
+	sigmaLon = point1[1] - point2[1]
+	sigmaLat = point1[0] - point2[0]
+
+	incert_pla_factor_E = sigmaLon / size
+	incert_pla_factor_N = sigmaLat / size
+	return incert_pla_factor_E, incert_pla_factor_N
+
 def csv_to_kml(
-               input_file,
-               output_file="",
-               separator=",",
-               doc_name="",
-               print_stats=True,
-               mode="icon",
-               label_scale=2,
-               icon_scale=1,
-               icon_href="http://maps.google.com/mapfiles/kml/shapes/placemark_circle.png",
+			   input_file,
+			   output_file="",
+			   separator=",",
+			   doc_name="",
+			   print_stats=True,
+			   mode="icon",
+			   label_scale=2,
+			   icon_scale=1,
+			   icon_href="http://maps.google.com/mapfiles/kml/shapes/placemark_circle.png",
 			   show_pt_name=False,
 			   altitudemode="absolute"
-              ):
+			  ):
 
 	#my data
 	labels = ["time", "day", "state", "lat", "lon", "h", "incert_pla", "incert_hig", "oX", "oY", "oZ"]
@@ -175,19 +195,9 @@ def csv_to_kml(
 	kml_lines = kml.newfolder(name="Trace")
 	kml_int_conf = kml.newfolder(name="Confidence interval")
 
-	# Calcul of a scaled version of incertainty
-	y = np.log(data["incert_pla"].values)
-	y = y+np.abs(np.min(y))
-	y = y/(2*np.max(y))
-	incert_pla_normalised = y/10000 + 0.00003
-
-	index_color = np.zeros(len(data)).astype(int)
-	    
-	index_color[:]            = 4
-	index_color[y<4*max(y)/5] = 3
-	index_color[y<3*max(y)/5] = 2
-	index_color[y<2*max(y)/5] = 1
-	index_color[y<1*max(y)/5] = 0
+	# Calcul of a factor for incertainty
+	size = 1000
+	incert_pla_factor_E, incert_pla_factor_N = calcul_incert_pla_factor(data, size)
 
 	line = []
 	index_line = 0
@@ -196,24 +206,24 @@ def csv_to_kml(
 		# insert points into the kml
 		description_pt = gen_description_pt(pt)
 		custom_pt(
-                  kml_points,
-                  float(pt["lon"]),
+				  kml_points,
+				  float(pt["lon"]),
 				  float(pt["lat"]),
 				  float(pt["altitude"]),
-                  status=pt["state"],
-                  mode=mode,
+				  status=pt["state"],
+				  mode=mode,
 				  name="Point n° " + str(index),
 				  description=description_pt,
-                  label_scale=label_scale,
-                  icon_scale=icon_scale,
-                  icon_href=icon_href,
+				  label_scale=label_scale,
+				  icon_scale=icon_scale,
+				  icon_href=icon_href,
 				  show_pt_name=show_pt_name,
 				  altitudemode=altitudemode
-                 )
+				 )
 		#insert the confidences intervals into the kml
   		#color choose
-		color = csts.colors_grade[index_color[index]]
-		incert_pla = incert_pla_normalised[index]
+		#color = csts.colors_grade[index_color[index]]
+		#incert_pla = incert_pla_normalised[index]
 		custom_int_conf(
 					kml_int_conf,
 					pt,
@@ -221,8 +231,9 @@ def csv_to_kml(
 					name="Point n° " + str(index),
 					description="",
 					altitudemode=altitudemode,
-					color=color,
-					incert_pla=incert_pla
+					#color=color,
+					incert_pla_factor_E=incert_pla_factor_E, 
+					incert_pla_factor_N=incert_pla_factor_N
 					)
 		
 
