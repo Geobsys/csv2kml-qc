@@ -213,6 +213,18 @@ def csv_to_kml(
 	size = 1000
 	incert_pla_factor_E, incert_pla_factor_N = calcul_incert_pla_factor(data, size)
 
+	# Define index_color for the confidence intervals
+	index_color = np.zeros(len(data)).astype(int) + 3
+
+	if not np.isnan(incert_pla_max) :
+		index_color[data["incert_pla"] <   incert_pla_max  ] = 2
+		index_color[data["incert_pla"] < 2*incert_pla_max/3] = 1
+		index_color[data["incert_pla"] <   incert_pla_max/3] = 0
+	else :
+		index_color[data["incert_pla"] <   np.max(data["incert_pla"])  ] = 2
+		index_color[data["incert_pla"] < 2*np.max(data["incert_pla"])/3] = 1
+		index_color[data["incert_pla"] <   np.max(data["incert_pla"])/3] = 0
+
 	line = []
 	index_line = 0
 	#iterate over the pts
@@ -236,8 +248,7 @@ def csv_to_kml(
 				 )
 		#insert the confidences intervals into the kml
   		#color choose
-		#color = csts.colors_grade[index_color[index]]
-		#incert_pla = incert_pla_normalised[index]
+		color = csts.colors_list[index_color[index]]
 		custom_int_conf(
 					kml_int_conf,
 					pt,
@@ -245,7 +256,7 @@ def csv_to_kml(
 					name="Point n° " + str(index),
 					description="",
 					altitudemode=altitudemode,
-					#color=color,
+					color=color,
 					incert_pla_factor_E=incert_pla_factor_E, 
 					incert_pla_factor_N=incert_pla_factor_N,
 					scale_factor_pla=scale_factor_pla,
