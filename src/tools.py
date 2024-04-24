@@ -73,22 +73,25 @@ def custom_int_conf( # Creation of a kml line
 				description="", # confidence interval description, string
 				altitudemode="absolute", # altitude mode in kml, string ("absolute", "relativeToGround", "clampToGround")
 				color=csts.colors_dict["green"], # confidence interval color, string
-				incert_pla_factor_E=1e5, 
-				incert_pla_factor_N=1e5,
-				scale_factor_pla=1,
-				incert_pla_max=np.nan,
-				scale_factor_hig=1,
-				incert_hig_max=np.nan
+				incert_pla_factor_E=1e5, # scale factor meters to degres Est
+				incert_pla_factor_N=1e5, # scale factor meters to degres North
+				scale_factor_pla=1, # scale factor planimetric show
+				incert_pla_max=np.nan, # maximum planimetric uncertainty showed
+				scale_factor_hig=1, # scale factor altimetric show
+				incert_hig_max=np.nan # maximum altimetric uncertainty showed
 				):
 	if (mode=="pyr"):
+		# Adjusting showing options
 		if pt["incert_pla"] > incert_pla_max :
 			pt["incert_pla"] = incert_pla_max
 		pt["incert_pla"] *= scale_factor_pla
 		if pt["incert_hig"] > incert_hig_max :
 			pt["incert_hig"] = incert_hig_max
 		pt["incert_hig"] *= scale_factor_hig
+		# switching from meters to equivalent degres
 		incert_E = pt["incert_pla"]*incert_pla_factor_E
 		incert_N = pt["incert_pla"]*incert_pla_factor_N
+		# creating the pyramid (confidence interval) corners
 		corners = np.array([(pt["lon"]-incert_E, pt["lat"]		   , pt["altitude"]), 
 			 	   			(pt["lon"]	   	   , pt["lat"]+incert_N, pt["altitude"]), 
 				   			(pt["lon"]+incert_E, pt["lat"]		   , pt["altitude"]), 
@@ -110,6 +113,7 @@ def custom_int_conf( # Creation of a kml line
 	return None
 
 def calcul_incert_pla_factor(data, size):
+	# calculate the factor to convert planimetric meters into geographical degres
 	transformer1 = Transformer.from_crs(4326, 2154)
 	transformer2 = Transformer.from_crs(2154, 4326)
 	
