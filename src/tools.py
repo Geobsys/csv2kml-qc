@@ -11,6 +11,13 @@ from shapely.geometry import Polygon, shape, mapping
 from shapely import intersects
 import fiona
 import os
+from re import findall
+import gpsdatetime as gpst
+""" Ephemerides management """
+import gnsstoolbox.orbits as orb
+
+""" GNSS data (rinex "o" files) """ 
+import gnsstoolbox.rinex_o as rx 
 # exemple line :
 # python3 src/csv_to_kml.py test/EXTENVENT.LOG
 # python3 src/csv_to_kml.py test/20240223.LOG -it 'log' -dr '(0,-1,100)' -departments "/Users/gabinbourlon/Desktop/PDI - git/D094" -mp 2 -mh 2
