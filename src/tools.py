@@ -67,16 +67,26 @@ def custom_int_conf( # Creation of a kml line
 				altitudemode="absolute", # altitude mode in kml, string ("absolute", "relativeToGround", "clampToGround")
 				color=csts.colors_dict["green"], # confidence interval color, string
 				incert_pla_factor_E=1e5, 
-				incert_pla_factor_N=1e5
+				incert_pla_factor_N=1e5,
+				scale_factor_pla=1,
+				incert_pla_max=1,
+				scale_factor_hig=1,
+				incert_hig_max=1
 				):
 	if (mode=="pyr"):
+		if pt["incert_pla"] > incert_pla_max :
+			pt["incert_pla"] = incert_pla_max
+		pt["incert_pla"] *= scale_factor_pla
+		if pt["incert_hig"] > incert_hig_max :
+			pt["incert_hig"] = incert_hig_max
+		pt["incert_hig"] *= scale_factor_hig
 		incert_E = pt["incert_pla"]*incert_pla_factor_E
 		incert_N = pt["incert_pla"]*incert_pla_factor_N
 		corners = np.array([(pt["lon"]-incert_E, pt["lat"]		   , pt["altitude"]), 
 			 	   			(pt["lon"]	   	   , pt["lat"]+incert_N, pt["altitude"]), 
 				   			(pt["lon"]+incert_E, pt["lat"]		   , pt["altitude"]), 
 				   			(pt["lon"]		   , pt["lat"]-incert_N, pt["altitude"]), 
-				   			(pt["lon"]		   , pt["lat"]		   , pt["altitude"] + pt["incert_hig"]  )])
+				   			(pt["lon"]		   , pt["lat"]		   , pt["altitude"] + pt["incert_hig"] )])
 		#append the four faces of the pyramid
 		pol = kml.newpolygon(name=name, description=description, altitudemode=altitudemode, extrude = 0)
 		pol.outerboundaryis = [corners[0], corners[1], corners[-1], corners[0]]
@@ -100,10 +110,10 @@ def calcul_incert_pla_factor(data, size):
 	E = point93[0] 
 	N = point93[1] 
 	h = point93[2]
-	point1 = transformer2.transform(E  + size, N	   , h)
-	point2 = transformer2.transform(E		 , N + size, h)
-	sigmaLon = point1[1] - point2[1]
-	sigmaLat = point1[0] - point2[0]
+	point1 = transformer2.transform(E       , N	   , h)
+	point2 = transformer2.transform(E + size, N + size, h)
+	sigmaLon = point2[1] - point1[1]
+	sigmaLat = point2[0] - point1[0]
 
 	incert_pla_factor_E = sigmaLon / size
 	incert_pla_factor_N = sigmaLat / size
@@ -233,7 +243,11 @@ def csv_to_kml(
 					altitudemode=altitudemode,
 					#color=color,
 					incert_pla_factor_E=incert_pla_factor_E, 
-					incert_pla_factor_N=incert_pla_factor_N
+					incert_pla_factor_N=incert_pla_factor_N,
+					scale_factor_pla=1,
+					incert_pla_max=1,
+					scale_factor_hig=1,
+					incert_hig_max=1
 					)
 		
 
