@@ -134,9 +134,8 @@ def calcul_incert_pla_factor(data, size):
 def csv_to_kml(
 			   input_file,
 			   input_type,
-			   output_file="",
 			   separator=",",
-			   data_range=(),
+			   output_file="",
 			   doc_name="",
 			   quiet=False,
 			   mode="icon",
@@ -144,17 +143,19 @@ def csv_to_kml(
 			   icon_scale=1,
 			   icon_href="http://maps.google.com/mapfiles/kml/shapes/placemark_circle.png",
 			   show_pt_name=False,
+			   data_range=(),
 			   altitudemode="absolute",
 			   show_point=True,
 			   show_line=True, 
+			   show_conf_int=True,
+			   scale_factor_pla=1,
+               incert_pla_max=np.nan,
+               scale_factor_hig=1,
+               incert_hig_max=np.nan,
 			   show_buildings=True,
 			   margin=0.001,
 			   departments='',
 			   save_buildings=False,
-			   scale_factor_pla=1,
-               incert_pla_max=np.nan,
-               scale_factor_hig=1,
-               incert_hig_max=np.nan
 			  ):
 	if not quiet :
 		print("\n################ csv to kml ################\n")
@@ -241,22 +242,13 @@ def csv_to_kml(
 	data["velocity"] = (data["velocity"].shift(-1) + data["velocity"])/2
 	data["velocity"] = data["velocity"].round(3)	
 
-	# Separation of data type in the kml
-	if show_point :
-		kml_points = kml.newfolder(name="Measured points")
-	if show_line :
-		kml_lines = kml.newfolder(name="Trace")
-	kml_int_conf = kml.newfolder(name="Confidence interval")
-
 	# Calcul of a factor for incertainty
 	size = 1000
-	incert_pla_factor_E, incert_pla_factor_N = calcul_incert_pla_factor(data, size)
-	if show_buildings :
-		kml_buildings = kml.newfolder(name='Buildings')
-	
+	incert_pla_factor_E, incert_pla_factor_N = calcul_incert_pla_factor(data, size)		
 	
 	if show_buildings and departments != '' :
 		#adding buildings
+		kml_buildings = kml.newfolder(name='Buildings')
 		#Outside box determination
 		transformer = Transformer.from_crs(4326, 2154)  
 		Nmax = np.max(data["lat"]) + margin
@@ -322,13 +314,20 @@ def csv_to_kml(
 		index_color[data["incert_pla"] < 2*np.max(data["incert_pla"])/3] = 1
 		index_color[data["incert_pla"] <   np.max(data["incert_pla"])/3] = 0
 
-		
+	# Separation of data type in the kml
+	if show_point :
+		kml_points = kml.newfolder(name="Measured points")
+	if show_line :
+		kml_lines = kml.newfolder(name="Trace")
+	if show_conf_int :
+		kml_int_conf = kml.newfolder(name="Confidence interval")		
 
 	line = []
 	index_line = 0
 	#iterate over the pts
 	for index, pt in data.iterrows():
 		if show_point :
+			# insert points into the kml
 			description_pt = gen_description_pt(pt)
 			custom_pt(
 					kml_points,
@@ -345,24 +344,25 @@ def csv_to_kml(
 					show_pt_name=show_pt_name,
 					altitudemode=altitudemode
 					)
-		#insert the confidences intervals into the kml
-  		#color choose
-		color = csts.colors_list[index_color[index]]
-		custom_int_conf(
-					kml_int_conf,
-					pt,
-					mode="pyr",
-					name="Point n° " + str(index),
-					description="",
-					altitudemode=altitudemode,
-					color=color,
-					incert_pla_factor_E=incert_pla_factor_E, 
-					incert_pla_factor_N=incert_pla_factor_N,
-					scale_factor_pla=scale_factor_pla,
-					incert_pla_max=incert_pla_max,
-					scale_factor_hig=scale_factor_hig,
-					incert_hig_max=incert_hig_max
-					)
+		if show_conf_int :
+			#insert the confidences intervals into the kml
+			#color choose
+			color = csts.colors_list[index_color[index]]
+			custom_int_conf(
+						kml_int_conf,
+						pt,
+						mode="pyr",
+						name="Point n° " + str(index),
+						description="",
+						altitudemode=altitudemode,
+						color=color,
+						incert_pla_factor_E=incert_pla_factor_E, 
+						incert_pla_factor_N=incert_pla_factor_N,
+						scale_factor_pla=scale_factor_pla,
+						incert_pla_max=incert_pla_max,
+						scale_factor_hig=scale_factor_hig,
+						incert_hig_max=incert_hig_max
+						)
 		
 		if show_line :
 			#prepare a segmentation of the trajectory by GNSS status
