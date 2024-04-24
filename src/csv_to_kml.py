@@ -32,6 +32,7 @@ if __name__ == "__main__":
 	parser.add_argument('--show_buildings',action="store_false",help="Don't show the show_buildings")
 	parser.add_argument('-margin',type=float,help="margin (in geographical degres) around the workfield for building modelisation",default=0.001)
 	parser.add_argument('-departments',type=str,help="input shp buildings file path",default='')
+	parser.add_argument('--save_buildings',action="store_true",help="If you want to save the shp file of your buildings")
 
 
 
@@ -56,5 +57,6 @@ if __name__ == "__main__":
 					 args.show_line,
 					 args.show_buildings,
 					 args.margin,
-					 args.departments
+					 args.departments,
+					 args.save_buildings
 					)

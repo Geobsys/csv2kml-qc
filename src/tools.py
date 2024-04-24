@@ -10,6 +10,7 @@ from pyproj import Transformer
 from shapely.geometry import Polygon, shape, mapping
 from shapely import intersects
 import fiona
+import os
 
 def custom_pt( # Creation of a kml point
 			  kml, # simplekml object
@@ -79,7 +80,8 @@ def csv_to_kml(
 			   show_line=True, 
 			   show_buildings=True,
 			   margin=0.001,
-			   departments=[]
+			   departments='',
+			   save_buildings=False
 			  ):
 	if not quiet :
 		print("\n################ csv to kml ################\n")
@@ -197,12 +199,12 @@ def csv_to_kml(
 		polygon = Polygon(frame)
 
 		#intersection between buildings and workfield
-		res_fold = departments.split('/')[:-1]
+		res_fold = departments.split('/')
 		res_file = ''
 		for e in res_fold :
 			res_file += e +"/"
-		res_file += "intersection.shp"
-
+		res_name = "intersection"
+		res_file = res_file + res_name + ".shp"
 
 		with fiona.open(departments, 'r') as couche:
 			with fiona.open(res_file, 'w', 'ESRI Shapefile', couche.schema) as output:
@@ -218,9 +220,17 @@ def csv_to_kml(
 						print(f"Intersection {100*i//len(couche)} % \r",end="")
 		if not quiet :
 			print("Intersection done.")
+		
 
 		#transformation to kml
 		shp2kml(res_file, kml_buildings, quiet)
+
+		# delete shp files if wanted
+		if not save_buildings :
+			for end in [".shp", ".dbf", ".cpg", ".shx"] :
+				if os.path.exists(res_file[:-4] + end):
+					# Supprimez le fichier
+					os.remove(res_file[:-4] + end)
 
 	line = []
 	index_line = 0
