@@ -10,10 +10,11 @@ from pyproj import Transformer
 from shapely.geometry import Polygon, shape, mapping
 from shapely import intersects
 import fiona
-
+import os
 # exemple line :
 # python3 src/csv_to_kml.py test/EXTENVENT.LOG
 # python3 src/csv_to_kml.py test/20240223.LOG -it 'log' -dr '(0,-1,100)' -mp 2 -mh 2
+
 
 def custom_pt( # Creation of a kml point
 			  kml, # simplekml object
@@ -149,6 +150,7 @@ def csv_to_kml(
 			   show_buildings=True,
 			   margin=0.001,
 			   departments='',
+			   save_buildings=False,
 			   scale_factor_pla=1,
                incert_pla_max=np.nan,
                scale_factor_hig=1,
@@ -275,13 +277,12 @@ def csv_to_kml(
 		polygon = Polygon(frame)
 
 		#intersection between buildings and workfield
-		print(departments)
-		res_fold = departments.split('/')[:-1]
+		res_fold = departments.split('/')
 		res_file = ''
 		for e in res_fold :
 			res_file += e +"/"
-		res_file += "intersection.shp"
-
+		res_name = "intersection"
+		res_file = res_file + res_name + ".shp"
 
 		with fiona.open(departments, 'r') as couche:
 			with fiona.open(res_file, 'w', 'ESRI Shapefile', couche.schema) as output:
@@ -297,9 +298,17 @@ def csv_to_kml(
 						print(f"Intersection {100*i//len(couche)} % \r",end="")
 		if not quiet :
 			print("Intersection done.")
+		
 
 		#transformation to kml
 		shp2kml(res_file, kml_buildings, quiet)
+
+		# delete shp files if wanted
+		if not save_buildings :
+			for end in [".shp", ".dbf", ".cpg", ".shx"] :
+				if os.path.exists(res_file[:-4] + end):
+					# Supprimez le fichier
+					os.remove(res_file[:-4] + end)
 
 	# Define index_color for the confidence intervals
 	index_color = np.zeros(len(data)).astype(int) + 3
@@ -312,6 +321,8 @@ def csv_to_kml(
 		index_color[data["incert_pla"] <   np.max(data["incert_pla"])  ] = 2
 		index_color[data["incert_pla"] < 2*np.max(data["incert_pla"])/3] = 1
 		index_color[data["incert_pla"] <   np.max(data["incert_pla"])/3] = 0
+
+		
 
 	line = []
 	index_line = 0
@@ -426,7 +437,7 @@ def shp2kml(shp_file, kml, quiet=False):
 	# for each building in the shp, the coords are used to create a kml polygon
 	if shp_file.endswith('.shp'):
 		with fiona.open(shp_file, 'r') as shp:
-			i = 0
+			loading = 0
 			for batiment in shp : 
 				hbat = batiment['properties']['HAUTEUR']
 				coords_gr = batiment['geometry']['coordinates'][0]
@@ -441,8 +452,8 @@ def shp2kml(shp_file, kml, quiet=False):
 				pol.outerboundaryis = coords
 				pol.extrude = 1
 				if not quiet :
-					i+=1
-					print(f"Conversion shp to kml {100*i//len(shp)} % \r",end="")
+					loading+=1
+					print(f"Conversion shp to kml {100*loading//len(shp)} % \r",end="")
 
 					
 	else : 

@@ -33,6 +33,7 @@ if __name__ == "__main__":
 	parser.add_argument('--show_buildings',action="store_false",help="Don't show the show_buildings")
 	parser.add_argument('-margin',type=float,help="margin (in geographical degres) around the workfield for building modelisation",default=0.001)
 	parser.add_argument('-departments',type=str,help="input shp buildings file path",default='')
+	parser.add_argument('--save_buildings',action="store_true",help="If you want to save the shp file of your buildings")
 	parser.add_argument('-sp','--scale_factor_pla',type=float,help="Scale factor for planimetric uncertainty.", default=1)
 	parser.add_argument('-mp','--incert_pla_max',type=float,help="Maximum planimetric uncertainty.", default=np.nan)
 	parser.add_argument('-sh','--scale_factor_hig',type=float,help="Scale factor for altimetric uncertainty.", default=1)
@@ -59,6 +60,7 @@ if __name__ == "__main__":
 					 args.show_buildings,
 					 args.margin,
 					 args.departments,
+					 args.save_buildings,
                      args.scale_factor_pla,
                      args.incert_pla_max,
                      args.scale_factor_hig,
