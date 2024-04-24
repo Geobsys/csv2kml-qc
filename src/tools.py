@@ -327,7 +327,7 @@ def shp2kml(shp_file, kml, quiet=False):
 	# for each building in the shp, the coords are used to create a kml polygon
 	if shp_file.endswith('.shp'):
 		with fiona.open(shp_file, 'r') as shp:
-			i = 0
+			loading = 0
 			for batiment in shp : 
 				hbat = batiment['properties']['HAUTEUR']
 				coords_gr = batiment['geometry']['coordinates'][0]
@@ -342,8 +342,8 @@ def shp2kml(shp_file, kml, quiet=False):
 				pol.outerboundaryis = coords
 				pol.extrude = 1
 				if not quiet :
-					i+=1
-					print(f"Conversion shp to kml {100*i//len(shp)} % \r",end="")
+					loading+=1
+					print(f"Conversion shp to kml {100*loading//len(shp)} % \r",end="")
 
 					
 	else : 
