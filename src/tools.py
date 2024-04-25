@@ -217,8 +217,16 @@ def csv_to_kml(
 	data[['coordX', 'coordY', 'coordZ']] = coordRGF93.T.round(3)
 
 	# Altitude from ellispoidal height
-	grid_path = "fr_ign_RAF20.tif" 
-	transformer = Transformer.from_pipeline("cct +proj=vgridshift +grids=" + grid_path)
+	location_file = os.path.abspath(__file__)
+	grid_path = "/".join(location_file.split('/')[:-2]) + "/params/fr_ign_RAF20.tif"
+
+	try  :
+		transformer = Transformer.from_pipeline("cct +proj=vgridshift +grids=" + grid_path)
+	except :
+		if " " in grid_path :
+			print("Error : your folder path contain a space, and pyproj doesn't manage it ...")
+		else :
+			print("Error : There is an error with pyproj.")
 	coordalt = transformer.transform(data['lon'], data['lat'], data['h'])
 	coordalt = np.array(coordalt)
 
