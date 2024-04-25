@@ -323,6 +323,26 @@ def csv_to_kml(
 		index_color[data["incert_pla"] < 2*np.max(data["incert_pla"])/3] = 1
 		index_color[data["incert_pla"] <   np.max(data["incert_pla"])/3] = 0
 
+	# ephemerids
+	if calc_ephemerids and rinex_name != '' :
+		#loading rinex files
+		Obs = rx.rinex_o()
+		Obs.loadRinexO(rinex_name + 'o')
+
+		Nav = orb.orbit()
+		Nav.loadRinexN(rinex_name + 'p')  
+
+		rnx = open(rinex_name + 'o', 'r')
+		rnx_lines = rnx.readlines()
+		rnx.close()
+		print()
+		print(len(Obs.headers[0].epochs))
+		print(len(data))
+		print()
+
+		#mat_obs = np.zeros((len(data),len(list_sat),4))*np.nan
+
+
 	# Separation of data type in the kml
 	if show_point :
 		kml_points = kml.newfolder(name="Measured points")
