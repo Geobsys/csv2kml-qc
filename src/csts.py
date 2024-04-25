@@ -38,13 +38,13 @@ param_dict={
              "date":        {'unity' : ''   ,'name' : 'Date'},
              "hour":        {'unity' : ''   ,'name' : 'Hour'},
 
-             "coordX":      {'unity' : 'm'  ,'name' : 'X (RGF93v1)'}, 
-             "coordY":      {'unity' : 'm'  ,'name' : 'Y (RGF93v1)'}, 
-             "coordZ":      {'unity' : 'm'  ,'name' : 'Z (RGF93v1)'},
+             "coordX":      {'unity' : 'm'  ,'name' : 'X (RGF93)'}, 
+             "coordY":      {'unity' : 'm'  ,'name' : 'Y (RGF93)'}, 
+             "coordZ":      {'unity' : 'm'  ,'name' : 'Z (RGF93)'},
              "altitude":    {'unity' : 'm'  ,'name' : 'Altitude'},
              "dist":        {'unity' : 'm'  ,'name' : 'Distance since prev pt'},
              "time_left":   {'unity' : 's'  ,'name' : 'Time left'},
              "time_laps":   {'unity' : 's'  ,'name' : 'Time laps since prev pt'},
-             "time_elapsed":{'unity' : 's'  ,'name' : 'Elapsed time'},
+             "time_elapsed":{'unity' : 's'  ,'name' : 'Time last since first pt'},
              "velocity":    {'unity' : 'm/s','name' : 'Velocity'}
             }

@@ -336,7 +336,7 @@ def csv_to_kml(
 	for index, pt in data.iterrows():
 		if show_point :
 			# insert points into the kml
-			description_pt = gen_description_pt(pt)
+			description_pt = gen_description_pt(pt, np.max(data["index"]))
 			custom_pt(
 					kml_points,
 					float(pt["lon"]),
@@ -415,7 +415,7 @@ def csv_to_kml(
 
 	return None
 
-def gen_description_pt(pt) :
+def gen_description_pt(pt, maxindex) :
 	# generate a description for a point based on the dataframes columns
 	index = pt.index
 	text = '<table style="border: 1px solid black;>'
@@ -424,7 +424,10 @@ def gen_description_pt(pt) :
 		if i == "state" :
 			value = f"{csts.status_dict[pt[i]]['name']}"
 		elif csts.param_dict[i]["unity"] != 's' :
-			value = f"{pt[i]} {csts.param_dict[i]['unity']}"
+			if i == "index" :
+				value = f"{pt[i]}/{maxindex}"
+			else :
+				value = f"{pt[i]} {csts.param_dict[i]['unity']}"
 		else :
 			value = f"{int(pt[i]//3600)}h {int((pt[i]%3600)//60)}min {round((pt[i]%3600)%60,3)}s"
 		text += f'<tr><td style="text-align: left;">{csts.param_dict[i]["name"]}</td><td style="text-align: left;">{value}</td></tr>\n'
