@@ -323,6 +323,18 @@ def gen_description_line(line) :
 	text += '</table>'
 	return text
 
+def gen_description_buildings(bat) :
+	text = '<table style="border: 1px solid black;>'
+	text += f'<tr><td">{" "}</td><td">{" "}</td></tr>\n'
+	for champ in ["ID", "HAUTEUR", "Z_MIN_SOL", "Z_MAX_SOL", "Z_MIN_TOIT", "Z_MAX_TOIT"] :
+		try :
+			text += f'<tr><td style="text-align: left;">{champ}</td><td style="text-align: left;">{bat[champ]}</td></tr>\n'
+		except :
+			print("Your Buildings file is different from IGN BDTOPO.")
+	text += '</table>'
+	return text
+
+
 def shp2kml(shp_file, kml, quiet=False):
 	# for each building in the shp, the coords are used to create a kml polygon
 	if shp_file.endswith('.shp'):
@@ -341,6 +353,8 @@ def shp2kml(shp_file, kml, quiet=False):
 				pol = kml.newpolygon(name='Batiment', altitudemode = "relativeToGround")
 				pol.outerboundaryis = coords
 				pol.extrude = 1
+
+				pol.description = gen_description_buildings(batiment['properties'])
 				if not quiet :
 					loading+=1
 					print(f"Conversion shp to kml {100*loading//len(shp)} % \r",end="")
