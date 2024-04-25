@@ -449,7 +449,10 @@ def gen_description_buildings(bat) :
 	text += f'<tr><td">{" "}</td><td">{" "}</td></tr>\n'
 	for champ in ["ID", "HAUTEUR", "Z_MIN_SOL", "Z_MAX_SOL", "Z_MIN_TOIT", "Z_MAX_TOIT"] :
 		try :
-			text += f'<tr><td style="text-align: left;">{champ}</td><td style="text-align: left;">{bat[champ]}</td></tr>\n'
+			if champ != "ID" :
+				text += f'<tr><td style="text-align: left;">{champ}</td><td style="text-align: left;">{bat[champ]} m</td></tr>\n'
+			else :
+				text += f'<tr><td style="text-align: left;">{champ}</td><td style="text-align: left;">{bat[champ]}</td></tr>\n'
 		except :
 			print("Your Buildings file is different from IGN BDTOPO.")
 	text += '</table>'
