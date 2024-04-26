@@ -226,8 +226,16 @@ def csv_to_kml(
 	data[['coordX', 'coordY', 'coordZ']] = coordRGF93.T.round(3)
 
 	# Altitude from ellispoidal height
-	grid_path = "fr_ign_RAF20.tif" 
-	transformer = Transformer.from_pipeline("cct +proj=vgridshift +grids=" + grid_path)
+	location_file = os.path.abspath(__file__)
+	grid_path = "/".join(location_file.split('/')[:-2]) + "/params/fr_ign_RAF20.tif"
+
+	try  :
+		transformer = Transformer.from_pipeline("cct +proj=vgridshift +grids=" + grid_path)
+	except :
+		if " " in grid_path :
+			print("Error : your folder path contain a space, and pyproj doesn't manage it ...")
+		else :
+			print("Error : There is an error with pyproj.")
 	coordalt = transformer.transform(data['lon'], data['lat'], data['h'])
 	coordalt = np.array(coordalt)
 
@@ -357,7 +365,7 @@ def csv_to_kml(
 	for index, pt in data.iterrows():
 		if show_point :
 			# insert points into the kml
-			description_pt = gen_description_pt(pt)
+			description_pt = gen_description_pt(pt, np.max(data["index"]))
 			custom_pt(
 					kml_points,
 					float(pt["lon"]),
@@ -436,7 +444,7 @@ def csv_to_kml(
 
 	return None
 
-def gen_description_pt(pt) :
+def gen_description_pt(pt, maxindex) :
 	# generate a description for a point based on the dataframes columns
 	index = pt.index
 	text = '<table style="border: 1px solid black;>'
@@ -445,7 +453,10 @@ def gen_description_pt(pt) :
 		if i == "state" :
 			value = f"{csts.status_dict[pt[i]]['name']}"
 		elif csts.param_dict[i]["unity"] != 's' :
-			value = f"{pt[i]} {csts.param_dict[i]['unity']}"
+			if i == "index" :
+				value = f"{pt[i]}/{maxindex}"
+			else :
+				value = f"{pt[i]} {csts.param_dict[i]['unity']}"
 		else :
 			value = f"{int(pt[i]//3600)}h {int((pt[i]%3600)//60)}min {round((pt[i]%3600)%60,3)}s"
 		text += f'<tr><td style="text-align: left;">{csts.param_dict[i]["name"]}</td><td style="text-align: left;">{value}</td></tr>\n'
@@ -461,6 +472,21 @@ def gen_description_line(line) :
 	text += f'<tr><td style="text-align: left;">{"Status"}</td><td style="text-align: left;">{csts.status_dict[line[0][0]]["name"]}</td></tr>\n'
 	text += '</table>'
 	return text
+
+def gen_description_buildings(bat) :
+	text = '<table style="border: 1px solid black;>'
+	text += f'<tr><td">{" "}</td><td">{" "}</td></tr>\n'
+	for champ in ["ID", "HAUTEUR", "Z_MIN_SOL", "Z_MAX_SOL", "Z_MIN_TOIT", "Z_MAX_TOIT"] :
+		try :
+			if champ != "ID" :
+				text += f'<tr><td style="text-align: left;">{champ}</td><td style="text-align: left;">{bat[champ]} m</td></tr>\n'
+			else :
+				text += f'<tr><td style="text-align: left;">{champ}</td><td style="text-align: left;">{bat[champ]}</td></tr>\n'
+		except :
+			print("Your Buildings file is different from IGN BDTOPO.")
+	text += '</table>'
+	return text
+
 
 def shp2kml(shp_file, kml, quiet=False):
 	# for each building in the shp, the coords are used to create a kml polygon
@@ -480,6 +506,8 @@ def shp2kml(shp_file, kml, quiet=False):
 				pol = kml.newpolygon(name='Batiment', altitudemode = "relativeToGround")
 				pol.outerboundaryis = coords
 				pol.extrude = 1
+
+				pol.description = gen_description_buildings(batiment['properties'])
 				if not quiet :
 					loading+=1
 					print(f"Conversion shp to kml {100*loading//len(shp)} % \r",end="")
