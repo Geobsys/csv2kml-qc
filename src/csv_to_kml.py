@@ -54,8 +54,8 @@ if __name__ == "__main__":
 	# Frustum 
 	parser.add_argument('--show_orientation', action="store_false",help="Don't show frustum")
 	parser.add_argument('-fr_captor', type=float,help="distance factor of the near face of the frustum. (Default=1)", default=1)
-	parser.add_argument('-fr_focal', type=float,help="focal distance. (Default=10)", default=10)
-	parser.add_argument('-fr_distance',type = float, help=" distance between the near plane et the far plane. (Default=5)", default=5)
+	parser.add_argument('-fr_focal', type=float,help="focal distance. (Default=10)", default=1)
+	parser.add_argument('-fr_distance',type = float, help=" distance between the near plane and the far plane. (Default=5)", default=5)
 	parser.add_argument('-fr_alpha',type=float, help="angle between camera reference frame and geographical reference frame. (Default=0)", default=0)
 	parser.add_argument('-fr_beta',type=float, help="angle between camera reference frame and geographical reference frame. (Default=0)",default=0)
 	parser.add_argument('-fr_gamma',type=float, help="angle between camera reference frame and geographical reference frame. (Default=0)",default=0)

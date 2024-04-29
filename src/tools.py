@@ -157,7 +157,7 @@ def custom_frustum(
 		# configuration of the near distance and the distance between the frustum square faces.
 		
 		far = (fr_captor		/fr_focal	*fr_distance) # focal distance to manage the depth of the frustum 
-		lon,lat,h = pt['lon'], pt['lat'],pt['h']
+		lon,lat,altitude = pt['lon'], pt['lat'],pt['altitude']
 		oX,oY,oZ = pt['oX'],pt['oY'],pt['oZ']
 
 		# rotation matrix : allow to change the frustum orientation according to the camera
@@ -218,7 +218,7 @@ def custom_frustum(
 		# Translation of the frustum's points in WGS84
 		frustum_o[:,0] *= incert_pla_factor_E
 		frustum_o[:,1] *= incert_pla_factor_N
-		frustum_o += np.array([lon, lat, h])
+		frustum_o += np.array([lon, lat, altitude])
 
 		# drawing of the  frustum
 		pol = kml.newpolygon(name=name, description=description, altitudemode=altitudemode, extrude=0)
@@ -556,19 +556,18 @@ def csv_to_kml(
 			custom_frustum(
 						kml_frustum,  # simplekml object
 						pt,
-						focal=10,
 						mode="fur",  # frustum representation, string
 						name="",	  # frustum name, string
 						description="",  # point description, string
 						altitudemode="absolute",  # altitude mode, string ("absolute", "relativeToGround", "clampToGround")
 						incert_pla_factor_E=incert_pla_factor_E,
 						incert_pla_factor_N= incert_pla_factor_N,
-						fr_captor=1,
-						fr_focal=10,
-						fr_distance=5,
-						fr_alpha=0,
-						fr_beta=0,
-						fr_gamma=0
+						fr_captor=fr_captor,
+						fr_focal=fr_focal,
+						fr_distance=fr_distance,
+						fr_alpha=fr_alpha,
+						fr_beta=fr_beta,
+						fr_gamma=fr_gamma
 						)
 		if show_line:
 			#prepare a segmentation of the trajectory by GNSS status
