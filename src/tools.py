@@ -139,14 +139,16 @@ def custom_frustum(
 	name="",	  # frustum name, string
 	description="",  # point description, string
 	altitudemode="absolute",  # altitude mode, string ("absolute", "relativeToGround", "clampToGround")
-):
+	incert_pla_factor_E = 1e-5,
+	incert_pla_factor_N = 1e-5,
+	):
 	if mode == "fur":
 		# Calcul des points du frustum
 		near = 1.0
 		d = 5
 		far = (near/focal*d) # Utilisation de la distance focale comme profondeur du frustum
 		lon,lat,h = pt['lon'], pt['lat'],pt['h']
-		oX,oY,oZ = pt['oX'],pt['oY'],pt['h']
+		oX,oY,oZ = pt['oX'],pt['oY'],pt['oZ']
 
 		# rotation matrix : allow to change the frustum orientation according to the camera
 
@@ -202,17 +204,18 @@ def custom_frustum(
 		]
 		
 
-		print(frustum)
+		
 
 		# Rotation du frustum vers geographique
 		frustum_o = frustum @ (rotation_matrixX @ rotation_matrixY @ rotation_matrixZ) @ (rotation_matrixX2 @ rotation_matrixY2 @ rotation_matrixZ2)
 
 
 	# Translation des points du frustum en coordonnées WGS84
-		frustum_o[:,:2] /= 11000
+		frustum_o[:,0] *= incert_pla_factor_E
+		frustum_o[:,1] *= incert_pla_factor_N
 		frustum_o += np.array([lon, lat, h])
 
-		print(frustum_o)
+		
 		# Tracé du frustum
 		pol = kml.newpolygon(name=name, description=description, altitudemode=altitudemode, extrude=0)
 		pol.outerboundaryis = [frustum_o[0], frustum_o[1], frustum_o[2], frustum_o[3], frustum_o[0]]
@@ -488,6 +491,8 @@ def csv_to_kml(
 						name="",	  # frustum name, string
 						description="",  # point description, string
 						altitudemode="absolute",  # altitude mode, string ("absolute", "relativeToGround", "clampToGround")
+						incert_pla_factor_E=incert_pla_factor_E,
+						incert_pla_factor_N= incert_pla_factor_N
 						)
 		if show_line:
 			#prepare a segmentation of the trajectory by GNSS status
