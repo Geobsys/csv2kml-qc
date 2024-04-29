@@ -324,17 +324,22 @@ def gen_description_line(line) :
 	return text
 
 def shp2kml(shp_file, kml, quiet=False):
+    """"Transform the .shp file to a kml file."""
 	# for each building in the shp, the coords are used to create a kml polygon
 	if shp_file.endswith('.shp'):
-		with fiona.open(shp_file, 'r') as shp:
+		with fiona.open(shp_file, 'r') as shp: #reading the shape file
 			loading = 0
 			for batiment in shp : 
+                #getting the important attributes of the building to create (height and coordinates of the corners of the polygon representing the ground coverage of the building)
 				hbat = batiment['properties']['HAUTEUR']
 				coords_gr = batiment['geometry']['coordinates'][0]
 				coords_gr = np.array(coords_gr).reshape((len(coords_gr), 3))[:,:2]
 				
+                #transforming the coordinates from EPSG:2154 (BD TOPO) to EPSG:4326 (WGS84, specific to .kml files)
 				transformer = Transformer.from_crs(2154, 4326)
 				coordsWGS = transformer.transform(coords_gr[:,:1], coords_gr[:,1:2])
+                
+                #adding the attributes into the kml file
 				coords = []
 				for i in range(len(coords_gr)):
 					coords.append((coordsWGS[1][i][0], coordsWGS[0][i][0], hbat))
