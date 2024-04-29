@@ -180,6 +180,7 @@ def csv_to_kml(
 	if show_buildings and departments != '' :
 		#adding buildings
 		#Outside box determination
+        #calculate the bbox of the worfield with a margin
 		transformer = Transformer.from_crs(4326, 2154)  
 		Nmax = np.max(data["lat"]) + margin
 		Nmin = np.min(data["lat"]) - margin
@@ -206,6 +207,7 @@ def csv_to_kml(
 		res_name = "intersection"
 		res_file = res_file + res_name + ".shp"
 
+        #reading the department file and writing in a new shape file (the spatial intersection)
 		with fiona.open(departments, 'r') as couche:
 			with fiona.open(res_file, 'w', 'ESRI Shapefile', couche.schema) as output:
 				i = 0
@@ -213,7 +215,8 @@ def csv_to_kml(
 					if batiment['geometry']['type'] == 'Polygon':
 						coords = batiment['geometry']['coordinates']						
 						bat_polygon = Polygon(coords[0])
-						if intersects(bat_polygon, polygon):
+                        
+						if intersects(bat_polygon, polygon): #intersection between the building of the department file and the bbox of the workfield
 							output.write(batiment)
 					if not quiet :
 						i+=1
