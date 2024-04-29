@@ -77,7 +77,7 @@ def custom_int_conf( # Creation of a kml line
 				pt,  # point object, pandas DataFrame
 				mode="pyr", # confidence interval representation, string
 				name="", # confidence interval name, string
-				description="", # confidence interval description, string
+				description=True, # if generate a description for confidence intervals
 				altitudemode="absolute", # altitude mode in kml, string ("absolute", "relativeToGround", "clampToGround")
 				color=csts.colors_dict["green"], # confidence interval color, string
 				incert_pla_factor_E=1e5, # scale factor meters to degres Est
@@ -96,25 +96,29 @@ def custom_int_conf( # Creation of a kml line
 			pt["incert_hig"] = incert_hig_max
 		pt["incert_hig"] *= scale_factor_hig
 		# switching from meters to equivalent degres
-		incert_E = pt["incert_pla"]*incert_pla_factor_E
-		incert_N = pt["incert_pla"]*incert_pla_factor_N
+		incert_lon = pt["incert_pla"]*incert_pla_factor_E
+		incert_lat = pt["incert_pla"]*incert_pla_factor_N
 		# creating the pyramid (confidence interval) corners
-		corners = np.array([(pt["lon"]-incert_E, pt["lat"]		   , pt["altitude"]), 
-			 	   			(pt["lon"]	   	   , pt["lat"]+incert_N, pt["altitude"]), 
-				   			(pt["lon"]+incert_E, pt["lat"]		   , pt["altitude"]), 
-				   			(pt["lon"]		   , pt["lat"]-incert_N, pt["altitude"]), 
-				   			(pt["lon"]		   , pt["lat"]		   , pt["altitude"] + pt["incert_hig"] )])
+		corners = np.array([(pt["lon"]-incert_lat, pt["lat"]		   , pt["altitude"]), 
+			 	   			(pt["lon"]	   	     , pt["lat"]+incert_lon, pt["altitude"]), 
+				   			(pt["lon"]+incert_lat, pt["lat"]		   , pt["altitude"]), 
+				   			(pt["lon"]		     , pt["lat"]-incert_lon, pt["altitude"]), 
+				   			(pt["lon"]		     , pt["lat"]		   , pt["altitude"] + pt["incert_hig"] )])
+		# creating the description
+		conf_int = [pt["incert_pla"], pt["incert_hig"], incert_lat, incert_lon]
+		description_text = gen_description_conf_int(conf_int)
+
 		#append the four faces of the pyramid
-		pol = kml.newpolygon(name=name, description=description, altitudemode=altitudemode, extrude = 0)
+		pol = kml.newpolygon(name=name, description=description_text, altitudemode=altitudemode, extrude = 0)
 		pol.outerboundaryis = [corners[0], corners[1], corners[-1], corners[0]]
 		pol.style.polystyle.color = color
-		pol = kml.newpolygon(name=name, description=description, altitudemode=altitudemode, extrude = 0)
+		pol = kml.newpolygon(name=name, description=description_text, altitudemode=altitudemode, extrude = 0)
 		pol.outerboundaryis = [corners[1], corners[2], corners[-1], corners[1]]
 		pol.style.polystyle.color = color
-		pol = kml.newpolygon(name=name, description=description, altitudemode=altitudemode, extrude = 0)
+		pol = kml.newpolygon(name=name, description=description_text, altitudemode=altitudemode, extrude = 0)
 		pol.outerboundaryis = [corners[2], corners[3], corners[-1], corners[2]]
 		pol.style.polystyle.color = color
-		pol = kml.newpolygon(name=name, description=description, altitudemode=altitudemode, extrude = 0)
+		pol = kml.newpolygon(name=name, description=description_text, altitudemode=altitudemode, extrude = 0)
 		pol.outerboundaryis = [corners[3], corners[0], corners[-1], corners[3]]
 		pol.style.polystyle.color = color
 	return None
@@ -528,7 +532,7 @@ def csv_to_kml(
 						pt,
 						mode="pyr",
 						name="Point n° " + str(index),
-						description="",
+						description=True,
 						altitudemode=altitudemode,
 						color=csts.colors_dict[csts.status_dict[pt["state"]]["color"]],
 						incert_pla_factor_E=incert_pla_factor_E, 
@@ -625,6 +629,16 @@ def gen_description_line(line) :
 	text += f'<tr><td style="text-align: left;">{"Start"}</td><td style="text-align: left;">{line[1][0]}</td></tr>\n'
 	text += f'<tr><td style="text-align: left;">{"End"}</td><td style="text-align: left;">{line[1][-1]}</td></tr>\n'
 	text += f'<tr><td style="text-align: left;">{"Status"}</td><td style="text-align: left;">{csts.status_dict[line[0][0]]["name"]}</td></tr>\n'
+	text += '</table>'
+	return text
+
+def gen_description_conf_int(conf_int) :
+	text = '<table style="border: 1px solid black;>'
+	text += f'<tr><td">{" "}</td><td">{" "}</td></tr>\n'
+	text += f'<tr><td style="text-align: left;">Planimetric uncertainty (E/N)</td><td style="text-align: left;">{conf_int[0]}</td></tr>\n'
+	text += f'<tr><td style="text-align: left;">Altimetric uncertainty</td><td style="text-align: left;">{conf_int[1]}</td></tr>\n'
+	text += f'<tr><td style="text-align: left;">Latitude uncertainty </td><td style="text-align: left;">{conf_int[2]}</td></tr>\n'
+	text += f'<tr><td style="text-align: left;">Longitude uncertainty </td><td style="text-align: left;">{conf_int[3]}</td></tr>\n'
 	text += '</table>'
 	return text
 
