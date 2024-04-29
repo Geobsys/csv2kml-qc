@@ -272,6 +272,9 @@ def csv_to_kml(
 			   fr_captor=1,
 			   fr_focal=10,
 			   fr_distance=5,
+			   fr_alpha=0,
+			   fr_beta = 0,
+			   fr_gamma = 0
 			  ):
 	if not quiet :
 		print("\n################ csv to kml ################\n")
