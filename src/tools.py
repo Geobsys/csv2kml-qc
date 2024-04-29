@@ -398,6 +398,9 @@ def csv_to_kml(
 						uncalculable_sat.append(name_sat)
 				pt["n_visible_sat"] = len(visible_sats)
 				pt["visible_sat"] = visible_sats
+			else :
+				pt["n_visible_sat"] = "Rinex file seems to be empty for this date."
+				pt["visible_sat"] = "Rinex file seems to be empty for this date."
 
 		if show_point :
 			# insert points into the kml
