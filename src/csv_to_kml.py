@@ -48,6 +48,15 @@ if __name__ == "__main__":
 	parser.add_argument('-departments',type=str,help="input shp buildings file path",default='')
 	parser.add_argument('--save_buildings',action="store_true",help="If you want to save the shp file of your buildings")
 
+	# Frustum 
+	parser.add_argument('--show_frustum', action="store_false",help="Don't show frustum")
+	parser.add_argument('-fr_captor', type=float,help="distance factor of the near face of the frustum. (Default=1)", default=1)
+	parser.add_argument('-fr_focal', type=float,help="focal distance. (Default=10)", default=10)
+	parser.add_argument('-fr_distance',type = float, help=" distance between the near plane et the far plane. (Default=5)", default=5)
+	parser.add_argument('-fr_alpha',type=float, help="angle between camera reference frame and geographical reference frame. (Default=0)", default=0)
+	parser.add_argument('-fr_beta',type=float, help="angle between camera reference frame and geographical reference frame. (Default=0)",default=0)
+	parser.add_argument('-fr_gamma',type=float, help="angle between camera reference frame and geographical reference frame. (Default=0)",default=0)
+
 	args=parser.parse_args()
 	
 	tools.csv_to_kml(
@@ -75,4 +84,11 @@ if __name__ == "__main__":
 					 args.margin,
 					 args.departments,
 					 args.save_buildings,
+					 args.show_frustrum,
+					 args.fr_captor,
+					 args.fr_focal,
+					 args.fr_distance,
+					 args.fr_alpha,
+					 args.fr_beta,
+					 args.fr_gamma
                     )
