@@ -10,7 +10,6 @@ from pyproj import Transformer
 from shapely.geometry import Polygon, shape, mapping
 from shapely import intersects
 import fiona
-import os
 from re import findall
 import gpsdatetime as gpst
 """ Ephemerides management """
