@@ -11,9 +11,16 @@ from shapely.geometry import Polygon, shape, mapping
 from shapely import intersects
 import fiona
 import os
+from re import findall
+import gpsdatetime as gpst
+""" Ephemerides management """
+import gnsstoolbox.orbits as orb
+
+""" GNSS data (rinex "o" files) """ 
+import gnsstoolbox.rinex_o as rx
 # exemple line :
 # python3 src/csv_to_kml.py test/EXTENVENT.LOG
-# python3 src/csv_to_kml.py test/20240223.LOG -it 'log' -dr '(0,-1,100)' -departments "/Users/gabinbourlon/Desktop/PDI - git/D094" -mp 2 -mh 2
+# python3 src/csv_to_kml.py test/20240223.LOG -it 'log' -dr '(0,-1,100)' -departments "/Users/gabinbourlon/Desktop/PDI - git/D094" -mp 2 -mh 2 -rn "test/rinex/sept054n.24"
 
 
 def custom_pt( # Creation of a kml point
@@ -156,6 +163,8 @@ def csv_to_kml(
 			   margin=0.001,
 			   departments='',
 			   save_buildings=False,
+			   calc_ephemerids=True,
+			   rinex_name=''
 			  ):
 	if not quiet :
 		print("\n################ csv to kml ################\n")
@@ -322,6 +331,32 @@ def csv_to_kml(
 		index_color[data["incert_pla"] < 2*np.max(data["incert_pla"])/3] = 1
 		index_color[data["incert_pla"] <   np.max(data["incert_pla"])/3] = 0
 
+	# ephemerids
+	if calc_ephemerids and rinex_name != '' :
+		#loading rinex files
+		Obs = rx.rinex_o()
+		Obs.loadRinexO(rinex_name + 'o')
+
+		Nav = orb.orbit()
+		Nav.loadRinexN(rinex_name + 'p')  
+
+		#finding all the observed sats during the observation
+		tot_observed_sats = []
+		for epoch in Obs.headers[0].epochs :
+			for sat in epoch.satellites :
+				if sat.const + str(sat.PRN) not in tot_observed_sats :
+					tot_observed_sats.append(sat.const + str(sat.PRN))
+		tot_observed_sats.sort()
+		dic_tot_observed_sats = {}
+		i = 1
+		for sat in tot_observed_sats :
+			dic_tot_observed_sats[sat] = i
+			i+=1
+		
+		#preparing the observation matrix of satellites for each point
+		mat_sat_obs = np.zeros((len(data),len(tot_observed_sats),4))*np.nan
+
+
 	# Separation of data type in the kml
 	if show_point :
 		kml_points = kml.newfolder(name="Measured points")
@@ -334,6 +369,39 @@ def csv_to_kml(
 	index_line = 0
 	#iterate over the pts
 	for index, pt in data.iterrows():
+		#ephemerids
+		if calc_ephemerids and rinex_name != '' and input_type == "log":
+			#finding the observed satellites on each point
+			date = pt["date"].split("/")
+			year = date[2]
+			month = date[1]
+			day = date[0]
+			hour = pt['hour'].split(':')
+			h = hour[0]
+			m = hour[1]
+			s = round(float(hour[2]),0)
+			date_hour = f"{year} {month} {day} {h} {m} {s}"
+			
+			gnssdate=gpst.gpsdatetime()
+			gnssdate.rinex_t(date_hour) 
+			Ep = Obs.getEpochByMjd(gnssdate.mjd)
+			if Ep != None :
+				visible_sats = []
+				uncalculable_sat = []
+				for sat in Ep.satellites :
+					name_sat = f"{sat.const}{sat.PRN}"
+					try :
+						X,Y,Z,dte = Nav.calcSatCoord(sat.const, sat.PRN, gnssdate)
+						mat_sat_obs[index, dic_tot_observed_sats[name_sat]] = X,Y,Z,dte
+						visible_sats.append(name_sat)
+					except :
+						uncalculable_sat.append(name_sat)
+				pt["n_visible_sat"] = len(visible_sats)
+				pt["visible_sat"] = visible_sats
+			else :
+				pt["n_visible_sat"] = "Rinex file seems to be empty for this date."
+				pt["visible_sat"] = "Rinex file seems to be empty for this date."
+
 		if show_point :
 			# insert points into the kml
 			description_pt = gen_description_pt(pt, np.max(data["index"]))

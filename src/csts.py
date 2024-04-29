@@ -46,5 +46,7 @@ param_dict={
              "time_left":   {'unity' : 's'  ,'name' : 'Time left'},
              "time_laps":   {'unity' : 's'  ,'name' : 'Time laps since prev pt'},
              "time_elapsed":{'unity' : 's'  ,'name' : 'Time last since first pt'},
-             "velocity":    {'unity' : 'm/s','name' : 'Velocity'}
+             "velocity":    {'unity' : 'm/s','name' : 'Velocity'},
+             "n_visible_sat":{'unity' : ''   ,'name' : 'Number of visible satellites'},
+             "visible_sat": {'unity' : ''   ,'name' : 'All visible satellites'}
             }
