@@ -364,7 +364,26 @@ def csv_to_kml(
 	index_line = 0
 	#iterate over the pts
 	for index, pt in data.iterrows():
+		#ephemerids
+		if calc_ephemerids and rinex_name != '' and input_type == "log":
+			#finding the observed satellites on each point
+			date = pt["date"].split("/")
+			year = date[2]
+			month = date[1]
+			day = date[0]
+			hour = pt['hour'].split(':')
+			h = hour[0]
+			m = hour[1]
+			s = round(float(hour[2]),0)
+			date_hour = f"{year} {month} {day} {h} {m} {s}"
+			
+			gnssdate=gpst.gpsdatetime()
+			gnssdate.rinex_t(date_hour) 
+			Ep = Obs.getEpochByMjd(gnssdate.mjd)
+			print(Ep)			
 
+
+			mat_sat_obs[index] = 0
 
 		if show_point :
 			# insert points into the kml
