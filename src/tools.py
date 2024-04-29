@@ -23,7 +23,7 @@ def custom_pt( # Creation of a kml point
 			  h,   # altitude, float
 			  status="None", # GNSS measure status (R, F, N or None), string
 			  mode="icon", # point representation, string
-			  name="", # point name, string
+			  name="", # point name, string python3 src/csv_to_kml.py test/EXTENVENT.LOG
 			  description="", # point description, string
 			  label_scale=2, # point name scale, int
 			  icon_scale=1, # point icon scale, int
@@ -122,7 +122,7 @@ def calcul_incert_pla_factor(data, size):
 	E = point93[0] 
 	N = point93[1] 
 	h = point93[2]
-	point1 = transformer2.transform(E       , N	   , h)
+	point1 = transformer2.transform(E	   , N	   , h)
 	point2 = transformer2.transform(E + size, N + size, h)
 	sigmaLon = point2[1] - point1[1]
 	sigmaLat = point2[0] - point1[0]
@@ -130,6 +130,89 @@ def calcul_incert_pla_factor(data, size):
 	incert_pla_factor_E = sigmaLon / size
 	incert_pla_factor_N = sigmaLat / size
 	return incert_pla_factor_E, incert_pla_factor_N
+
+def custom_frustum(
+	kml,  # simplekml object
+	pt,
+	focal,
+	mode="fur",  # frustum representation, string
+	name="",	  # frustum name, string
+	description="",  # point description, string
+	altitudemode="absolute",  # altitude mode, string ("absolute", "relativeToGround", "clampToGround")
+):
+	if mode == "fur":
+		# Calcul des points du frustum
+		near = 1.0/11000
+		far = focal /11000 # Utilisation de la distance focale comme profondeur du frustum
+		lon,lat,h = pt['lon'], pt['lat'],pt['h']
+		oX,oY,oZ = pt['oX'],pt['oY'],pt['h']
+
+		d = 5 / 11000
+		# rotation matrix 
+		angle = 10
+		rotation_matrixX = np.array([
+        	[1, 0, 0],
+        	[0, np.cos(angle), -np.sin(angle)],
+        	[0, np.sin(angle), np.cos(angle)]
+    	])
+    
+		rotation_matrixY = np.array([
+        	[np.cos(angle), 0, np.sin(angle)],
+        	[0, 1, 0],
+        	[-np.sin(angle), 0, np.cos(angle)]
+    	])
+    
+		rotation_matrixZ = np.array([
+        [np.cos(angle), -np.sin(angle), 0],
+        [np.sin(angle), np.cos(angle), 0],
+        [0, 0, 1]
+    ])
+    
+		# Points du frustum près et loin
+		near_corners = [
+			[near, 0, 0],
+			[0, near, 0],
+			[-near, 0, 0],
+			[0, -near, 0]
+		]
+
+		far_corners = [
+			[far * oX, far * oY, far * oZ+10],
+			[-far * oX, far * oY, far * oZ+10],
+			[-far * oX, -far * oY, far * oZ+10],
+			[far * oX, -far * oY, far * oZ+10]
+		]
+		
+
+		for i in range(4):
+			near_corners[i] = np.dot(rotation_matrixZ, np.dot(rotation_matrixY, np.dot(rotation_matrixX, near_corners[i])))
+
+		# Transformation des points du frustum en coordonnées WGS84
+		for i in range(4):
+			near_corners[i] = np.array(near_corners[i]) + np.array([lon, lat, h])
+			far_corners[i] = np.array(far_corners[i]) + np.array([lon, lat, h])
+		
+		# Tracé du frustum
+		pol = kml.newpolygon(name=name, description=description, altitudemode=altitudemode, extrude=0)
+		pol.outerboundaryis = [near_corners[0], near_corners[1], near_corners[2], near_corners[3], near_corners[0]]
+		pol.style.linestyle.width = 2
+		pol.style.linestyle.color = simplekml.Color.green  # Couleur par défaut
+
+		ext = kml.newpolygon(name=name, description=description, altitudemode=altitudemode, extrude=0)
+		ext.outerboundaryis = [far_corners[0], far_corners[1], far_corners[2], far_corners[3], far_corners[0]]
+		ext.style.linestyle.width = 2
+		ext.style.linestyle.color = simplekml.Color.red  # Couleur par défaut
+
+
+
+		for i in range(4):
+			lin = kml.newlinestring(name=name, description=description)
+			lin.coords = [near_corners[i], far_corners[i]]
+			lin.altitudemode = altitudemode
+			lin.style.linestyle.width = 2
+			lin.style.linestyle.color = simplekml.Color.green  # Couleur par défaut
+
+	return None
 
 def csv_to_kml(
 			   input_file,
@@ -149,13 +232,14 @@ def csv_to_kml(
 			   show_line=True, 
 			   show_conf_int=True,
 			   scale_factor_pla=1,
-               incert_pla_max=np.nan,
-               scale_factor_hig=1,
-               incert_hig_max=np.nan,
+			   incert_pla_max=np.nan,
+			   scale_factor_hig=1,
+			   incert_hig_max=np.nan,
 			   show_buildings=True,
 			   margin=0.001,
 			   departments='',
 			   save_buildings=False,
+			   show_orientation=True
 			  ):
 	if not quiet :
 		print("\n################ csv to kml ################\n")
@@ -328,7 +412,9 @@ def csv_to_kml(
 	if show_line :
 		kml_lines = kml.newfolder(name="Trace")
 	if show_conf_int :
-		kml_int_conf = kml.newfolder(name="Confidence interval")		
+		kml_int_conf = kml.newfolder(name="Confidence interval")
+	if show_orientation:
+		kml_frustum = kml.newfolder(name="frustum")
 
 	line = []
 	index_line = 0
@@ -372,7 +458,17 @@ def csv_to_kml(
 						incert_hig_max=incert_hig_max
 						)
 		
-		if show_line :
+		if show_orientation:
+			custom_frustum(
+						kml_frustum,  # simplekml object
+						pt,
+						focal=10,
+						mode="fur",  # frustum representation, string
+						name="",	  # frustum name, string
+						description="",  # point description, string
+						altitudemode="absolute",  # altitude mode, string ("absolute", "relativeToGround", "clampToGround")
+						)
+		if show_line:
 			#prepare a segmentation of the trajectory by GNSS status
 			if index+1 < len(data) :
 				if len(line) == 0 :
