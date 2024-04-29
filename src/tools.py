@@ -347,7 +347,12 @@ def csv_to_kml(
 				if sat.const + str(sat.PRN) not in tot_observed_sats :
 					tot_observed_sats.append(sat.const + str(sat.PRN))
 		tot_observed_sats.sort()
-
+		dic_tot_observed_sats = {}
+		i = 1
+		for sat in tot_observed_sats :
+			dic_tot_observed_sats[sat] = i
+			i+=1
+		
 		#preparing the observation matrix of satellites for each point
 		mat_sat_obs = np.zeros((len(data),len(tot_observed_sats),4))*np.nan
 
@@ -380,10 +385,19 @@ def csv_to_kml(
 			gnssdate=gpst.gpsdatetime()
 			gnssdate.rinex_t(date_hour) 
 			Ep = Obs.getEpochByMjd(gnssdate.mjd)
-			print(Ep)			
-
-
-			mat_sat_obs[index] = 0
+			if Ep != None :
+				visible_sats = []
+				uncalculable_sat = []
+				for sat in Ep.satellites :
+					name_sat = f"{sat.const}{sat.PRN}"
+					try :
+						X,Y,Z,dte = Nav.calcSatCoord(sat.const, sat.PRN, gnssdate)
+						mat_sat_obs[index, dic_tot_observed_sats[name_sat]] = X,Y,Z,dte
+						visible_sats.append(name_sat)
+					except :
+						uncalculable_sat.append(name_sat)
+				pt["n_visible_sat"] = len(visible_sats)
+				pt["visible_sat"] = visible_sats
 
 		if show_point :
 			# insert points into the kml
