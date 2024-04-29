@@ -393,9 +393,9 @@ def csv_to_kml(
 					try :
 						X,Y,Z,dte = Nav.calcSatCoord(sat.const, sat.PRN, gnssdate)
 						mat_sat_obs[index, dic_tot_observed_sats[name_sat]] = X,Y,Z,dte
-						visible_sats.append(name_sat)
 					except :
 						uncalculable_sat.append(name_sat)
+					visible_sats.append(name_sat)
 				pt["n_visible_sat"] = len(visible_sats)
 				pt["visible_sat"] = visible_sats
 			else :
