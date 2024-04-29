@@ -429,18 +429,6 @@ def csv_to_kml(
 					# Supprimez le fichier
 					os.remove(res_file[:-4] + end)
 
-	# Define index_color for the confidence intervals
-	index_color = np.zeros(len(data)).astype(int) + 3
-
-	if not np.isnan(incert_pla_max) :
-		index_color[data["incert_pla"] <   incert_pla_max  ] = 2
-		index_color[data["incert_pla"] < 2*incert_pla_max/3] = 1
-		index_color[data["incert_pla"] <   incert_pla_max/3] = 0
-	else :
-		index_color[data["incert_pla"] <   np.max(data["incert_pla"])  ] = 2
-		index_color[data["incert_pla"] < 2*np.max(data["incert_pla"])/3] = 1
-		index_color[data["incert_pla"] <   np.max(data["incert_pla"])/3] = 0
-
 	# ephemerids
 	if calc_ephemerids and rinex_name != '' :
 		#loading rinex files
@@ -535,7 +523,6 @@ def csv_to_kml(
 		if show_conf_int :
 			#insert the confidences intervals into the kml
 			#color choose
-			color = csts.colors_list[index_color[index]]
 			custom_int_conf(
 						kml_int_conf,
 						pt,
@@ -543,7 +530,7 @@ def csv_to_kml(
 						name="Point n° " + str(index),
 						description="",
 						altitudemode=altitudemode,
-						color=color,
+						color=csts.colors_dict[csts.status_dict[pt["state"]]["color"]],
 						incert_pla_factor_E=incert_pla_factor_E, 
 						incert_pla_factor_N=incert_pla_factor_N,
 						scale_factor_pla=scale_factor_pla,
