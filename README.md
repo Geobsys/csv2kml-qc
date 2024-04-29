@@ -15,6 +15,18 @@ Some tools need to be present on your system to run **csv2kml-qc** properly :
 - **[Git](https://git-scm.com/)**
 - **[Python](https://www.python.org/)**
 - **[simplekml](https://simplekml.readthedocs.io/)**
+- **[pyproj](https://pyproj4.github.io/pyproj/stable/)**
+- **[shapely](https://shapely.readthedocs.io/en/stable/)**
+- **[numpy](https://numpy.org/install/)**
+- **[pandas](https://pandas.pydata.org/docs/getting_started/install.html)**
+- **[os](https://docs.python.org/fr/3/library/os.html)**
+- **[fiona](https://pypi.org/project/fiona/)**
+- **[argparse](https://pypi.org/project/argparse/)**
+- **[re](https://pypi.org/project/regex/)**
+- **[gpsdatetime](https://pypi.org/project/gpsdatetime/)**
+- **[gnsstoolbox](https://pypi.org/project/gnsstoolbox/)**
+
+
 
 # Installation
 Under Linux (Ubuntu) distribution the installation procedure is as follows:
@@ -36,18 +48,136 @@ python3.10 -m venv venv_csv2kml-qc
 ```bash
 source venv_csv2kml-qc/bin/activate
 ```
-6. Install **simplekml** module:
+6. Installs
+**simplekml** module:
 ```bash
-pip install simplekml
+pip install simplekml 
 ```
+Creating the object (line, point, polygon)
+**pyproj** module:
+```bash
+pip install pyproj
+```
+Calculating coordinates
+
+**shapely** module:
+```bash
+pip install shapely
+```
+Making the 3D model of the buildings and the intersections
+
+**os** module:
+```bash
+pip install os
+```
+**numpy** module:
+```bash
+pip install numpy
+```
+**pandas** module:
+```bash
+pip install pandas
+```
+**fiona** module:
+```bash
+pip install fiona
+```
+Manipulation of geospatial datas
+
+**argparse** module:
+```bash
+pip install argparse
+```
+**re** module:
+```bash
+pip install regex
+```
+**gpsdatetime** module:
+```bash
+pip install gpsdatetime
+```
+**gnsstoolbox** module:
+```bash
+pip install gnsstoolbox
+```
+
 # Usage
 To test **csv2kml-qc**:
 1. Access the main folder:
 ```bash
 cd csv2kml-qc
 ```
-2. Launch the tool on the dataset example:
+2. Launch the tool with the default setting on the dataset example:
 ```bash
 python3.10 src/csv_to_kml.py test/EXTENVENT.LOG
 ```
-3. Open the file **test/EXTENVENT.kml** on **[Google Earth](https://earth.google.com/)** viewer
+EXTENVENT.LOG is one of the enter file
+
+3. Parameters 
+
+**import parameters**
+Define the format of the import file in the enter of the programm.
+input_file, "input file from the Geostix in .csv format", type : string
+-it "input file", type : string, "input file type between 'extevent' and 'log'", by default : "extevent",choices=["extevent", "log"]
+-sep "separator", type : string, "separator used in the .csv file", by default : ","
+
+**export parameters**
+Define the format of the export file in the end of the programm. 
+-o "output_file", type : string, "output file in .kml format (Default=./input_file.kml)", by default : ""
+-name "doc_name", type : string, "kml document name",default="", by default : ""
+--quiet, "print some statistics"
+
+**apearance parameters**
+User can choose the representation of the point (mode, label and icon size in the kml)
+-m "--mode", type : string, "representation mode", by default : "icon", choices=["icon"]
+-ls, "--label_scale", type : float, "label scale let you modify the size of the label", by default : 2
+-is, "--icon_scale", type : float, "icon scale let you modify the size of the icon", by default : 1
+-ih, "--icon_href", type : str, "marker in the kml", "icon href (Default=http://maps.google.com/mapfiles/kml/shapes/placemark_circle.png)",default="http://maps.google.com/mapfiles/kml/shapes/placemark_circle.png"
+--show_pt_name, action="store_true", "Hide the points names"
+
+**general parameters**
+User can modify the number of data and the altitude in the representation of the object (relitveground or absolute).
+-dr, "--data_range", type : string, "Range of data from start (s), to end (e), with a step (t) : (s,e,t). e and t are optionnal.", "this allow you to decimate the number of the point",  by default : '(0,-1,100)'
+-am, "--altitudemode", type : string, "See simplekml .Altitudemode (absolute, relativeToGround, clampToGround). (Default=absolute)", by default : "absolute", choices=["absolute", "relativeToGround", "clampToGround"]
+
+**Point**
+User can choose to show to visualize or not the points.
+--show_point, action="store_false", "Don't show points"
+
+**Line**
+User can choose to show to visualize or not the lines.
+--show_line, action="store_false", "Don't show the lines between points"
+
+**Confidence interval**
+User can choose to visualize or not the confidence intervals. There are represent as 3D pyramids. He can also choose a scale factor for planimetric and altimetric uncertainty. If there are too big uncertaintyn he can add a maximum value for them. 
+--show_conf_int, action="store_false", "Don't show the confidence interval"
+-sp, "--scale_factor_pla", type : float, "Scale factor for planimetric uncertainty. ", by default : 1
+-mp, "--incert_pla_max", type : float, "Maximum planimetric uncertainty.", by default : np.nan
+-sh, "--scale_factor_hig", type : float, "Scale factor for altimetric uncertainty.", by default : 1
+-mh, "--incert_hig_max", type : float, "Maximum altimetric uncertainty.", by default : np.nan
+
+**Buildings**
+If the user wants, he can create a 3D model for the buildings in the study aera by adding a shapefile of the aera. 
+-departments, type : string, "input shp buildings file path", by default : '', "the user have to choose and download himself the right shapefile on https://geoservices.ign.fr/documentation/donnees/vecteur/bdtopo which correspond to his study area." 
+--show_buildings, action="store_false", "Don't show the show_buildings, used only if there is a shapefile in enter"
+-margin, type : float, "margin (in geographical degres) around the workfield for building modelisation ", by default : 0.001, "used only if there is a shapefile in enter"
+--save_buildings, action="store_true", "If you want to save the shp file of your buildings, used only if there is a shapefile in enter"
+
+**Ephemerids**
+If you want to know the number of satellite seen by a point at its acquisition date, you can add a rinex file which correspond at the right date. 
+--calc_ephemerids,action="store_false", "Don't calculate the ephemerids"
+-rn, "--rinex_name", type : string, "name of the observation and rinex file (without the extension)",by default : ''
+
+**Frustum**
+If you want to creat the frustum of the picture. These allow you to visualize the orientation of the sensors when taking a photo
+--show_orientation, action="store_false", "Don't show frustum"
+-fr_captor, type : float, "distance factor of the near face of the frustum.", by default : 1
+-fr_focal, type=float, "focal distance.", by default : 10
+-fr_distance',type : float, " distance between the near plane et the far plane.", by default : 5
+-fr_alpha, type : float, "angle between camera reference frame and geographical reference frame", by default : 0
+-fr_beta, type : float, "angle between camera reference frame and geographical reference frame", by default : 0
+-fr_gamma, type : float, "angle between camera reference frame and geographical reference frame", by default : 0
+
+3. Open the file **XXX.kml** on **[Google Earth](https://earth.google.com/)** viewer, you can decide to show the buildings, the traces, the points and the measured intervals through the top left window. 
+By clicking on a point, you can see all its caracteristics.   
+
