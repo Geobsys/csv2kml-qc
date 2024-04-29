@@ -340,15 +340,16 @@ def csv_to_kml(
 		Nav = orb.orbit()
 		Nav.loadRinexN(rinex_name + 'p')  
 
-		rnx = open(rinex_name + 'o', 'r')
-		rnx_lines = rnx.readlines()
-		rnx.close()
-		print()
-		print(len(Obs.headers[0].epochs))
-		print(len(data))
-		print()
+		#finding all the observed sats during the observation
+		tot_observed_sats = []
+		for epoch in Obs.headers[0].epochs :
+			for sat in epoch.satellites :
+				if sat.const + str(sat.PRN) not in tot_observed_sats :
+					tot_observed_sats.append(sat.const + str(sat.PRN))
+		tot_observed_sats.sort()
 
-		#mat_obs = np.zeros((len(data),len(list_sat),4))*np.nan
+		#preparing the observation matrix of satellites for each point
+		mat_sat_obs = np.zeros((len(data),len(tot_observed_sats),4))*np.nan
 
 
 	# Separation of data type in the kml
@@ -363,6 +364,8 @@ def csv_to_kml(
 	index_line = 0
 	#iterate over the pts
 	for index, pt in data.iterrows():
+
+
 		if show_point :
 			# insert points into the kml
 			description_pt = gen_description_pt(pt, np.max(data["index"]))
