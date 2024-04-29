@@ -88,7 +88,7 @@ if __name__ == "__main__":
 					 args.departments,
 					 args.save_buildings,
 					 args.calc_ephemerids,
-					 args.rinex_name
+					 args.rinex_name,
 					 args.show_orientation,
 					 args.fr_captor,
 					 args.fr_focal,

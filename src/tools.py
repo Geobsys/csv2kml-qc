@@ -267,7 +267,7 @@ def csv_to_kml(
 			   departments='',
 			   save_buildings=False,
 			   calc_ephemerids=True,
-			   rinex_name=''
+			   rinex_name='',
 			   show_orientation=True,
 			   fr_captor=1,
 			   fr_focal=10,
@@ -559,7 +559,7 @@ def csv_to_kml(
 						description="",  # point description, string
 						altitudemode="absolute",  # altitude mode, string ("absolute", "relativeToGround", "clampToGround")
 						incert_pla_factor_E=incert_pla_factor_E,
-						incert_pla_factor_N= incert_pla_factor_N,*
+						incert_pla_factor_N= incert_pla_factor_N,
 						fr_captor=1,
 						fr_focal=10,
 						fr_distance=5,
