@@ -142,64 +142,85 @@ def custom_frustum(
 ):
 	if mode == "fur":
 		# Calcul des points du frustum
-		near = 1.0/11000
-		far = focal /11000 # Utilisation de la distance focale comme profondeur du frustum
+		near = 1.0
+		d = 5
+		far = (near/focal*d) # Utilisation de la distance focale comme profondeur du frustum
 		lon,lat,h = pt['lon'], pt['lat'],pt['h']
 		oX,oY,oZ = pt['oX'],pt['oY'],pt['h']
 
-		d = 5 / 11000
-		# rotation matrix 
-		angle = 10
+		# rotation matrix : allow to change the frustum orientation according to the camera
+
 		rotation_matrixX = np.array([
         	[1, 0, 0],
-        	[0, np.cos(angle), -np.sin(angle)],
-        	[0, np.sin(angle), np.cos(angle)]
+        	[0, np.cos(oX), -np.sin(oX)],
+        	[0, np.sin(oX), np.cos(oX)]
     	])
     
 		rotation_matrixY = np.array([
-        	[np.cos(angle), 0, np.sin(angle)],
+        	[np.cos(oY), 0, np.sin(oY)],
         	[0, 1, 0],
-        	[-np.sin(angle), 0, np.cos(angle)]
+        	[-np.sin(oY), 0, np.cos(oY)]
     	])
     
 		rotation_matrixZ = np.array([
-        [np.cos(angle), -np.sin(angle), 0],
-        [np.sin(angle), np.cos(angle), 0],
+        [np.cos(oZ), -np.sin(oZ), 0],
+        [np.sin(oZ), np.cos(oZ), 0],
         [0, 0, 1]
     ])
+		# rotation matrix2 allow to change the referential of the camera to the geographical reference frame
+		alpha, beta, gamma = 0,0,0
+		rotation_matrixX2 = np.array([
+        	[1, 0, 0],
+        	[0, np.cos(alpha), -np.sin(alpha)],
+        	[0, np.sin(alpha), np.cos(alpha)]
+    	])
+    
+		rotation_matrixY2 = np.array([
+        	[np.cos(beta), 0, np.sin(beta)],
+        	[0, 1, 0],
+        	[-np.sin(beta), 0, np.cos(beta)]
+    	])
+    
+		rotation_matrixZ2 = np.array([
+        [np.cos(gamma), -np.sin(gamma), 0],
+        [np.sin(gamma), np.cos(gamma), 0],
+        [0, 0, 1]
+    ])
+		
+		
     
 		# Points du frustum près et loin
-		near_corners = [
-			[near, 0, 0],
-			[0, near, 0],
-			[-near, 0, 0],
-			[0, -near, 0]
-		]
-
-		far_corners = [
-			[far * oX, far * oY, far * oZ+10],
-			[-far * oX, far * oY, far * oZ+10],
-			[-far * oX, -far * oY, far * oZ+10],
-			[far * oX, -far * oY, far * oZ+10]
+		frustum = [
+			[near, 0, focal],
+			[0, near, focal],
+			[-near, 0, focal],
+			[0, -near, focal],
+			[far , 0, d+focal],
+			[0, far , d+focal],
+			[-far, 0, d+focal],
+			[0, -far, d+focal]
 		]
 		
 
-		for i in range(4):
-			near_corners[i] = np.dot(rotation_matrixZ, np.dot(rotation_matrixY, np.dot(rotation_matrixX, near_corners[i])))
+		print(frustum)
 
-		# Transformation des points du frustum en coordonnées WGS84
-		for i in range(4):
-			near_corners[i] = np.array(near_corners[i]) + np.array([lon, lat, h])
-			far_corners[i] = np.array(far_corners[i]) + np.array([lon, lat, h])
-		
+		# Rotation du frustum vers geographique
+		frustum_o = frustum @ (rotation_matrixX @ rotation_matrixY @ rotation_matrixZ) @ (rotation_matrixX2 @ rotation_matrixY2 @ rotation_matrixZ2)
+
+
+	# Translation des points du frustum en coordonnées WGS84
+		frustum_o[:,:2] /= 11000
+		frustum_o += np.array([lon, lat, h])
+
+		print(frustum_o)
 		# Tracé du frustum
 		pol = kml.newpolygon(name=name, description=description, altitudemode=altitudemode, extrude=0)
-		pol.outerboundaryis = [near_corners[0], near_corners[1], near_corners[2], near_corners[3], near_corners[0]]
+		pol.outerboundaryis = [frustum_o[0], frustum_o[1], frustum_o[2], frustum_o[3], frustum_o[0]]
 		pol.style.linestyle.width = 2
 		pol.style.linestyle.color = simplekml.Color.green  # Couleur par défaut
 
 		ext = kml.newpolygon(name=name, description=description, altitudemode=altitudemode, extrude=0)
-		ext.outerboundaryis = [far_corners[0], far_corners[1], far_corners[2], far_corners[3], far_corners[0]]
+		ext.outerboundaryis = [frustum_o[4], frustum_o[5], frustum_o[6], frustum_o[7], frustum_o[4]]
 		ext.style.linestyle.width = 2
 		ext.style.linestyle.color = simplekml.Color.red  # Couleur par défaut
 
@@ -207,7 +228,7 @@ def custom_frustum(
 
 		for i in range(4):
 			lin = kml.newlinestring(name=name, description=description)
-			lin.coords = [near_corners[i], far_corners[i]]
+			lin.coords = [frustum_o[i], frustum_o[i+4]]
 			lin.altitudemode = altitudemode
 			lin.style.linestyle.width = 2
 			lin.style.linestyle.color = simplekml.Color.green  # Couleur par défaut
