@@ -266,7 +266,7 @@ def csv_to_kml(input_file, # string
 	if(output_file==""): 
 		output_file="".join([os.path.splitext(input_file)[0],".kml"])
 
-	### Adding attributes
+	# Adding attributes
 	# coordinates transformation to cartesian geocentric 
 	transformer = Transformer.from_crs(4326, 4964)
 	coordRGF93 = transformer.transform(data['lon'], data['lat'], data['h'])
@@ -386,6 +386,8 @@ def csv_to_kml(input_file, # string
 	# Search all viewed satellites
 	if calc_ephemerids and rinex_name != '' :
 		#loading rinex files
+		if rinex_name[-1] in ['o', 'p'] :
+			rinex_name = rinex_name[:-1]
 		Obs = rx.rinex_o()
 		Obs.loadRinexO(rinex_name + 'o')
 		Nav = orb.orbit()

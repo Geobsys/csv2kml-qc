@@ -49,7 +49,7 @@ if __name__ == "__main__":
 	parser.add_argument('-save_buildings',type=str,help="If you want to save the shp file of your buildings, you can provide a folder path and name. If the name is 'intersection', it will not be saved. (Default=intersection)", default="intersection")
 	# Ephemerids
 	parser.add_argument('--calc_ephemerids',action="store_false",help="Don't calculate the ephemerids")
-	parser.add_argument('-rn','--rinex_name',type=str,help="name of the observation and rinex file (without the extension)",default='')
+	parser.add_argument('-rn','--rinex_name',type=str,help="Path of the observation or navigation rinex file",default='')
 
 	# Frustum 
 	parser.add_argument('--show_orientation', action="store_false",help="Don't show frustum")
