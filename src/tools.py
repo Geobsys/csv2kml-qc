@@ -269,7 +269,7 @@ def csv_to_kml(
 			   show_buildings=True,
 			   margin=0.001,
 			   departments='',
-			   save_buildings=False,
+			   save_buildings='intersection',
 			   calc_ephemerids=True,
 			   rinex_name='',
 			   show_orientation=True,
@@ -400,12 +400,15 @@ def csv_to_kml(
 		bbox = (Emin, Nmin, Emax, Nmax)
 
 		# Intersection between buildings and workfield
-		res_fold = departments.split('/')
 		res_file = ''
-		for e in res_fold :
-			res_file += e +"/"
-		res_name = "intersection"
-		res_file = res_file + res_name + ".shp"
+		if "/" not in save_buildings :
+			res_fold = departments.split('/')
+			for e in res_fold :
+				res_file += e +"/"
+		if save_buildings[:-4] == ".shp" :
+			res_file = res_file + save_buildings
+		else :
+			res_file = res_file + save_buildings + ".shp"
 
 		
 		# Opening buildings shapefile
@@ -414,6 +417,7 @@ def csv_to_kml(
 			schema = source.schema
 
 		with fiona.open(res_file, 'w', driver='ESRI Shapefile', schema=schema) as sink:
+			print("Selecting buildings on the workfield ...")
 			for layer in layers :
 				with fiona.open(departments, 'r', layer=layer) as source:
 					
@@ -434,7 +438,8 @@ def csv_to_kml(
 		shp2kml(res_file, kml_buildings, quiet)
 
 		# delete shp files if wanted
-		if not save_buildings :
+		if save_buildings == 'intersection' :
+			print("Deleting temporary files ...")
 			for end in [".shp", ".dbf", ".cpg", ".shx"] :
 				if os.path.exists(res_file[:-4] + end):
 					# Supprimez le fichier
