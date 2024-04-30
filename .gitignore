@@ -1,7 +1,7 @@
 __pycache__.DS_Store
 test/20240223.kml
 test/EXTENVENT.kml
-__pycache__
+__pycache__ directory
 .DS_Store
 src/.DS_Store
 src/__pycache__/tools.cpython-311.pyc
