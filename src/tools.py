@@ -409,13 +409,22 @@ def csv_to_kml(
 
 		
 		# Opening buildings shapefile
-		with fiona.open(departments, 'r') as source:
-			# Selecting buildings inside the convex envelop
-			filtered_buildings = source.filter(bbox=bbox)
-			
-			# Saving thoses buildings in the output file
-			with fiona.open(res_file, 'w', driver=source.driver, schema=source.schema) as sink:
-				sink.writerecords(filtered_buildings)
+		layers = fiona.listlayers(departments)
+		with fiona.open(departments, 'r', layer=layers[0]) as source :
+			schema = source.schema
+
+		with fiona.open(res_file, 'w', driver='ESRI Shapefile', schema=schema) as sink:
+			for layer in layers :
+				with fiona.open(departments, 'r', layer=layer) as source:
+					
+					if source.schema == schema :
+						# Selecting buildings inside the convex envelop
+						filtered_buildings = source.filter(bbox=bbox)
+						# Saving thoses buildings in the output file
+						sink.writerecords(filtered_buildings)
+					else :
+						print(f"The shapefile '{layer}' schema is different from the used schema of '{layers[0]}'. The buildings of '{layer}' aren't saved to the kml.")
+
 
 		if not quiet:
 			print("Intersection done.")	

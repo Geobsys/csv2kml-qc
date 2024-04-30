@@ -45,7 +45,7 @@ if __name__ == "__main__":
 	# Buildings
 	parser.add_argument('--show_buildings',action="store_false",help="Don't show the show_buildings")
 	parser.add_argument('-margin',type=float,help="margin (in geographical degres) around the workfield for building modelisation (Default=0.001)",default=0.001)
-	parser.add_argument('-departments',type=str,help="input shp buildings file path",default='')
+	parser.add_argument('-departments',type=str,help="input folder where shp building file is stocked. Warning, if there is others file in it, the programm will chose the first one by alphabet.",default='')
 	parser.add_argument('--save_buildings',action="store_true",help="If you want to save the shp file of your buildings")
 	# Ephemerids
 	parser.add_argument('--calc_ephemerids',action="store_false",help="Don't calculate the ephemerids")
