@@ -144,6 +144,7 @@ def calcul_incert_pla_factor(data, size):
 def custom_frustum(
 	kml,  # simplekml object
 	pt,
+	produit_matrice_rotation,
 	mode="fur",  # frustum representation, string
 	name="",	  # frustum name, string
 	description="",  # point description, string
@@ -153,9 +154,6 @@ def custom_frustum(
 	fr_captor=1,
 	fr_focal=10,
 	fr_distance=5,
-	fr_alpha=0,
-	fr_beta=0,
-	fr_gamma=0
 	):
 	if mode == "fur":
 		# configuration of the near distance and the distance between the frustum square faces.
@@ -183,25 +181,6 @@ def custom_frustum(
         [np.sin(oZ), np.cos(oZ), 0],
         [0, 0, 1]
     ])
-		# rotation matrix2 allow to change the reference frame of the camera to the geographical reference frame
-		fr_alpha, fr_beta, fr_gamma = 0,0,0
-		rotation_matrixX2 = np.array([
-        	[1, 0, 0],
-        	[0, np.cos(fr_alpha), -np.sin(fr_alpha)],
-        	[0, np.sin(fr_alpha), np.cos(fr_alpha)]
-    	])
-    
-		rotation_matrixY2 = np.array([
-        	[np.cos(fr_beta), 0, np.sin(fr_beta)],
-        	[0, 1, 0],
-        	[-np.sin(fr_beta), 0, np.cos(fr_beta)]
-    	])
-    
-		rotation_matrixZ2 = np.array([
-        [np.cos(fr_gamma), -np.sin(fr_gamma), 0],
-        [np.sin(fr_gamma), np.cos(fr_gamma), 0],
-        [0, 0, 1]
-    ])
 		
 		    
 		# Far and near points of the frustum
@@ -217,7 +196,7 @@ def custom_frustum(
 		]
 		
 		# Rotation of the frustum into the geographical reference frame
-		frustum_o = frustum @ (rotation_matrixX @ rotation_matrixY @ rotation_matrixZ) @ (rotation_matrixX2 @ rotation_matrixY2 @ rotation_matrixZ2)
+		frustum_o = frustum @ (rotation_matrixX @ rotation_matrixY @ rotation_matrixZ) @ produit_matrice_rotation
 
 		# Translation of the frustum's points in WGS84
 		frustum_o[:,0] *= incert_pla_factor_E
@@ -377,6 +356,28 @@ def csv_to_kml(
 	size = 1000
 	incert_pla_factor_E, incert_pla_factor_N = calcul_incert_pla_factor(data, size)		
 	
+	# rotation matrix2 allow to change the reference frame of the camera to the geographical reference frame
+	rotation_matrixX2 = np.array([
+        	[1, 0, 0],
+        	[0, np.cos(fr_alpha), -np.sin(fr_alpha)],
+        	[0, np.sin(fr_alpha), np.cos(fr_alpha)]
+    	])
+    
+	rotation_matrixY2 = np.array([
+        	[np.cos(fr_beta), 0, np.sin(fr_beta)],
+        	[0, 1, 0],
+        	[-np.sin(fr_beta), 0, np.cos(fr_beta)]
+    	])
+    
+	rotation_matrixZ2 = np.array([
+        [np.cos(fr_gamma), -np.sin(fr_gamma), 0],
+        [np.sin(fr_gamma), np.cos(fr_gamma), 0],
+        [0, 0, 1]
+    ])
+
+	produit_matrice_rotation = rotation_matrixX2 @ rotation_matrixY2 @ rotation_matrixZ2
+
+
 	if show_buildings and departments != '' :			
 		# adding buildings
 		kml_buildings = kml.newfolder(name='Buildings')
@@ -411,6 +412,7 @@ def csv_to_kml(
 		# Opening buildings shapefile
 		with fiona.open(departments, 'r') as source:
 			# Selecting buildings inside the convex envelop
+			print(source)
 			filtered_buildings = source.filter(bbox=bbox)
 			
 			# Saving thoses buildings in the output file
@@ -541,10 +543,12 @@ def csv_to_kml(
 						incert_hig_max=incert_hig_max
 						)
 		
-		if show_orientation and input_type == 'extevent':
-			custom_frustum(
+		if show_orientation:
+			if input_type == "extevent":
+				custom_frustum(
 						kml_frustum,  # simplekml object
 						pt,
+						produit_matrice_rotation,
 						mode="fur",  # frustum representation, string
 						name="",	  # frustum name, string
 						description="",  # point description, string
@@ -554,9 +558,6 @@ def csv_to_kml(
 						fr_captor=fr_captor,
 						fr_focal=fr_focal,
 						fr_distance=fr_distance,
-						fr_alpha=fr_alpha,
-						fr_beta=fr_beta,
-						fr_gamma=fr_gamma
 						)
 		if show_line:
 			#prepare a segmentation of the trajectory by GNSS status
