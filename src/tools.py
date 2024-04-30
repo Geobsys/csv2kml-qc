@@ -400,19 +400,21 @@ def csv_to_kml(
 		bbox = (Emin, Nmin, Emax, Nmax)
 
 		# Intersection between buildings and workfield
+		layers = []
 		res_file = ''
+		if departments[-4:] == ".shp" :
+			layers = [departments.split('/')[-1][:-4]]
+			departments = "/".join(departments.split('/')[:-1]) + '/'
 		if "/" not in save_buildings :
-			res_fold = departments.split('/')
-			for e in res_fold :
-				res_file += e +"/"
-		if save_buildings[:-4] == ".shp" :
+			res_file = "/".join(departments.split('/')) + '/'
+		if save_buildings[-4:] == ".shp" :
 			res_file = res_file + save_buildings
 		else :
 			res_file = res_file + save_buildings + ".shp"
 
-		
 		# Opening buildings shapefile
-		layers = fiona.listlayers(departments)
+		if layers == [] :
+			layers = fiona.listlayers(departments)
 		with fiona.open(departments, 'r', layer=layers[0]) as source :
 			schema = source.schema
 
