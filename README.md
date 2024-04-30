@@ -108,21 +108,26 @@ To test **csv2kml-qc**:
 3. Parameters 
    - **import parameters**:
      Define the format of the import file in the enter of the programm.
-|   Command   |   Name |  Type  |  Description |   Default value    | Choice value |
-|---    |:-:    |:-:    |:-:    |:-:    |:-: |
-|   -it   |   input file   |   string |   input file type between 'extevent' and 'log' | "extevent" | ["extevent", "log"] |
-|   -sep   |   separator  |   string |   separator used in the .csv file |   ,  |  |
+
+|Command | Name | Type | Description | Default value | Choices value |
+|-----------|----------------|--------|--------------------------------------------------|---------------|-----------------------|
+| -it       | input file     | string | input file type between 'extevent' and 'log'    | "extevent"   | ["extevent", "log"]   |
+| -sep      | separator      | string | separator used in the .csv file                  | ","           |                       |
+
+
    - **export parameters**:
      Define the format of the export file in the end of the programm. 
-|   Command   |   Name |  Type  |  Description |   Default value    | 
-|---    |:-:    |:-:    |:-:    |:-:    |
+
+| Command | Name | Type | Description | Default value | 
+|----|----|----|----|----|
 |   -o   |   output file   |   string |   output file in .kml format | "" |  
 |   -name   |   doc_name  |   string |   kml document name |   ""  |  
 |   --quiet   |     |    |   print some statistics |     |
    - **apearance parameters**:
      User can choose the representation of the point (mode, label and icon size in the kml)
+
 |   Command   |   Name |  Type  |  Description |   Default value    | Choice value |
-|---    |:-:    |:-:    |:-:    |:-:    |:-: |
+|----|----|----|----|----|----|
 |   -m   |   mode   |   string |   representation mode | "icon" | ["icon"] |
 |   -ls   |   label_scale  |   float |   label scale let you modify the size of the label |   2  |  |
 |   -is   |   icon_scale  |   float |   icon scale let you modify the size of the icon |   1  |  |
@@ -130,24 +135,28 @@ To test **csv2kml-qc**:
 |   --show_pt_name   |     |  action="store_true"  |   Hide the points names |     |
    - **general parameters**:
      User can modify the number of data and the altitude in the representation of the object (relitveground or absolute).
+
 |   Command   |   Name |  Type  |  Description |   Default value    | Choice value |
-|---    |:-:    |:-:    |:-:    |:-:    |:-: |
+|----|----|----|----|----|----|
 |   -dr   |   data_range   |   string |   Range of data from start (s), to end (e), with a step (t) : (s,e,t). e and t are optionnal. This allow you to decimate the number of the point | "extevent" | ["extevent", "log"] |
 |   -am   |   altitude mode  |   string |   See simplekml .Altitudemode (absolute, relativeToGround, clampToGround). This define the mode of the altitude's representation |   "absolute"  | ["absolute", "relativeToGround", "clampToGround"] |
    - **Point**:
      User can choose to show to visualize or not the points.
+
 |   Command   |   Action |   Description | 
-|---    |:-:    |:-:    |
+|----|----|----|
 |--show_point | action="store_false" | "Don't show points" |
    - **Line**:
      User can choose to show to visualize or not the lines.
+
 |   Command   |   Action |   Description | 
-|---    |:-:    |:-:    |
+|----|----|----|
 |--show_line | action="store_false" | "Don't show the lines between the points" |
    - **Confidence interval**:
      User can choose to visualize or not the confidence intervals. There are represent as 3D pyramids. He can also choose a scale factor for planimetric and altimetric uncertainty. If there are too big uncertaintyn he can add a maximum value for them. 
+
 |   Command   |   Name |  Type  |  Description |   Default value    | 
-|---    |:-:    |:-:    |:-:    |:-:    |
+|----|----|----|----|----|
 |   --show_conf_int   |      | action="store_false" |   Don't show the confidence interval |  |  
 |   -sp   |   scale_factor_pla  | float |   Scale factor for planimetric uncertainty. |  1  |  
 |   -mp   |  incert_pla_max   |  float  |   Maximum planimetric uncertainty |  np.nan   |
@@ -155,23 +164,26 @@ To test **csv2kml-qc**:
 |   -mh   |  incert_hig_max   |  float  |   Maximum altimetric uncertainty |  np.nan   |
    - **Buildings**:
      If the user wants, he can create a 3D model for the buildings in the study aera by adding a shapefile of the aera. 
+
 |   Command   |   Name |  Type  |  Description |   Default value    | Condition |
-|---    |:-:    |:-:    |:-:    |:-:    |:-: |
+|----|----|----|----|----|----|
 |   -departments   |   departments   |   string |  input shp buildings file path. The user have to choose and download himself the right shapefile on [BD-TOPO](https://geoservices.ign.fr/documentation/donnees/vecteur/bdtopo) which correspond to his study area | "" |  |
 |   --show_buildings   |     |   action="store_false" |   Don't show the show_buildings |    | Used only if there is a shapefile in enter |
 |   -margin   |   margin  |   float |   margin (in geographical degres) around the workfield for building modelisation  |   0.001  | Used only if there is a shapefile in enter |
 |   --save_buildings   |     |  action="store_true"  |   If you want to save the shp file of your buildings |     |Used only if there is a shapefile in enter |
    - **Ephemerids**:
      If you want to know the number of satellite seen by a point at its acquisition date, you can add a rinex file which correspond at the right date. 
+
 |   Command   |   Name |  Type  |  Description |   Default value    | 
-|---    |:-:    |:-:    |:-:    |:-:    |
+|----|----|----|----|----|
 |   --calc_ephemerids   |      | action="store_false" |   Don't calculate the ephemerids |  |  
 |   -rn   |   rinex_name  | string |   name of the observation and rinex file (without the extension) |  ""  |  
 
    - **Frustum**:
      If you want to creat the frustum of the picture. These allow you to visualize the orientation of the sensors when taking a photo
+
 |   Command   |   Name |  Type  |  Description |   Default value    | 
-|---    |:-:    |:-:    |:-:    |:-:    |
+|----|----|----|----|----|
 |   --show_orientation   |      | action="store_false" |   Don't show frustum |  |  
 |   -fr_captor   |   frustum captor  | float |   distance factor of the near face of the frustum |  1  | 
 |   -fr_focal   |   frustum focal  | float |   focal distance |  10  | 
