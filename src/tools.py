@@ -143,22 +143,22 @@ def calcul_incert_pla_factor(data, size):
 
 def custom_frustum(
 	kml,  # simplekml object
-	pt,
-	produit_matrice_rotation,
+	pt,	  # point object, pandas DataFrame
+	product_rotation_matrix, # product between rotation  matrix
 	mode="fur",  # frustum representation, string
 	name="",	  # frustum name, string
 	description="",  # point description, string
 	altitudemode="absolute",  # altitude mode, string ("absolute", "relativeToGround", "clampToGround")
-	incert_pla_factor_E = 1e-5,
-	incert_pla_factor_N = 1e-5,
-	fr_captor=1,
-	fr_focal=10,
-	fr_distance=5,
+	incert_pla_factor_E = 1e-5,	# scale factor meters to degres Est
+	incert_pla_factor_N = 1e-5,	# scale factor meters to degres North
+	fr_captor=1,	# size of the captor
+	fr_focal=10,	# size of the focal
+	fr_distance=5,	# distance between the two faces of the frustum
 	):
 	if mode == "fur":
 		# configuration of the near distance and the distance between the frustum square faces.
 		
-		far = (fr_captor		/fr_focal	*fr_distance) # focal distance to manage the depth of the frustum 
+		far = (fr_captor/fr_focal*fr_distance) # distance to place the corner of the frustum 
 		lon,lat,altitude = pt['lon'], pt['lat'],pt['altitude']
 		oX,oY,oZ = pt['oX'],pt['oY'],pt['oZ']
 
@@ -181,9 +181,8 @@ def custom_frustum(
         [np.sin(oZ), np.cos(oZ), 0],
         [0, 0, 1]
     ])
-		
-		    
-		# Far and near points of the frustum
+				    
+		# Far and near points of the frustum and the difference of altitude between them
 		frustum = [
 			[fr_captor		, 0, fr_focal	],
 			[0, fr_captor		, fr_focal	],
@@ -196,7 +195,7 @@ def custom_frustum(
 		]
 		
 		# Rotation of the frustum into the geographical reference frame
-		frustum_o = frustum @ (rotation_matrixX @ rotation_matrixY @ rotation_matrixZ) @ produit_matrice_rotation
+		frustum_o = frustum @ (rotation_matrixX @ rotation_matrixY @ rotation_matrixZ) @ product_rotation_matrix
 
 		# Translation of the frustum's points in WGS84
 		frustum_o[:,0] *= incert_pla_factor_E
@@ -375,7 +374,7 @@ def csv_to_kml(
         [0, 0, 1]
     ])
 
-	produit_matrice_rotation = rotation_matrixX2 @ rotation_matrixY2 @ rotation_matrixZ2
+	product_rotation_matrix = rotation_matrixX2 @ rotation_matrixY2 @ rotation_matrixZ2
 
 
 	if show_buildings and departments != '' :			
@@ -410,7 +409,7 @@ def csv_to_kml(
 
 		
 		# Opening buildings shapefile
-		with fiona.open(departments, 'r') as source:
+		with fiona.open(departments, 'r', layer="BATIMENT") as source:
 			# Selecting buildings inside the convex envelop
 			print(source)
 			filtered_buildings = source.filter(bbox=bbox)
@@ -545,14 +544,15 @@ def csv_to_kml(
 		
 		if show_orientation:
 			if input_type == "extevent":
+				# insert the frustums into the kml
 				custom_frustum(
-						kml_frustum,  # simplekml object
+						kml_frustum,  
 						pt,
-						produit_matrice_rotation,
-						mode="fur",  # frustum representation, string
-						name="",	  # frustum name, string
-						description="",  # point description, string
-						altitudemode="absolute",  # altitude mode, string ("absolute", "relativeToGround", "clampToGround")
+						product_rotation_matrix,
+						mode="fur",  
+						name="",	  
+						description="",  
+						altitudemode="absolute",  
 						incert_pla_factor_E=incert_pla_factor_E,
 						incert_pla_factor_N= incert_pla_factor_N,
 						fr_captor=fr_captor,
@@ -687,6 +687,6 @@ def shp2kml(shp_file, kml, quiet=False):
 
 					
 	else : 
-		print("Le format de fichier ne correspond pas")
+		print("the format of the file does not match")
 		return None
 	return None
