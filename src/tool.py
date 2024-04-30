@@ -39,7 +39,7 @@ def csv_to_kml(input_file, # string
 			   scale_factor_hig=1, # float
 			   incert_hig_max=np.nan, # float
 			   show_buildings=True, # boolean
-			   margin=0.001, # float
+			   margin=20, # float
 			   departments='', # string
 			   save_buildings='intersection', # string
 			   calc_ephemerids=True, # boolean
@@ -170,11 +170,11 @@ def csv_to_kml(input_file, # string
 
 		# outside box determination
 		transformer = Transformer.from_crs(4326, 2154)  
-		E = np.array([np.min(data["lon"]) - margin, np.max(data["lon"]) + margin])
-		N = np.array([np.min(data["lat"]) - margin, np.max(data["lat"]) + margin])
+		E = np.array([np.min(data["lon"]), np.max(data["lon"])])
+		N = np.array([np.min(data["lat"]), np.max(data["lat"])])
 		coordLambert = transformer.transform(N,E)
 
-		bbox = (coordLambert[0][0], coordLambert[1][0], coordLambert[0][1], coordLambert[1][1])
+		bbox = (coordLambert[0][0]-margin, coordLambert[1][0]-margin, coordLambert[0][1]+margin, coordLambert[1][1]+margin) #xmin,ymin,xmax,ymax
 
 		# intersection between buildings and workfield
 		layers = []
