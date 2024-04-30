@@ -2,14 +2,11 @@
 """
 @author: mehdi daakir, gabin bourlon, axel debock, felix mercier, clement cambours
 """
-
-#todo:
-#do shared KML styles
-#force 2D mode ?
-#polygone mode using sigma
-
-
-import tools,argparse
+# Imports :
+# Python files :
+import tool
+# Packages :
+import argparse
 import numpy as np
 
 if __name__ == "__main__":
@@ -62,7 +59,7 @@ if __name__ == "__main__":
 
 	args=parser.parse_args()
 	
-	tools.csv_to_kml(
+	tool.csv_to_kml(
 					 args.input_file,
 					 args.input_type,
 					 args.separator,
