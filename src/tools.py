@@ -247,7 +247,7 @@ def csv_to_kml(
 			   show_buildings=True,
 			   margin=0.001,
 			   departments='',
-			   save_buildings=False,
+			   save_buildings='intersection',
 			   calc_ephemerids=True,
 			   rinex_name='',
 			   show_orientation=True,
@@ -400,23 +400,37 @@ def csv_to_kml(
 		bbox = (Emin, Nmin, Emax, Nmax)
 
 		# Intersection between buildings and workfield
-		res_fold = departments.split('/')
+		layers = []
 		res_file = ''
-		for e in res_fold :
-			res_file += e +"/"
-		res_name = "intersection"
-		res_file = res_file + res_name + ".shp"
+		if departments[-4:] == ".shp" :
+			layers = [departments.split('/')[-1][:-4]]
+			departments = "/".join(departments.split('/')[:-1]) + '/'
+		if "/" not in save_buildings :
+			res_file = "/".join(departments.split('/')) + '/'
+		if save_buildings[-4:] == ".shp" :
+			res_file = res_file + save_buildings
+		else :
+			res_file = res_file + save_buildings + ".shp"
 
-		
 		# Opening buildings shapefile
-		with fiona.open(departments, 'r', layer="BATIMENT") as source:
-			# Selecting buildings inside the convex envelop
-			print(source)
-			filtered_buildings = source.filter(bbox=bbox)
-			
-			# Saving thoses buildings in the output file
-			with fiona.open(res_file, 'w', driver=source.driver, schema=source.schema) as sink:
-				sink.writerecords(filtered_buildings)
+		if layers == [] :
+			layers = fiona.listlayers(departments)
+		with fiona.open(departments, 'r', layer=layers[0]) as source :
+			schema = source.schema
+
+		with fiona.open(res_file, 'w', driver='ESRI Shapefile', schema=schema) as sink:
+			print("Selecting buildings on the workfield ...")
+			for layer in layers :
+				with fiona.open(departments, 'r', layer=layer) as source:
+					
+					if source.schema == schema :
+						# Selecting buildings inside the convex envelop
+						filtered_buildings = source.filter(bbox=bbox)
+						# Saving thoses buildings in the output file
+						sink.writerecords(filtered_buildings)
+					else :
+						print(f"The shapefile '{layer}' schema is different from the used schema of '{layers[0]}'. The buildings of '{layer}' aren't saved to the kml.")
+
 
 		if not quiet:
 			print("Intersection done.")	
@@ -426,7 +440,8 @@ def csv_to_kml(
 		shp2kml(res_file, kml_buildings, quiet)
 
 		# delete shp files if wanted
-		if not save_buildings :
+		if save_buildings == 'intersection' :
+			print("Deleting temporary files ...")
 			for end in [".shp", ".dbf", ".cpg", ".shx"] :
 				if os.path.exists(res_file[:-4] + end):
 					# Supprimez le fichier
