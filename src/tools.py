@@ -377,10 +377,11 @@ def csv_to_kml(
 	size = 1000
 	incert_pla_factor_E, incert_pla_factor_N = calcul_incert_pla_factor(data, size)		
 	
-	if show_buildings and departments != '' :
-		#adding buildings
+	if show_buildings and departments != '' :			
+		# adding buildings
 		kml_buildings = kml.newfolder(name='Buildings')
-		#Outside box determination
+
+		# Outside box determination
 		transformer = Transformer.from_crs(4326, 2154)  
 		Nmax = np.max(data["lat"]) + margin
 		Nmin = np.min(data["lat"]) - margin
@@ -388,7 +389,7 @@ def csv_to_kml(
 		Emin = np.min(data["lon"]) - margin
 		E = np.array([[Emin, Emax]])
 		N = np.array([[Nmin, Nmax]])
-		
+
 		coordLambert = transformer.transform(N,E)
 
 		Emin = coordLambert[0][0][0]
@@ -396,10 +397,9 @@ def csv_to_kml(
 		Nmin = coordLambert[1][0][0]
 		Nmax = coordLambert[1][0][1]
 
-		frame = [(Emin, Nmin), (Emin, Nmax), (Emax, Nmax), (Emax, Nmin), (Emin, Nmin)]
-		polygon = Polygon(frame)
+		bbox = (Emin, Nmin, Emax, Nmax)
 
-		#intersection between buildings and workfield
+		# Intersection between buildings and workfield
 		res_fold = departments.split('/')
 		res_file = ''
 		for e in res_fold :
@@ -407,20 +407,18 @@ def csv_to_kml(
 		res_name = "intersection"
 		res_file = res_file + res_name + ".shp"
 
-		with fiona.open(departments, 'r') as couche:
-			with fiona.open(res_file, 'w', 'ESRI Shapefile', couche.schema) as output:
-				i = 0
-				for batiment in couche:
-					if batiment['geometry']['type'] == 'Polygon':
-						coords = batiment['geometry']['coordinates']						
-						bat_polygon = Polygon(coords[0])
-						if intersects(bat_polygon, polygon):
-							output.write(batiment)
-					if not quiet :
-						i+=1
-						print(f"Intersection {100*i//len(couche)} % \r",end="")
-		if not quiet :
-			print("Intersection done.")
+		
+		# Opening buildings shapefile
+		with fiona.open(departments, 'r') as source:
+			# Selecting buildings inside the convex envelop
+			filtered_buildings = source.filter(bbox=bbox)
+			
+			# Saving thoses buildings in the output file
+			with fiona.open(res_file, 'w', driver=source.driver, schema=source.schema) as sink:
+				sink.writerecords(filtered_buildings)
+
+		if not quiet:
+			print("Intersection done.")	
 		
 
 		#transformation to kml
@@ -543,7 +541,7 @@ def csv_to_kml(
 						incert_hig_max=incert_hig_max
 						)
 		
-		if show_orientation:
+		if show_orientation and input_type == 'extevent':
 			custom_frustum(
 						kml_frustum,  # simplekml object
 						pt,
@@ -662,24 +660,29 @@ def shp2kml(shp_file, kml, quiet=False):
 	if shp_file.endswith('.shp'):
 		with fiona.open(shp_file, 'r') as shp:
 			loading = 0
+			unshowed_bat = 0
 			for batiment in shp : 
 				hbat = batiment['properties']['HAUTEUR']
-				coords_gr = batiment['geometry']['coordinates'][0]
-				coords_gr = np.array(coords_gr).reshape((len(coords_gr), 3))[:,:2]
-				
-				transformer = Transformer.from_crs(2154, 4326)
-				coordsWGS = transformer.transform(coords_gr[:,:1], coords_gr[:,1:2])
-				coords = []
-				for i in range(len(coords_gr)):
-					coords.append((coordsWGS[1][i][0], coordsWGS[0][i][0], hbat))
-				pol = kml.newpolygon(name='Batiment', altitudemode = "relativeToGround")
-				pol.outerboundaryis = coords
-				pol.extrude = 1
+				coords_gr = np.array(batiment['geometry']['coordinates'][0])
+				try :
+					coords_gr = coords_gr.reshape((len(coords_gr), 3))[:,:2]
+					transformer = Transformer.from_crs(2154, 4326)
+					coordsWGS = transformer.transform(coords_gr[:,:1], coords_gr[:,1:2])
+					coords = []
+					for i in range(len(coords_gr)):
+						coords.append((coordsWGS[1][i][0], coordsWGS[0][i][0], hbat))
+					pol = kml.newpolygon(name='Batiment', altitudemode = "relativeToGround")
+					pol.outerboundaryis = coords
+					pol.extrude = 1
 
-				pol.description = gen_description_buildings(batiment['properties'])
-				if not quiet :
-					loading+=1
-					print(f"Conversion shp to kml {100*loading//len(shp)} % \r",end="")
+					pol.description = gen_description_buildings(batiment['properties'])
+					if not quiet :
+						loading+=1
+						print(f"Conversion shp to kml {100*loading//len(shp)} % \r",end="")
+				except :
+					unshowed_bat += 1
+				
+				
 
 					
 	else : 
