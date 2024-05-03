@@ -185,12 +185,12 @@ To test **csv2kml-qc**:
 |   Command   |   Name |  Type  |  Description |   Default value    | 
 |----|----|----|----|----|
 |   --show_orientation   |      | action="store_false" |   Don't show frustum |  |  
-|   -fr_captor   |   frustum captor  | float |   distance factor of the near face of the frustum |  1  | 
+|   -fr_captor   |   frustum captor  | float |   half-size of the near face of the frustum |  1  | 
 |   -fr_focal   |   frustum focal  | float |   focal distance |  10  | 
 |   -fr_distance   |   frustum distance  | float |   distance between the near plane et the far plane |  5  | 
 |   -fr_alpha   |  alpha angle (frustum)  | float |   angle between camera reference frame and geographical reference frame aroud 'x' axe |  0  | 
 |   -fr_beta   |   beta angle (frustum)  | float |   angle between camera reference frame and geographical reference frame around 'y'|  0  | 
-|   -fr_gamme   |   gamma angle (frustum)  | float |   angle between camera reference frame and geographical reference frame around 'z' axe |  0  | 
+|   -fr_gamma   |   gamma angle (frustum)  | float |   angle between camera reference frame and geographical reference frame around 'z' axe |  0  | 
 
 3. Open the file **XXX.kml** on **[Google Earth](https://earth.google.com/)** viewer, you can decide to show the buildings, the traces, the points and the measured intervals through the top left window. 
 By clicking on a point, you can see all its characteristics.
