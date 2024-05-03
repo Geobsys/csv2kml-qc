@@ -127,15 +127,15 @@ To test **csv2kml-qc**:
 3. Data format (CSV)
 
 - **extevent**:
-     Choose "extevent" paramter for this format.
+  Choose "extevent" paramter for this format.
 
 | Time (s) | Day | State| Latitude | Longitude | Height | Planimetric uncertainty | Height uncertainty | Orientation X | Orientaion Y | Orianttion Z |
 |---|---|---|---|---|---|---|---|---|---|---|
 | time | day | state | lat | lon | h | incert_pla | incert_hig | oX | oY | oZ | 
 | 222708 | 445,2285 | R | 45.519933813 | 6.680457525 | 1738.724 | 0.04 | 0.05 | 0.3585647 | -0.0514448 | 0.1724559 |
 
--**log**:
-    Choose "log" parameter for this format.
+- **log**:
+  Choose "log" parameter for this format.
 
 | Undifined 1 | GNSS | Undifined 2 | Time (s) | Date (jj/mm/annee) | Hour (h:mn:s) | State | Latitude | Longitude | Height | Planimetric uncertainty | Height uncertainty |
 |---|---|---|---|---|---|---|---|---|---|---|---|
