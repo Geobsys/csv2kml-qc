@@ -87,10 +87,10 @@ def custom_int_conf(kml, # simplekml object
 		incert_lon = pt["incert_pla"]*incert_pla_factor_E
 		incert_lat = pt["incert_pla"]*incert_pla_factor_N
 		# creating the pyramid (confidence interval) corners
-		corners = np.array([(pt["lon"]-incert_lat, pt["lat"]		   , pt["altitude"]), 
-			 	   			(pt["lon"]	   	     , pt["lat"]+incert_lon, pt["altitude"]), 
-				   			(pt["lon"]+incert_lat, pt["lat"]		   , pt["altitude"]), 
-				   			(pt["lon"]		     , pt["lat"]-incert_lon, pt["altitude"]), 
+		corners = np.array([(pt["lon"]-incert_lon, pt["lat"]		   , pt["altitude"]), 
+			 	   			(pt["lon"]	   	     , pt["lat"]+incert_lat, pt["altitude"]), 
+				   			(pt["lon"]+incert_lon, pt["lat"]		   , pt["altitude"]), 
+				   			(pt["lon"]		     , pt["lat"]-incert_lat, pt["altitude"]), 
 				   			(pt["lon"]		     , pt["lat"]		   , pt["altitude"] + pt["incert_hig"] )])
 		# creating the description
 		conf_int = [pt["incert_pla"], pt["incert_hig"], incert_lat, incert_lon]
