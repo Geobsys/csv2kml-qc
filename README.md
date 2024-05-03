@@ -48,6 +48,25 @@ Under Linux (Ubuntu) distribution the installation procedure is as follows:
     source venv_csv2kml-qc/bin/activate
     ```
 6. Install modules:
+
+    #### Use the bash file for linux and macOS user or .bat file for windows user present in setup file.
+
+    For Linux user, put these command in the terminal :
+    ```bash
+    chmod +x setup_linux.sh
+    sudo ./setup_linux.sh
+    ```
+    For macOS user, put these command in the terminal :
+    ```bash
+    chmod +x setup_macOS.sh
+    sudo ./setup_macOS.sh
+    ```
+
+    For Windows user, just double clic on the .bat.
+
+    #### Or follow the install bellow : 
+   
+   
    - **simplekml** module:
     ```bash
     pip install simplekml 
@@ -105,7 +124,26 @@ To test **csv2kml-qc**:
     ```
     EXTENVENT.LOG is one of the enter files.
 
-3. Parameters 
+3. Data format (CSV)
+
+- **extevent**:
+     Choose "extevent" paramter for this format.
+
+| Time (s) | Day | State| Latitude | Longitude | Height | Planimetric uncertainty | Height uncertainty | Orientation X | Orientaion Y | Orianttion Z |
+|---|---|---|---|---|---|---|---|---|---|---|
+| time | day | state | lat | lon | h | incert_pla | incert_hig | oX | oY | oZ | 
+| 222708 | 445,2285 | R | 45.519933813 | 6.680457525 | 1738.724 | 0.04 | 0.05 | 0.3585647 | -0.0514448 | 0.1724559 |
+
+-**log**:
+    Choose "log" parameter for this format.
+
+| Undifined 1 | GNSS | Undifined 2 | Time (s) | Date (jj/mm//annee) | Hour (h:mn:s) | State | Latitude | Longitude | Height | Planimetric uncertainty | Height uncertainty |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| uk1 | GNSS | uk2 | time | date | hour | state | lat | lon | h | incert_pla | incert_hig |
+| 1 | GNSS | 2 | 481467.100 | "23/02/2024" | "13:44:27.100" | "N" | 48.845234261 | 2.423569332 | 132.608 | 22.01 | 47.68 |
+
+
+5. Parameters 
    - **import parameters**:
      Define the format of the import file in the enter of the programm.
 
