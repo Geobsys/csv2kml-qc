@@ -44,10 +44,9 @@ if __name__ == "__main__":
 	parser.add_argument('-margin',type=float,help="margin (in meters) around the workfield for building modelisation (Default=20)",default=20)
 	parser.add_argument('-departments',type=str,help="input folder where shp building file is stocked, or directly the file path. Warning, if there is others file in the folder, the programm will chose the first one by alphabet to define the schema, and then look to the others for the intersection if the both schema match.",default='')
 	parser.add_argument('-save_buildings',type=str,help="If you want to save the shp file of your buildings, you can provide a folder path and name. If the name is 'intersection', it will not be saved. (Default=intersection)", default="intersection")
-	# Ephemeridsfdis
+	# Ephemerids
 	parser.add_argument('--calc_ephemerids',action="store_false",help="Don't calculate the ephemerids")
 	parser.add_argument('-rn','--rinex_name',type=str,help="Path of the observation or navigation rinex file",default='')
-
 	# Frustum 
 	parser.add_argument('--show_orientation', action="store_false",help="Don't show frustum")
 	parser.add_argument('-fr_sensor', type=float,help="distance factor of the near face of the frustum. (Default=1)", default=1)
