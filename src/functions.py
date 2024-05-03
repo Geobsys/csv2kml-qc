@@ -120,12 +120,12 @@ def custom_frustum(	kml,  # simplekml object
 					altitudemode="absolute",  # altitude mode, string ("absolute", "relativeToGround", "clampToGround")
 					incert_pla_factor_E = 1e-5,	# scale factor meters to degres Est
 					incert_pla_factor_N = 1e-5,	# scale factor meters to degres North
-					fr_captor=1,	# size of the captor
+					fr_sensor=1,	# size of the sensor
 					fr_focal=10,	# size of the focal
 					fr_distance=5,	# distance between the two faces of the frustum
 					):
 	if (mode == "fur") :
-		far = (fr_captor/fr_focal*fr_distance)
+		far = (fr_sensor/fr_focal*fr_distance)
 		lon,lat,altitude = pt['lon'], pt['lat'],pt['altitude']
 		oX,oY,oZ = pt['oX'],pt['oY'],pt['oZ']
 
@@ -141,10 +141,10 @@ def custom_frustum(	kml,  # simplekml object
 									 [0         , 0          , 1]])
 				    
 		# far and near points of the frustum and the difference of altitude between them
-		frustum = [[ fr_captor, 0        , fr_focal],
-				   [ 0        , fr_captor, fr_focal],
-				   [-fr_captor, 0        , fr_focal],
-				   [ 0        ,-fr_captor, fr_focal],
+		frustum = [[ fr_sensor, 0        , fr_focal],
+				   [ 0        , fr_sensor, fr_focal],
+				   [-fr_sensor, 0        , fr_focal],
+				   [ 0        ,-fr_sensor, fr_focal],
 				   [ far      , 0        , fr_distance + fr_focal],
 				   [ 0        , far      , fr_distance + fr_focal],
 				   [-far      , 0        , fr_distance + fr_focal],

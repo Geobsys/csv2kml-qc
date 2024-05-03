@@ -45,7 +45,7 @@ def csv_to_kml(input_file, # string
 			   calc_ephemerids=True, # boolean
 			   rinex_name='', # string
 			   show_orientation=True, # boolean
-			   fr_captor=1, # float
+			   fr_sensor=1, # float
 			   fr_focal=10, # float
 			   fr_distance=5, # float
 			   fr_alpha=0, # float
@@ -336,7 +336,7 @@ def csv_to_kml(input_file, # string
 							   altitudemode="absolute",  
 							   incert_pla_factor_E=incert_pla_factor_E,
 							   incert_pla_factor_N= incert_pla_factor_N,
-							   fr_captor=fr_captor,
+							   fr_sensor=fr_sensor,
 							   fr_focal=fr_focal,
 							   fr_distance=fr_distance)
 				
