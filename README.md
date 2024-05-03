@@ -167,7 +167,7 @@ To test **csv2kml-qc**:
 
 |   Command   |   Name |  Type  |  Description |   Default value    | Condition |
 |----|----|----|----|----|----|
-|   -departments   |   departments   |   string |  Input folder where shp building file is stocked, or directly the file path. Warning, if there is others file in the folder, the programm will chose the first one by alphabet to define the schema, and then look to the others for the intersection if the both schema match. The user have to choose and download himself the right shapefile on [BD-TOPO](https://geoservices.ign.fr/documentation/donnees/vecteur/bdtopo) which correspond to his study area | "" |  |
+|   -departments   |   departments   |   string |  Input folder where shp building file is stocked, or directly the file path. Warning, if there is others file in the folder, the programm will chose the first one by alphabet to define the schema, and then look to the others for the intersection if the both schema match. The user have to choose and download himself the right shapefile on [BD-TOPO](https://geoservices.ign.fr/bdtopo) which correspond to his study area. | "" |  |
 |   --show_buildings   |     |   action="store_false" |   Don't show the show_buildings |    | Used only if there is a shapefile in enter |
 |   -margin   |   margin  |   float |   margin (in geographical degres) around the workfield for building modelisation  |   0.001  | Used only if there is a shapefile in enter |
 |   --save_buildings   |     |  action="store_true"  |   If you want to save the shp file of your buildings, you can provide a folder path and name. If the name is 'intersection', it will not be saved. |     |Used only if there is a shapefile in enter |
