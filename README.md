@@ -137,7 +137,7 @@ To test **csv2kml-qc**:
 -**log**:
     Choose "log" parameter for this format.
 
-| Undifined 1 | GNSS | Undifined 2 | Time (s) | Date (jj/mm//annee) | Hour (h:mn:s) | State | Latitude | Longitude | Height | Planimetric uncertainty | Height uncertainty |
+| Undifined 1 | GNSS | Undifined 2 | Time (s) | Date (jj/mm/annee) | Hour (h:mn:s) | State | Latitude | Longitude | Height | Planimetric uncertainty | Height uncertainty |
 |---|---|---|---|---|---|---|---|---|---|---|---|
 | uk1 | GNSS | uk2 | time | date | hour | state | lat | lon | h | incert_pla | incert_hig |
 | 1 | GNSS | 2 | 481467.100 | "23/02/2024" | "13:44:27.100" | "N" | 48.845234261 | 2.423569332 | 132.608 | 22.01 | 47.68 |
