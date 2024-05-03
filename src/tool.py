@@ -178,16 +178,16 @@ def csv_to_kml(input_file, # string
 
 		# intersection between buildings and workfield
 		layers = []
-		res_file = ''
+		shp_out_file = ''
 		if departments[-4:] == ".shp" :
 			layers = [departments.split('/')[-1][:-4]]
 			departments = "/".join(departments.split('/')[:-1]) + '/'
 		if "/" not in save_buildings :
-			res_file = "/".join(departments.split('/')) + '/'
+			shp_out_file = "/".join(departments.split('/')) + '/'
 		if save_buildings[-4:] == ".shp" :
-			res_file = res_file + save_buildings
+			shp_out_file = shp_out_file + save_buildings
 		else :
-			res_file = res_file + save_buildings + ".shp"
+			shp_out_file = shp_out_file + save_buildings + ".shp"
 
 		# opening buildings shapefile
 		if layers == [] :
@@ -195,7 +195,7 @@ def csv_to_kml(input_file, # string
 		with fiona.open(departments, 'r', layer=layers[0]) as source :
 			schema = source.schema
 		# intersection of bildings file and workfield
-		with fiona.open(res_file, 'w', driver='ESRI Shapefile', schema=schema) as sink:
+		with fiona.open(shp_out_file, 'w', driver='ESRI Shapefile', schema=schema) as sink:
 			if not quiet:
 				print("Selecting buildings on the workfield ...\r", end="")
 			for layer in layers :
@@ -211,16 +211,16 @@ def csv_to_kml(input_file, # string
 			print("Selecting buildings on the workfield done.")	
 		
 		#transformation to kml
-		shp2kml(res_file, kml_buildings, quiet)
+		shp2kml(shp_out_file, kml_buildings, quiet)
 
 		# delete shp files if wanted
 		if save_buildings == 'intersection' :
 			if not quiet:
 				print("Deleting temporary files ...")
 			for end in [".shp", ".dbf", ".cpg", ".shx"] :
-				if os.path.exists(res_file[:-4] + end):
+				if os.path.exists(shp_out_file[:-4] + end):
 					# Supprimez le fichier
-					os.remove(res_file[:-4] + end)
+					os.remove(shp_out_file[:-4] + end)
 
 	# Search all viewed satellites
 	if calc_ephemerids and rinex_name != '' :
@@ -382,7 +382,9 @@ def csv_to_kml(input_file, # string
 	if not quiet:
 		print("                      ")
 		print("\n==> Job done")
-		print("==> Saved as", output_file)
+		print("==> KML output saved as", output_file)
+		if save_buildings != "intersection" :
+			print("==> SHP output saved as", shp_out_file)
 		print("\n############################################\n")
 	return None
 
