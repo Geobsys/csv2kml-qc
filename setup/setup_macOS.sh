@@ -15,8 +15,6 @@ fi
 # Installing dependencies using Homebrew
 brew install git python@3.10
 
-# Cloning the git repository
-git clone git@github.com:Geobsys/csv2kml-qc.git
 
 # Creating the virtual environment
 python3.10 -m venv venv_csv2kml-qc

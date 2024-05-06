@@ -15,9 +15,6 @@ if not exist "%ProgramFiles%\Python310\python.exe" (
     choco install python --version=3.10 -y
 )
 
-REM Cloning the git repository (if necessary)
-git clone git@github.com:Geobsys/csv2kml-qc.git
-
 REM Creating the virtual environment
 python -m venv venv_csv2kml-qc
 
