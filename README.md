@@ -65,51 +65,9 @@ Under Linux (Ubuntu) distribution the installation procedure is as follows:
     For Windows user, just double clic on the .bat.
 
     #### Or follow the install bellow : 
-   
-   
-   - **simplekml** module:
+
     ```bash
-    pip install simplekml 
-    ```
-   - **pyproj** module:
-    ```bash
-    pip install pyproj
-    ```
-   - **shapely** module:
-    ```bash
-    pip install shapely
-    ```
-   - **os** module:
-    ```bash
-    pip install os
-    ```
-   - **numpy** module:
-    ```bash
-    pip install numpy
-    ```
-   - **pandas** module:
-    ```bash
-    pip install pandas
-    ```
-   - **fiona** module:
-    ```bash
-    pip install fiona
-    ```
-   - **argparse** module:
-    ```bash
-    pip install argparse
-    ```
-   - **re** module:
-    ```bash
-    pip install regex
-    ```
-   - **gpsdatetime** module:
-    ```bash
-    pip install gpsdatetime
-    ```
-   - **gnsstoolbox** module:
-    ```bash
-    pip install gnsstoolbox
+    pip install simplekml pyproj shapely numpy pandas fiona gpsdatetime gnsstoolbox
     ```
 
 # Usage
@@ -176,7 +134,7 @@ To test **csv2kml-qc**:
 
 |   Command   |   Name |  Type  |  Description |   Default value    | Choice value |
 |----|----|----|----|----|----|
-|   -dr   |   data_range   |   string |   Range of data from start (s), to end (e), with a step (t) : (s,e,t). e and t are optionnal. This allow you to decimate the number of the point | "extevent" | ["extevent", "log"] |
+|   -dr   |   data_range   |   string |   Range of data from start (s), to end (e), with a step (t) : (s,e,t). e and t are optionnal. This allow you to decimate the number of the point | '(0,-1,100)' |  |
 |   -am   |   altitude mode  |   string |   See simplekml .Altitudemode (absolute, relativeToGround, clampToGround). This define the mode of the altitude's representation |   "absolute"  | ["absolute", "relativeToGround", "clampToGround"] |
    - **Point**:
      User can choose to show to visualize or not the points.
