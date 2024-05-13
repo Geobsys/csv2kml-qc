@@ -27,7 +27,7 @@ if __name__ == "__main__":
 	parser.add_argument('-ih','--icon_href',type=str,help="icon href (Default=http://maps.google.com/mapfiles/kml/shapes/placemark_circle.png)",default="http://maps.google.com/mapfiles/kml/shapes/placemark_circle.png")
 	parser.add_argument('--show_pt_name',action="store_true",help="Hide the points names")
 	# General parameters
-	parser.add_argument('-dr','--data_range',type=str, help="Range of data from start (s), to end (e), with a step (t) : (s,e,t). e and t are optionnal. (Default=(0,-1,100))",default='(0,-1,100)')
+	parser.add_argument('-dr','--data_range',type=str, help="Range of data from start (s), to end (e), with a step (t) : (s,e,t). e and t are optionnal. If -it 'extevent' Default=(0,-1,1), -it 'log' Default=(0,-1,10))",default='default')
 	parser.add_argument('-am','--altitudemode',type=str,help="See simplekml .Altitudemode (absolute, relativeToGround, clampToGround). (Default=absolute)", default="absolute",choices=["absolute", "relativeToGround", "clampToGround"])
 	# Point
 	parser.add_argument('--show_point',action="store_false",help="Don't show points")

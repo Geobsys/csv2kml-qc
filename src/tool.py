@@ -29,7 +29,7 @@ def csv_to_kml(input_file, # string
 			   icon_scale=1, # integer
 			   icon_href="http://maps.google.com/mapfiles/kml/shapes/placemark_circle.png", # string
 			   show_pt_name=False, # boolean
-			   data_range='()', # string
+			   data_range='default', # string
 			   altitudemode="absolute", # string
 			   show_point=True, # boolean
 			   show_line=True, # boolean
@@ -69,7 +69,16 @@ def csv_to_kml(input_file, # string
 		return None
 
 	# clear empty coordinates
-	data_range = np.array(data_range[1:-1].split(",")).astype(int)
+	if data_range == 'default' :
+		if input_type == 'extevent' :
+			data_range = '(0,-1,1)'
+		elif input_type == 'log' :
+			data_range = '(0,-1,10)'
+	try :
+		data_range = np.array(data_range[1:-1].split(",")).astype(int)
+	except :
+		print("The data_range parameter (-dr) isn't in the right format :\n Range of data from start (s), to end (e), with a step (t) : (s,e,t). e and t are optionnal. If -it 'extevent' Default=(0,-1,1), -it 'log' Default=(0,-1,10)")
+		return 
 	lonlat = data[['lon', 'lat']].values
 	empty = np.union1d(data[np.isnan(lonlat[:,0])].index, data[np.isnan(lonlat[:,1])].index)
 	data = data.drop(empty)
