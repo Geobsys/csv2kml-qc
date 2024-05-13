@@ -135,7 +135,7 @@ During your measurements, you recorded the observation and navigation RINEX file
 
 1. Provide the path to the observation (or navigation) file to obtain the list of visible satellites at each point in their description with '-rn' :
     ```bash 
-    python src/csv_to_kml.py test/EXTEVENT.LOG -it extevent -rn test/rinex/sept054n.24o
+    python src/csv_to_kml.py test/20240223.LOG -it log -rn test/rinex/sept054n.24o
     ```
 # Help 
 
