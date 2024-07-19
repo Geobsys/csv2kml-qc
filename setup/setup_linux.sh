@@ -20,7 +20,7 @@ else
 fi
 
 # Install required Python packages
-if pip install simplekml pyproj shapely os numpy pandas fiona argparse regex gpsdatetime gnsstoolbox; then
+if pip install simplekml pyproj shapely numpy pandas fiona argparse regex gpsdatetime gnsstoolbox; then
     echo "Python packages installed successfully."
 else
     echo "Error installing Python packages."
