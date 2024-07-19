@@ -65,7 +65,7 @@ python src/csv_to_kml.py test/20240323.LOG -it 'log'
 
 **Note : the data range option also allows you to exclude the first and last points.**
 
-**By default, the data range is (0,-1,100).**
+**By default, the data range is (0,-1,1) for 'extevent' mode and (0,-1,10) for 'log' mode.**
 
 
 # Uncertainties
