@@ -8,26 +8,27 @@
 \f0\fs24 \cf0 Ligne pour acc\'e9der :\
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\partightenfactor0
 
-\f1\fs22 \cf2 \CocoaLigature0 cd /Users/anthonydiallo/Downloads/csv2kml-qc-calc-NLOS_V0/src
+\f1\fs22 \cf2 \CocoaLigature0 cd /Users/anthonydiallo/Downloads/csv2kml-qc-calc-NLOS_ABS
 \f0\fs24 \cf0 \CocoaLigature1 \
 \pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
 \cf0 \
 Ligne pour th\'e9orique : \
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\partightenfactor0
 
-\f1\fs22 \cf2 \CocoaLigature0 python3 csv_to_kml.py ensg.kml -start_time_kml 10h00 -it kmltraj --temporal -d 21/03/2025 -end_time_kml 18h00 -dist_step_kml 0.5 -velocity_kml 1.5 -rn 20250322.rnx -buildings buildings_near_ensg.shp --mnt=90\
-\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\partightenfactor0
+\f1\fs22 \cf2 \CocoaLigature0 python3 src/csv_to_kml.py test/kml/ensg.kml -start_time 12h00 -it kmltraj --temporal -d 23/03/2025 -end_time 17h00 -dist_step 1.5 -velocity 1.5 -rn test/rinex/20250323.rnx -buildings test/shp/buildings_near_ensg.shp -mnt 90\
 \
 \
 Ligne pour r\'e9el :\
-\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\partightenfactor0
-python3 csv_to_kml.py --temporal 20240223.LOG -it log -rn sept054n.24p --detect_nlos -buildings Buildings.shp --time_end 14:05 -start_time_log 13:44 -velocity_log 2.5 -ro sept054n.24o -d 23/02/2024\
-\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\partightenfactor0
+python3 src/csv_to_kml.py --temporal test/20240223.LOG -it log -rn test/rinex/sept054n.24p --detect_nlos -buildings test/shp/Buildings.shp -end_time 16h05 -start_time 13h00 -velocity 2.5 -ro test/rinex/sept054n.24o -d 23/02/2024\
 \
 Ligne pour ancien :\
-\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\partightenfactor0
 python3 csv_to_kml.py /Users/anthonydiallo/Downloads/csv2kml-qc-calc-NLOS_RELATIF/test/20240223.LOG \\\
   -buildings /Users/anthonydiallo/Downloads/csv2kml-qc-calc-NLOS_RELATIF/test/shp \\\
   -ro /Users/anthonydiallo/Downloads/csv2kml-qc-calc-NLOS_RELATIF/test/rinex/sept054.24o \\\
   -rn /Users/anthonydiallo/Downloads/csv2kml-qc-calc-NLOS_RELATIF/test/rinex/sept054n.24p \\\
-  --detect_nlos}
+  --detect_nlos\
+\
+\
+\'c0 faire : enlever les chemins relatifs (absolus)\
+Attention aux satellites qui sont visibles \'e0 travers \
+Il faut mettre une moyenne de LOS et d\'92obstructed par point}
