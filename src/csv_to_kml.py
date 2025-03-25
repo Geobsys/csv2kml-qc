@@ -46,7 +46,6 @@ if __name__ == "__main__":
     parser.add_argument('-it', '--input_type', type=str, help="input file type between 'extevent' and 'log' (Default=log)",
                         default="log", choices=["extevent", "log"])
     parser.add_argument('-sep','--separator', type=str, help="separator used in the .csv file (Default=,)", default=",")
-    parser.add_argument('-buildings', '--buildings', type=str, default='', help="Chemin vers le shapefile des bâtiments")
     parser.add_argument('-ro', type=str, help="RINEX observation file", default='')
     # Export parameters
     parser.add_argument('-o','--output_file', type=str, help="output file in .kml format (Default=./input_file.kml)", default="")
@@ -83,6 +82,7 @@ if __name__ == "__main__":
     parser.add_argument('-mh','--incert_hig_max', type=float, help="Maximum altimetric uncertainty. (Default=Nan)", default=np.nan)
 
     # Buildings
+    parser.add_argument('-buildings', type=str, help="Chemin vers le fichier .shp des bâtiments", default='')
     parser.add_argument('--show_buildings', action="store_false", help="Don't show buildings")
     parser.add_argument('-margin', type=float, help="margin (in meters) around the workfield for building modelisation (Default=20)", default=20)
     parser.add_argument('-departments', type=str,
@@ -138,7 +138,7 @@ if __name__ == "__main__":
     # Mode temporel (calcul de la fenêtre temporelle optimale)
     if args.temporal:
         # CAS 1: Trajectoire théorique => kmltraj
-        if args.input_type == "kmltraj" and args.rinex_name_nav and args.detect_nlos:
+        if args.input_type == "kmltraj" and args.rinex_name and args.detect_nlos:
             if args.buildings != "":
                 dummy_kml = simplekml.Kml()
                 buildings_dict = functions.shp2kml(args.buildings, dummy_kml)
@@ -152,7 +152,7 @@ if __name__ == "__main__":
             #   (modifications dans functions.py)
             df_optimal = functions.compute_optimal_window_from_kml(
                 kml_file=args.input_file,
-                rinex_nav_file=args.rinex_name_nav,
+                rinex_nav_file=args.rinex_name,
                 buildings_dict=buildings_dict,
                 start_time=args.start_time_kml,
                 end_time=args.end_time_kml,
@@ -197,7 +197,7 @@ if __name__ == "__main__":
                 #   qui va gérer la logique "z = h - mnt" si mnt!=0 (dans functions.py).
                 df_optimal = functions.compute_optimal_window_from_log(
                     data=data,
-                    rinex_nav_file=args.rinex_name_nav,
+                    rinex_nav_file=args.rinex_name,
                     buildings_dict=buildings_dict,
                     time_step_sec=3600,
                     output_csv="resultats_optimal_window_log.csv",

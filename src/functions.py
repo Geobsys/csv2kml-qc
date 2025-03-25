@@ -270,34 +270,54 @@ def calcul_incert_pla_factor(data, size):
 
 """ Transform shapefile objects into kml objects """
 def shp2kml(shp_file, kml, quiet=False):
-	# for each building in the shp, the coords are used to create a kml polygon
-	if shp_file.endswith('.shp'):
-		with fiona.open(shp_file, 'r') as shp:
-			loading = 0
-			unshowed_bat = 0
-			for batiment in shp : 
-				hbat = batiment['properties']['HAUTEUR']
-				coords_gr = np.array(batiment['geometry']['coordinates'][0])
-				try :
-					coords_gr = coords_gr.reshape((len(coords_gr), 3))[:,:2]
-					transformer = pyproj.Transformer.from_crs(2154, 4326)
-					coordsWGS = transformer.transform(coords_gr[:,:1], coords_gr[:,1:2])
-					coords = []
-					for i in range(len(coords_gr)):
-						coords.append((coordsWGS[1][i][0], coordsWGS[0][i][0], hbat))
-					pol = kml.newpolygon(name='Batiment', altitudemode = "relativeToGround")
-					pol.outerboundaryis = coords
-					pol.extrude = 1
-					pol.description = gen_description_buildings(batiment['properties'])
-					if not quiet :
-						loading+=1
-						print(f"Conversion shp to kml {100*loading//len(shp)} % \r",end="")
-				except :
-					unshowed_bat += 1
-	else : 
-		print("the format of the file does not match")
-		return None
-	return None
+    buildings_infos = {}
+    if shp_file.endswith('.shp'):
+        with fiona.open(shp_file, 'r') as shp:
+            loading = 0
+            unshowed_bat = 0
+            for building in shp:
+                building_id = str(building['properties']['ID'])
+                building_height = building['properties']['HAUTEUR']
+                building_ground_coords = np.array(building['geometry']['coordinates'][0])
+                if quiet:
+                    print(f"\nChecking building {building_id}: height={building_height}, ground_coords shape={building_ground_coords.shape}")
+                try:
+                    if building_height is not None and building_ground_coords.size > 0 and np.all(building_ground_coords[:, -1] != -1000):
+                        if quiet:
+                            print(f"Valid building: {building_id}")
+                        building_roof_coords = building_ground_coords.copy()
+                        building_roof_coords[:, -1] += building_height
+                        buildings_infos[building_id] = {
+                            "height": building_height,
+                            "base_coords": building_ground_coords,
+                            "roof_coords": building_roof_coords
+                        }
+                        if quiet:
+                            print(f"Inserted {building_id} into buildings_infos")
+                            print("Current dictionary keys:", list(buildings_infos.keys()))
+                    # Conversion en WGS84 pour le dessin KML
+                    building_ground_coords = building_ground_coords.reshape((len(building_ground_coords), 3))[:, :2]
+                    transformer = pyproj.Transformer.from_crs(2154, 4326)
+                    coordsWGS = transformer.transform(building_ground_coords[:, :1], building_ground_coords[:, 1:2])
+                    coords = [(coordsWGS[1][i][0], coordsWGS[0][i][0], building_height) for i in range(len(building_ground_coords))]
+
+                    pol = kml.newpolygon(
+                        name=building['properties']['ID'],
+                        altitudemode="relativeToGround"
+                    )
+                    pol.outerboundaryis = coords
+                    pol.extrude = 1
+                    pol.description = gen_description_buildings(building['properties'])
+                    if quiet:
+                        loading += 1
+                        print(f"Conversion shp to kml {100 * loading // len(shp)} % \r", end="")
+                except Exception as e:
+                    unshowed_bat += 1
+                    print(f"Error processing {building_id}: {e}")
+    else:
+        print("The file format is not supported.")
+        return None
+    return buildings_infos
 
 def llh_2_XYZ(lon, lat, h):
     """
@@ -620,8 +640,6 @@ def read_and_discretize_kml(kml_file, start_time, end_time, distance_step, veloc
     df_points = pd.DataFrame(points)
     print(f"[read_and_discretize_kml] Discrétisation terminée avec {len(df_points)} points.")
     return df_points
-
-# --- Fonction principale intégrant l'actualisation dynamique de gnssdate et la récupération des éphémérides ---
 
 # --- Fonction principale intégrant l'actualisation dynamique de gnssdate et la récupération des éphémérides ---
 
