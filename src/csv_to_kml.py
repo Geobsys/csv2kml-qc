@@ -133,7 +133,7 @@ if __name__ == "__main__":
             end_time=args.end_time_kml,
             distance_step=args.dist_step_kml,
             velocity=args.velocity_kml,
-            time_step_sec=1800,  # intervalle de simulation (30 min par défaut)
+            time_step_sec=3600,  # intervalle de simulation (30 min par défaut)
             output_csv="resultats_optimal_window.csv"
         )
         print(df_optimal)

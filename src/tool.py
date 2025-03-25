@@ -90,24 +90,6 @@ def csv_to_kml(
     if not quiet:
         print(csts.desc_tool)
         print("==> Input File : %s\n" % input_file)
-    
-    # 1. Import data
-    if input_type == "kmltraj" and detect_nlos and rinex_nav != "":
-        # On appelle directement la fonction de functions.py
-        buildings_dict = {}
-        df_optimal = functions.compute_optimal_window_from_kml(
-            kml_file=input_file,
-            rinex_nav_file=rinex_nav,
-            buildings_dict=buildings_dict,  # si vous avez chargé le shapefile
-            start_time=start_time_kml,
-            end_time=end_time_kml,
-            distance_step=dist_step_kml,
-            velocity=velocity_kml,
-            time_step_sec=1800,
-            output_csv="resultats_optimal_window.csv"
-        )
-        print(df_optimal)
-
     else:
         if input_type == "extevent":
             labels = csts.extevent_labels
@@ -424,7 +406,3 @@ def csv_to_kml(
             print("==> SHP output saved as", shp_out_file if shp_out_file else "No shapefile saved.")
         print(csts.sep_line)
     return None
-
-
-
-
