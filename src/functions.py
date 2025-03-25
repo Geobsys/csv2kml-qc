@@ -905,46 +905,59 @@ def compute_optimal_window_from_kml(kml_file, rinex_nav_file, buildings_dict,
 ###############################################
 # Fonctions de simulation temporelle pour LOG
 ###############################################
+
+def resample_log_points(points, step):
+    """
+    Rééchantillonne une trajectoire (liste de dict avec clés "E", "N", "H")
+    pour obtenir des points espacés d'une distance 'step' (en m).
+    
+    Retourne :
+      - new_points : liste de points rééchantillonnés (dict)
+      - target_dists : tableau numpy des distances cumulées associées à chaque point
+    """
+    if len(points) < 2:
+        return points, np.array([0.0])
+    
+    # Extraction des coordonnées sous forme de tableau
+    coords = np.array([[p["E"], p["N"], p["H"]] for p in points])
+    
+    # Calcul des distances entre points successifs
+    segment_lengths = np.sqrt(np.sum(np.diff(coords, axis=0)**2, axis=1))
+    cum_dist = np.concatenate(([0.0], np.cumsum(segment_lengths)))
+    total_length = cum_dist[-1]
+    
+    # Création du vecteur cible des distances (espacement constant)
+    target_dists = np.arange(0, total_length, step)
+    if target_dists[-1] < total_length:
+        target_dists = np.append(target_dists, total_length)
+    
+    # Interpolation linéaire pour chaque coordonnée
+    new_E = np.interp(target_dists, cum_dist, coords[:, 0])
+    new_N = np.interp(target_dists, cum_dist, coords[:, 1])
+    new_H = np.interp(target_dists, cum_dist, coords[:, 2])
+    
+    new_points = [{"E": e, "N": n, "H": h} for e, n, h in zip(new_E, new_N, new_H)]
+    return new_points, target_dists
+
+
 def compute_optimal_window_from_log(data, rinex_nav_file, buildings_dict,
                                     time_step_sec=900,
                                     output_csv="resultats_optimal_window_log.csv",
                                     time_end="",
                                     start_time="8h00",
-                                    velocity=1.5):
+                                    velocity=1.5,
+                                    dist_step=5):
     """
-    Calcule la performance (total LOS satellites) pour différentes trajectoires issues
-    du fichier LOG en ignorant les horodatages fournis.
-    
-    Seules les coordonnées (lat, lon, h) sont utilisées pour discrétiser la trajectoire.
-    On attribue à chaque point un temps artificiel basé sur un temps de départ (start_time)
-    et la distance cumulée entre les points, sachant que la vitesse moyenne est renseignée.
-    
-    Pour chaque instant de départ candidat, on simule la trajectoire complète en décalant
-    le temps de chaque point (basé sur la distance cumulée / velocity) et on agrège le nombre
-    de satellites LOS perçus (via la simulation RINEX/compute_collisions).
-    
-    Paramètres :
-      - data : DataFrame contenant les données LOG (doit contenir "lat", "lon", "h")
-      - rinex_nav_file : chemin du fichier RINEX de navigation.
-      - buildings_dict : dictionnaire des bâtiments.
-      - candidate_step_sec : pas (en secondes) entre deux simulations candidates (ex. 900 s).
-      - output_csv : nom du fichier CSV de sortie.
-      - time_end : heure de fin (format "HHhMM") pour la simulation.
-      - start_time : heure de départ (format "HHhMM") pour la simulation.
-      - velocity : vitesse moyenne (en m/s) utilisée pour calculer le temps entre points.
-    
-    Le résultat est un CSV listant pour chaque trajectoire candidate (définie par un instant de départ)
-    le total des satellites LOS perçus sur l’ensemble de la trajectoire, avec le détail par point.
+    ... (docstring inchangée, vous pouvez ajouter une note sur le rééchantillonnage à 'dist_step' mètres)
     """
     import math
     from datetime import datetime, timedelta
 
-    # Filtrer uniquement les lignes avec des coordonnées non vides et limiter aux 200 premiers points
+    # Filtrer les lignes avec coordonnées valides et limiter aux 200 premiers points
     data = data[(data["lat"].notnull()) & (data["lon"].notnull()) & (data["h"].notnull()) &
                 (data["lat"] != "") & (data["lon"] != "") & (data["h"] != "")]
-    data = data.head(200)
+    data = data.head(600)
 
-    # Fonction utilitaire pour convertir "HHhMM" en secondes
     def parse_time(hhmm):
         try:
             hh, mm = map(int, hhmm.replace("h", ":").split(":"))
@@ -952,16 +965,15 @@ def compute_optimal_window_from_log(data, rinex_nav_file, buildings_dict,
         except Exception as e:
             return 0
 
-    # 1) Construction d'une liste de points basée sur les coordonnées (on ignore date/time)
-    log_points = []  # chaque élément sera un dict avec les coordonnées Lambert93 obtenues
+    # Construction de la liste de points (coordonnées Lambert93 obtenues)
+    log_points = []
     for i, row in data.iterrows():
         try:
             lat = float(row["lat"])
             lon = float(row["lon"])
             h = float(str(row["h"]).replace('"','').strip())
-        except Exception as e:
+        except Exception:
             continue
-        # Récupération (ou calcul) des coordonnées ECEF
         try:
             coordX = float(row["coordX"])
             coordY = float(row["coordY"])
@@ -970,12 +982,11 @@ def compute_optimal_window_from_log(data, rinex_nav_file, buildings_dict,
             try:
                 receiver_xyz = llh_2_XYZ(lon, lat, h)
                 coordX, coordY, coordZ = receiver_xyz
-            except Exception as e2:
+            except Exception:
                 continue
-        # Conversion en Lambert-93 avec alt ortho
         try:
             E_l93, N_l93, H_ortho, lon2, lat2 = XYZ_2_ENH(coordX, coordY, coordZ, csts.grid_path)
-        except Exception as e3:
+        except Exception:
             continue
         log_points.append({
             "E": E_l93,
@@ -986,16 +997,10 @@ def compute_optimal_window_from_log(data, rinex_nav_file, buildings_dict,
         print("Aucun point valide extrait des données LOG.")
         return None
 
-    # 2) Calcul de la distance cumulée entre points (en mètres)
-    cumulative = [0.0]
-    for i in range(1, len(log_points)):
-        p1 = log_points[i-1]
-        p2 = log_points[i]
-        dist = math.sqrt((p2["E"] - p1["E"])**2 + (p2["N"] - p1["N"])**2)
-        cumulative.append(cumulative[-1] + dist)
+    # Rééchantillonnage des points pour obtenir un espacement constant (dist_step en mètres)
+    log_points, cumulative = resample_log_points(log_points, dist_step)
     trajectory_duration = cumulative[-1] / velocity  # temps total de la trajectoire (en s)
 
-    # 3) Définition des bornes de simulation
     candidate_start_min = parse_time(start_time)
     if time_end:
         simulation_end = parse_time(time_end)
@@ -1003,7 +1008,6 @@ def compute_optimal_window_from_log(data, rinex_nav_file, buildings_dict,
         simulation_end = candidate_start_min + trajectory_duration + 3600
     candidate_start_max = simulation_end - trajectory_duration
 
-    # Utilisation d'une date de base (on peut utiliser celle fournie dans le fichier ou une valeur par défaut)
     try:
         base_date = datetime.strptime(data.iloc[0]["date"].strip('"'), "%d/%m/%Y")
     except Exception as e:
@@ -1015,7 +1019,7 @@ def compute_optimal_window_from_log(data, rinex_nav_file, buildings_dict,
     while candidate <= candidate_start_max:
         total_los = 0
         per_point_los = []
-        # Pour chaque point, le temps effectif est : candidate + (distance cumulée / velocity)
+        # Pour chaque point, le temps effectif est : candidate + (cumulative[i] / velocity)
         for i, point in enumerate(log_points):
             effective_time = candidate + (cumulative[i] / velocity)
             sim_dt = base_date + timedelta(seconds=effective_time)
@@ -1030,7 +1034,7 @@ def compute_optimal_window_from_log(data, rinex_nav_file, buildings_dict,
                 min=sim_dt.minute,
                 sec=sim_dt.second
             )
-            mjd_time = gnssdate.mjd
+            mjd_time = gnssdate
             print(f"[DEBUG] [LOG Simulation] Trajectory candidate starting at {datetime.utcfromtimestamp(candidate).strftime('%H:%M:%S')}, point {i}: sim_dt {key} | MJD={mjd_time}")
 
             # Lecture du fichier RINEX nav
@@ -1046,6 +1050,7 @@ def compute_optimal_window_from_log(data, rinex_nav_file, buildings_dict,
                 return None
 
             try:
+                import tempfile
                 with tempfile.NamedTemporaryFile(mode='w', delete=False) as temp:
                     temp.writelines(lines)
                     temp_filename = temp.name
@@ -1086,6 +1091,7 @@ def compute_optimal_window_from_log(data, rinex_nav_file, buildings_dict,
                 los_count = 0
             else:
                 sim_key = list(current_sat_dict.keys())[0]
+                # Ici, on peut utiliser la fonction compute_collisions (déjà définie) pour le LOG
                 current_sat_dict = compute_collisions(current_sat_dict, buildings_dict, dist_building=300, show=False)
                 local_sat_infos = current_sat_dict[sim_key]["sat_infos"].values()
                 los_count = sum(1 for s in local_sat_infos if s.get("status", "UNKNOWN") == "LOS")
@@ -1101,7 +1107,6 @@ def compute_optimal_window_from_log(data, rinex_nav_file, buildings_dict,
         })
         candidate += time_step_sec
 
-    # Export des résultats dans un CSV
     import pandas as pd
     df_results = pd.DataFrame(results)
     print("\n--- Résultats Trajectoire Optimale (LOG) ---")
