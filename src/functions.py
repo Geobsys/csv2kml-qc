@@ -1003,10 +1003,10 @@ def candidate_simulation(candidate, points_list, cumulative, base_date, base_poi
         return {
             "Trajectory Start": date_start_utc,
             "Total LOS": total_los,
-            #"Total NLOS": total_nlos,  # par code, c'est 0
+            "Total NLOS": total_nlos,  # par code, c'est 0
             #"Total Obstructed": total_obstructed,
             "Average LOS": avg_los,
-            #"Average NLOS": avg_nlos,  # idem => 0
+            "Average NLOS": avg_nlos,  # idem => 0
             "Average Obstructed": avg_obstructed,
             "Avg GDOP": avg_gdop,
             "Avg PDOP": avg_pdop,
