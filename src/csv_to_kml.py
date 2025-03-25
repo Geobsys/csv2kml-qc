@@ -113,10 +113,6 @@ if __name__ == "__main__":
     parser.add_argument('-velocity_kml', type=float, default=1.5,
                         help="Velocity (m/s) for KML traj (Default=1.5)")
 
-    # Param RINEX obs/nav
-    parser.add_argument('--rinex_obs', type=str, help="RINEX observation file", default='')
-    parser.add_argument('--rinex_nav', type=str, help="RINEX navigation file", default='')
-
     parser.add_argument('--mnt', type=float, default=0.0,
                         help="Altitude offset or mean altitude for forcing Z (ex. 45).")
     parser.add_argument('--time_end', type=str, help="Heure de fin de simulation (format HH:MM:SS) pour étaler la simulation au-delà de la fin des relevés LOG", default=None)
@@ -128,10 +124,28 @@ if __name__ == "__main__":
                         help="Velocity (m/s) for LOG trajectory simulation (default=1.5)")
     args = parser.parse_args()
     
+    # Conversion des chemins relatifs pour les fichiers situés dans le dossier 'test'
+    # Pour le fichier d'entrée : si le type est 'kmltraj' on recherche dans le dossier 'kml', sinon dans 'log'
+    if not os.path.isabs(args.input_file):
+        if args.input_type == "kmltraj":
+            args.input_file = functions.chemin_relatif(args.input_file, "kml")
+        else:
+            args.input_file = functions.chemin_relatif(args.input_file, "log")
+    
+    # Pour les fichiers RINEX (observation ou navigation)
+    if args.rinex_name and not os.path.isabs(args.rinex_name):
+        args.rinex_name = functions.chemin_relatif(args.rinex_name, "rinex")
+    if args.ro and not os.path.isabs(args.ro):
+        args.ro = functions.chemin_relatif(args.ro, "rinex")
+    
+    # Pour le shapefile des bâtiments
+    if args.buildings and not os.path.isabs(args.buildings):
+        args.buildings = functions.chemin_relatif(args.buildings, "shp")
+    
     # Mode temporel (calcul de la fenêtre temporelle optimale)
     if args.temporal:
         # CAS 1: Trajectoire théorique => kmltraj
-        if args.input_type == "kmltraj" and args.rinex_name and args.detect_nlos:
+        if args.input_type == "kmltraj" and args.rinex_name :
             if args.buildings != "":
                 dummy_kml = simplekml.Kml()
                 buildings_dict = functions.shp2kml(args.buildings, dummy_kml)
@@ -150,7 +164,7 @@ if __name__ == "__main__":
                 velocity=args.velocity_kml,
                 time_step_sec=900,
                 output_csv="resultats_optimal_window_kml.csv",
-                mnt = args.mnt
+                mnt=args.mnt
             )
             print(df_optimal)
             
@@ -182,9 +196,7 @@ if __name__ == "__main__":
                         print(f"{len(buildings_dict)} bâtiments chargés depuis {args.buildings}")
                 else:
                     buildings_dict = {}
-                    
-                # => compute_optimal_window_from_log
-                #   qui va gérer la logique "z = h - mnt" si mnt!=0 (dans functions.py).
+
                 df_optimal = functions.compute_optimal_window_from_log(
                     data=data,
                     rinex_nav_file=args.rinex_name,
@@ -199,39 +211,40 @@ if __name__ == "__main__":
                 print(df_optimal)
                 
     else:
-    	tool.csv_to_kml(
-    					 args.input_file,
-    					 args.input_type,
-    					 args.separator,
-    					 args.output_file,
-    					 args.doc_name,
-    					 args.quiet,
-    					 args.mode,
-    					 args.label_scale,
-    					 args.icon_scale,
-    					 args.icon_href,
-    					 args.show_pt_name,
-    					 args.data_range,
-    					 args.altitudemode,
-    					 args.show_point,
-    					 args.show_line,
-    					 args.show_conf_int,
-                         args.scale_factor_pla,
-                         args.incert_pla_max,
-                         args.scale_factor_hig,
-                         args.incert_hig_max,
-    					 args.show_buildings,
-    					 args.margin,
-    					 args.departments,
-    					 args.save_buildings,
-    					 args.calc_ephemerids,
-    					 args.rinex_name,
-    					 args.show_orientation,
-    					 args.fr_sensor,
-    					 args.fr_focal,
-    					 args.fr_distance,
-    					 args.fr_alpha,
-    					 args.fr_beta,
-    					 args.fr_gamma
-                        )
+        tool.csv_to_kml(
+             args.input_file,
+             args.input_type,
+             args.separator,
+             args.output_file,
+             args.doc_name,
+             args.quiet,
+             args.mode,
+             args.label_scale,
+             args.icon_scale,
+             args.icon_href,
+             args.show_pt_name,
+             args.data_range,
+             args.altitudemode,
+             args.show_point,
+             args.show_line,
+             args.show_conf_int,
+             args.scale_factor_pla,
+             args.incert_pla_max,
+             args.scale_factor_hig,
+             args.incert_hig_max,
+             args.show_buildings,
+             args.margin,
+             args.departments,
+             args.save_buildings,
+             args.calc_ephemerids,
+             args.rinex_name,
+             args.show_orientation,
+             args.fr_sensor,
+             args.fr_focal,
+             args.fr_distance,
+             args.fr_alpha,
+             args.fr_beta,
+             args.fr_gamma
+        )
+
 

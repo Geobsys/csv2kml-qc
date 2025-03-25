@@ -766,7 +766,7 @@ def compute_collisions(sat_dict, building_dict, dist_building=300, show=False):
 
 def compute_optimal_window_from_kml(kml_file, rinex_nav_file, buildings_dict,
                                     start_time, end_time, distance_step, velocity,
-                                    time_step_sec=900, output_csv="resultats_optimal_window.csv", mnt=45.0):
+                                    time_step_sec, mnt=60, output_csv="resultats_optimal_window.csv"):
     """
     Calcule la performance pour différentes trajectoires théoriques.
     Pour chaque fenêtre candidate, simule la trajectoire en décalant le temps de chaque point,
@@ -799,7 +799,7 @@ def compute_optimal_window_from_kml(kml_file, rinex_nav_file, buildings_dict,
 
     candidate_start_min = parse_time(start_time)
     global_end_sec = parse_time(end_time)
-    simulation_end = global_end_sec + 60  # marge de 60 s
+    simulation_end = global_end_sec + 600  # marge de 60 s
     base_date = datetime(2024, 2, 23)
     base_point_time = points_df.iloc[0]["time_sod"]
     last_point_time = points_df.iloc[-1]["time_sod"]
@@ -1052,10 +1052,9 @@ def candidate_simulation(candidate, points_list, cumulative, base_date, base_poi
                 "Avg PDOP": avg_pdop}
 
 def compute_optimal_window_from_log(data, rinex_nav_file, buildings_dict,
-                                    time_step_sec=900,
-                                    output_csv="resultats_optimal_window_log.csv",
-                                    time_end="", start_time="8:00", velocity=1.5,
-                                    rinex_obs_file=None):
+                                    time_step_sec,
+                                    time_end, start_time, velocity=1.5,
+                                    rinex_obs_file=None, output_csv="resultats_optimal_window_log.csv"):
     """
     Calcule la performance pour différentes trajectoires issues du fichier LOG en ignorant les horodatages.
     Pour chaque fenêtre candidate, la trajectoire est simulée (temps artificiel basé sur la distance cumulée/velocity)
@@ -1237,4 +1236,42 @@ def draw_collision_rays(sat_dict, kml_layer):
             style_key = 'LOS' if sat_status == 'LOS' else 'NLOS'
             vector_placemark.style = line_style_dict[style_key]
     return None
+
+def chemin_relatif(nom_fichier: str, type_fichier: str) -> str:
+    """
+    Retourne le chemin absolu d'un fichier en utilisant des chemins relatifs à partir du dossier 'test'.
+
+    La structure de votre projet est la suivante :
+        project/
+            src/
+                csv_to_kml.py
+                functions.py
+            test/
+                kml/     -> pour les fichiers KML
+                shp/     -> pour les fichiers shape
+                log/     -> pour les fichiers LOG
+                rinex/   -> pour les fichiers Rinex
+
+    :param nom_fichier: Nom du fichier (par exemple 'short.kml' ou '20240223.LOG').
+    :param type_fichier: Type de fichier, parmi 'kml', 'shp', 'log' ou 'rinex'.
+    :return: Chemin absolu vers le fichier.
+    """
+    import os
+
+    dossiers_valides = ['kml', 'shp', 'log', 'rinex']
+    if type_fichier not in dossiers_valides:
+        raise ValueError(
+            f"Type de fichier '{type_fichier}' non supporté. Choisissez parmi {dossiers_valides}."
+        )
+    
+    # Détermine le chemin du dossier courant (celui de functions.py, dans src)
+    chemin_courant = os.path.dirname(os.path.abspath(__file__))
+    # Le dossier 'test' se trouve au même niveau que 'src', on remonte d'un niveau et on rejoint 'test'
+    dossier_test = os.path.abspath(os.path.join(chemin_courant, "..", "test"))
+    
+    # Construit le chemin complet en rejoignant le sous-dossier (kml, shp, log ou rinex) et le nom du fichier
+    chemin_fichier = os.path.join(dossier_test, type_fichier, nom_fichier)
+    
+    return chemin_fichier
+
 
