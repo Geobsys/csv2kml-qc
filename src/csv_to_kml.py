@@ -189,11 +189,12 @@ if __name__ == "__main__":
                     data=data,
                     rinex_nav_file=args.rinex_name,
                     buildings_dict=buildings_dict,
-                    time_step_sec=900,
+                    time_step_sec=120,
                     output_csv="resultats_optimal_window_log.csv",
                     time_end=args.time_end,
                     start_time=args.start_time_log,
-                    velocity=args.velocity_log
+                    velocity=args.velocity_log,
+                    rinex_obs_file=args.ro
                 )
                 print(df_optimal)
                 
