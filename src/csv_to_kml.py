@@ -114,12 +114,17 @@ if __name__ == "__main__":
     if not args.quiet:
         print("args.hide_pts =", args.hide_pts)
     
-    # Pour le mode kmltraj, on extrait la trajectoire depuis le KML
     if args.input_type == "kmltraj" and args.rinex_name_nav and args.detect_nlos:
-    
-        # On suppose qu'on n'a pas de shapefile buildings (ou on le charge à part si besoin)
-        buildings_dict = {}
-    
+    # Si un chemin vers un shapefile est fourni, charger les bâtiments
+        if args.buildings != "":
+            # On crée un objet KML temporaire pour que shp2kml puisse créer des polygones (même si on ne les utilise pas ensuite)
+            dummy_kml = simplekml.Kml()
+            buildings_dict = functions.shp2kml(args.buildings, dummy_kml, show=False)
+            if not args.quiet:
+                print(f"{len(buildings_dict)} bâtiments chargés depuis {args.buildings}")
+        else:
+            buildings_dict = {}
+
         df_optimal = functions.compute_optimal_window_from_kml(
             kml_file=args.input_file,
             rinex_nav_file=args.rinex_name_nav,
@@ -128,9 +133,9 @@ if __name__ == "__main__":
             end_time=args.end_time_kml,
             distance_step=args.dist_step_kml,
             velocity=args.velocity_kml,
-            time_step_sec=1800,  # ou un paramètre dédié
+            time_step_sec=1800,  # intervalle de simulation (30 min par défaut)
             output_csv="resultats_optimal_window.csv"
-            )
+        )
         print(df_optimal)
     else:
         if args.input_type == "extevent":
