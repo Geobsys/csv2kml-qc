@@ -1077,9 +1077,9 @@ def compute_optimal_window_from_log(data, rinex_nav_file, buildings_dict,
                                                       dist_building=300, show=False)
                 local_sat_infos = current_sat_dict.get(sim_key, {}).get("sat_infos", {})
                 n_los = sum(1 for v in local_sat_infos.values() if v.get("status", "UNKNOWN") == "LOS")
-                n_nlos = sum(1 for v in local_sat_infos.values() if v.get("status", "UNKNOWN") == "NLOS")
+                n_obs = sum(1 for v in local_sat_infos.values() if v.get("status", "UNKNOWN") == "NLOS")
 
-            print(f"    [DEBUG] LOS={n_los}, NLOS={n_obs} (t_eval={t_eval}s)")
+            print(f"    [DEBUG] LOS={n_los}, OBS={n_obs} (t_eval={t_eval}s)")
             simulation_times.append(t_eval)
             simulation_los.append(n_los)
 
