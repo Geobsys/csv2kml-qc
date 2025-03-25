@@ -748,15 +748,19 @@ def candidate_simulation(candidate, points_list, cumulative, base_date, base_poi
     """
     Simulation d'une fenêtre candidate pour une trajectoire et agrégation des statistiques.
     
-    1) Création locale de l'objet Nav à partir de Nav_data
-    2) Lecture du RINEX d'observation (si fourni)
-    3) Parcours de chaque point de la trajectoire discrétisée
-       - Calcul de la date GNSS (mjd_time)
-       - Extraction/chargement des coordonnées satellites
-       - Filtrage par angle d'élévation (exclusion des satellites sous l'horizon)
-       - Calcul de collisions avec les bâtiments (LOS / NLOS)
-       - Agrégation des statistiques (LOS, NLOS, PDOP/GDOP, etc.)
-    4) Retourne un dictionnaire contenant un résumé de la simulation pour cette 'fenêtre' candidate.
+    Procédure :
+      1) Création locale de l'objet Nav à partir de Nav_data.
+      2) Lecture du fichier RINEX d'observation (si fourni).
+      3) Pour chaque point de la trajectoire discrétisée :
+         - Calcul de la date GNSS (mjd_time).
+         - Extraction/chargement des coordonnées satellites.
+         - Filtrage par angle d'élévation (exclusion des satellites sous l'horizon, seuil >= 5°).
+         - Calcul des collisions avec les bâtiments (détermination du statut LOS, NLOS ou Obstructed).
+         - Agrégation des statistiques (somme des satellites LOS, NLOS, Obstructed et calcul du GDOP).
+      4) Calcul de la moyenne par point des satellites LOS, NLOS et Obstructed.
+      5) Retourne un dictionnaire récapitulatif pour la fenêtre candidate.
+         - Pour le cas réel (si Obs est fourni), seuls les moyennes par point sont renvoyées.
+         - Pour le cas théorique, les totaux sont également renvoyés.
     """
     import math
     import tempfile
@@ -769,27 +773,18 @@ def candidate_simulation(candidate, points_list, cumulative, base_date, base_poi
         Calcule l'angle d'élévation (en degrés) d'un satellite
         par rapport à un récepteur en coordonnées ECEF.
         """
-        # 1) Conversion de la position récepteur en (lat, lon, h)
         transformer_ecef_to_llh = pyproj.Transformer.from_crs("EPSG:4978", "EPSG:4326", always_xy=True)
-        lat_u, lon_u, h_u = transformer_ecef_to_llh.transform(userXYZ[0], userXYZ[1], userXYZ[2])
+        lat_u, lon_u, _ = transformer_ecef_to_llh.transform(userXYZ[0], userXYZ[1], userXYZ[2])
         lat_u_rad = math.radians(lat_u)
         lon_u_rad = math.radians(lon_u)
-
-        # 2) Calcul du vecteur récepteur->satellite en ECEF
         rx_sat = satXYZ - userXYZ
-
-        # 3) Matrice de rotation ECEF -> ENU
-        #    Source de référence classique : https://gssc.esa.int/navipedia/index.php/Transformations_between_ECEF_and_ENU_coordinates
         R = np.array([
-            [-math.sin(lon_u_rad),                 math.cos(lon_u_rad),               0           ],
+            [-math.sin(lon_u_rad), math.cos(lon_u_rad), 0],
             [-math.sin(lat_u_rad)*math.cos(lon_u_rad), -math.sin(lat_u_rad)*math.sin(lon_u_rad), math.cos(lat_u_rad)],
             [ math.cos(lat_u_rad)*math.cos(lon_u_rad),  math.cos(lat_u_rad)*math.sin(lon_u_rad), math.sin(lat_u_rad)]
         ])
-
-        enu = R @ rx_sat  # vecteur dans le repère local ENU
+        enu = R @ rx_sat
         e, n, u = enu
-
-        # 4) Angle d’élévation = arcsin(Up / Norm(ENU))
         horiz_dist = math.sqrt(e**2 + n**2)
         elev = math.degrees(math.atan2(u, horiz_dist))
         return elev
@@ -835,21 +830,13 @@ def candidate_simulation(candidate, points_list, cumulative, base_date, base_poi
                     Obs = None
             os.remove(obs_temp_filename)
 
-    # Mise en cache des éphémérides, pour éviter de recalculer à chaque point
     ephemerides_cache = {}
     total_los = 0
     total_nlos = 0
     total_obstructed = 0
     dop_list = []
 
-    # Conversion de la position ENH (Lambert-93) du récepteur en ECEF si besoin
-    # pour le calcul d'élévation. La clé "coordX" / "coordY" / "coordZ" dans le
-    # DataFrame est souvent l'ECEF déjà, mais vérifiez si c'est bien votre cas.
-    # Si c'est du Lambert-93, il faut convertir. Exemple :
-    #   rcv_ecef = ENH_2_XYZ([pt["coordE"], pt["coordN"], pt["H"]], csts.grid_path)
-    
     for idx, pt in points_list.iterrows():
-        # Simulation du temps
         effective_time = candidate + (pt["time_sod"] - base_point_time)
         sim_dt = base_date + timedelta(seconds=effective_time)
         sim_dt = snap_to_nearest_epoch(sim_dt, snap_threshold=1)
@@ -859,57 +846,39 @@ def candidate_simulation(candidate, points_list, cumulative, base_date, base_poi
         mjd_time = gnssdate.mjd
         mjd_key = f"{mjd_time:.5f}"
 
-        # Détermination de la position du récepteur en Lambert-93 (E, N, H)
-        # S'il s'agit bien de colonnes Lambert-93, on doit passer en ECEF
-        # si on veut calculer l'élévation. Exemple :
         if "coordX" in pt:
-            # Supposons que coordX, coordY, coordZ soient déjà ECEF
             rcv_ecef = np.array([pt["coordX"], pt["coordY"], pt["coordZ"]], dtype=float)
             rcv_pos_dict = {"coordE": pt["coordX"], "coordN": pt["coordY"], "H": pt["coordZ"]}
         else:
-            # Sinon, c'est peut-être la version (E, N, H) Lambert-93
-            # => conversion en ECEF
             E, N, H = pt["E"], pt["N"], pt["H"]
             rcv_ecef = ENH_2_XYZ([[E, N, H]], csts.grid_path)[0]
             rcv_pos_dict = {"coordE": E, "coordN": N, "H": H}
 
-        # Chargement / cache des éphémérides
         if mjd_key in ephemerides_cache:
             sat_cepoch_dict = ephemerides_cache[mjd_key]
         else:
             sat_cepoch_dict = {}
             for const in ["G", "R", "E", "C"]:
-                # prn max peut être ajusté selon la constellation
-                # ex: G = 32, R = 27, E = 36, C = 63, etc.
                 for prn in range(1, 40):
                     try:
-                        # L'argument "degree" dans calcSatCoord correspond à
-                        # un degré pour interpolation polynomiale, et non à un
-                        # masque d'élévation. On peut le mettre à 0.
                         Xs, Ys, Zs, dte = Nav.calcSatCoord(const, prn, mjd_time, degree=0)
                         if (Xs, Ys, Zs) != (0, 0, 0) and not np.isnan([Xs, Ys, Zs]).any():
-                            # Vérification de l'élévation : on exclut si < 0°
                             sat_ecef = np.array([Xs, Ys, Zs], dtype=float)
                             elev_deg = compute_elevation(rcv_ecef, sat_ecef)
                             if elev_deg >= 5.0:
                                 sat_cepoch_dict[f"{const}{prn:02d}"] = {
                                     "X": Xs, "Y": Ys, "Z": Zs, "dte": dte,
-                                    # On peut stocker l'élévation si besoin
                                     "elevation_deg": elev_deg
                                 }
                     except Exception:
                         pass
             ephemerides_cache[mjd_key] = sat_cepoch_dict
 
-        # Assemblage du dictionnaire satellites/récepteur pour la suite
         current_sat_dict = {key: {"rcvr_infos": rcv_pos_dict, "sat_infos": sat_cepoch_dict}}
         current_sat_dict = compute_collisions(current_sat_dict, buildings_dict, dist_building=300)
         local_sat_infos = current_sat_dict[key]["sat_infos"]
 
-        # Comptage des satellites LOS
         los_count = sum(1 for s in local_sat_infos.values() if s.get("status", "UNKNOWN") == "LOS")
-
-        # Gestion du mode observation RINEX : NLOS => "Obstructed" si non observé
         if Obs is not None:
             epoch_obs = Obs.getEpochByMjd(gnssdate.mjd)
             observed_set = set()
@@ -923,17 +892,12 @@ def candidate_simulation(candidate, points_list, cumulative, base_date, base_poi
             nlos_count = sum(1 for s in local_sat_infos.values() if s.get("status", "UNKNOWN") == "NLOS")
             obstructed_count = sum(1 for s in local_sat_infos.values() if s.get("status", "UNKNOWN") == "Obstructed")
         else:
-            nlos_count = 0
-            # Dans le cas théorique, on n'a pas d'Obs => tout "NLOS" reste NLOS
+            nlos_count = sum(1 for s in local_sat_infos.values() if s.get("status", "UNKNOWN") == "NLOS")
             obstructed_count = sum(1 for s in local_sat_infos.values() if s.get("status", "UNKNOWN") == "NLOS")
-
-        # Accumulation
         total_los += los_count
         total_nlos += nlos_count
         total_obstructed += obstructed_count
 
-        # Calcul du GDOP à partir des satellites LOS (en Lambert-93)
-        # On récupère "sats_pos_l93" pour tous les satellites LOS
         sat_positions = [
             s["sats_pos_l93"] for s in local_sat_infos.values()
             if s.get("status", "UNKNOWN") == "LOS" and "sats_pos_l93" in s
@@ -951,26 +915,33 @@ def candidate_simulation(candidate, points_list, cumulative, base_date, base_poi
         dop_list.append(dop_value)
 
     avg_gdop = np.nanmean(dop_list) if dop_list else np.nan
-    total_observed = total_los + total_nlos + total_obstructed
+    # Calcul des moyennes par point
+    num_points = len(points_list)
+    avg_los_per_point = total_los / num_points if num_points > 0 else np.nan
+    avg_nlos_per_point = total_nlos / num_points if num_points > 0 else np.nan
+    avg_obstructed_per_point = total_obstructed / num_points if num_points > 0 else np.nan
 
     if Obs is not None:
         return {
             "Trajectory Start": datetime.utcfromtimestamp(candidate).strftime("%H:%M:%S"),
-            "Total LOS": total_los,
-            "Total NLOS": total_nlos,
-            "Total Obstructed": total_obstructed,
-            "Total Observed": total_observed,
+            "Avg LOS per point": avg_los_per_point,
+            "Avg NLOS per point": avg_nlos_per_point,
+            "Avg Obstructed per point": avg_obstructed_per_point,
             "Avg GDOP": avg_gdop
         }
     else:
+        total_observed = total_los + total_nlos + total_obstructed
         return {
             "Trajectory Start": datetime.utcfromtimestamp(candidate).strftime("%H:%M:%S"),
             "Total LOS": total_los,
+            #"Total NLOS": total_nlos,
             "Total Obstructed": total_obstructed,
             "Total Observed": total_observed,
-            "Avg GDOP": avg_gdop
+            "Avg GDOP": avg_gdop,
+            "Avg LOS per point": avg_los_per_point,
+            #"Avg NLOS per point": avg_nlos_per_point,
+            "Avg Obstructed per point": avg_obstructed_per_point
         }
-
 
 #####################################################################################################################
 # --- Fonctions de simulation temporelle ---
