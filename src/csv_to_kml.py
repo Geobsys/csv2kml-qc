@@ -123,24 +123,6 @@ if __name__ == "__main__":
     parser.add_argument('-ll','--line_length', type=float, help="Line length for collisions (Default=250)", default=250)
     args = parser.parse_args()
     
-    # Conversion des chemins relatifs pour les fichiers situés dans le dossier 'test'
-    # Pour le fichier d'entrée : si le type est 'kmltraj' on recherche dans le dossier 'kml', sinon dans 'log'
-    if not os.path.isabs(args.input_file):
-        if args.input_type == "kmltraj":
-            args.input_file = functions.chemin_relatif(args.input_file, "kml")
-        else:
-            args.input_file = functions.chemin_relatif(args.input_file, "log")
-    
-    # Pour les fichiers RINEX (observation ou navigation)
-    if args.rinex_name and not os.path.isabs(args.rinex_name):
-        args.rinex_name = functions.chemin_relatif(args.rinex_name, "rinex")
-    if args.ro and not os.path.isabs(args.ro):
-        args.ro = functions.chemin_relatif(args.ro, "rinex")
-    
-    # Pour le shapefile des bâtiments
-    if args.buildings and not os.path.isabs(args.buildings):
-        args.buildings = functions.chemin_relatif(args.buildings, "shp")
-    
     # Mode temporel (calcul de la fenêtre temporelle optimale)
     if args.temporal:
         # CAS 1: Trajectoire théorique => kmltraj

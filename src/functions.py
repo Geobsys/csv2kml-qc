@@ -515,42 +515,42 @@ def draw_collision_rays(sat_dict, kml_layer):
             vector_placemark.style = line_style_dict[style_key]
     return None
 
-def chemin_relatif(nom_fichier: str, type_fichier: str) -> str:
-    """
-    Retourne le chemin absolu d'un fichier en utilisant des chemins relatifs à partir du dossier 'test'.
+# def chemin_relatif(nom_fichier: str, type_fichier: str) -> str:
+#     """
+#     Retourne le chemin absolu d'un fichier en utilisant des chemins relatifs à partir du dossier 'test'.
 
-    La structure du projet est la suivante :
-        csv_to_kml/
-            src/
-                csv_to_kml.py
-                functions.py
-            test/
-                kml/     -> pour les fichiers KML
-                shp/     -> pour les fichiers shape
-                log/     -> pour les fichiers LOG
-                rinex/   -> pour les fichiers Rinex
+#     La structure du projet est la suivante :
+#         csv_to_kml/
+#             src/
+#                 csv_to_kml.py
+#                 functions.py
+#             test/
+#                 kml/     -> pour les fichiers KML
+#                 shp/     -> pour les fichiers shape
+#                 log/     -> pour les fichiers LOG
+#                 rinex/   -> pour les fichiers Rinex
 
-    :param nom_fichier: Nom du fichier (par exemple 'short.kml' ou '20240223.LOG').
-    :param type_fichier: Type de fichier, parmi 'kml', 'shp', 'log' ou 'rinex'.
-    :return: Chemin absolu vers le fichier.
-    """
-    import os
+#     :param nom_fichier: Nom du fichier (par exemple 'short.kml' ou '20240223.LOG').
+#     :param type_fichier: Type de fichier, parmi 'kml', 'shp', 'log' ou 'rinex'.
+#     :return: Chemin absolu vers le fichier.
+#     """
+#     import os
 
-    dossiers_valides = ['kml', 'shp', 'log', 'rinex']
-    if type_fichier not in dossiers_valides:
-        raise ValueError(
-            f"Type de fichier '{type_fichier}' non supporté. Choisissez parmi {dossiers_valides}."
-        )
+#     dossiers_valides = ['kml', 'shp', 'log', 'rinex']
+#     if type_fichier not in dossiers_valides:
+#         raise ValueError(
+#             f"Type de fichier '{type_fichier}' non supporté. Choisissez parmi {dossiers_valides}."
+#         )
     
-    # Détermine le chemin du dossier courant (celui de functions.py, dans src)
-    chemin_courant = os.path.dirname(os.path.abspath(__file__))
-    # Le dossier 'test' se trouve au même niveau que 'src', on remonte d'un niveau et on rejoint 'test'
-    dossier_test = os.path.abspath(os.path.join(chemin_courant, "..", "test"))
+#     # Détermine le chemin du dossier courant (celui de functions.py, dans src)
+#     chemin_courant = os.path.dirname(os.path.abspath(__file__))
+#     # Le dossier 'test' se trouve au même niveau que 'src', on remonte d'un niveau et on rejoint 'test'
+#     dossier_test = os.path.abspath(os.path.join(chemin_courant, "..", "test"))
     
-    # Construit le chemin complet en rejoignant le sous-dossier (kml, shp, log ou rinex) et le nom du fichier
-    chemin_fichier = os.path.join(dossier_test, type_fichier, nom_fichier)
+#     # Construit le chemin complet en rejoignant le sous-dossier (kml, shp, log ou rinex) et le nom du fichier
+#     chemin_fichier = os.path.join(dossier_test, type_fichier, nom_fichier)
     
-    return chemin_fichier
+#     return chemin_fichier
 
 
 #####################################################################################################################
