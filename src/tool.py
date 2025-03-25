@@ -78,13 +78,7 @@ def csv_to_kml(
     rinex_obs="",
     rinex_nav="",
     line_length=250,
-    show_extent=True,
-    start_time_kml="8h00",
-    end_time_kml="20h00",
-    dist_step_kml=5,
-    velocity_kml=1.5,
-    date="23/02/2024",
-    time_step_sec=1800      # new parameter for kmltraj mode
+    show_extent=True
 ):
     """Main function generating a KML file from an input dataset."""
     if not quiet:

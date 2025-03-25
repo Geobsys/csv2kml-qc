@@ -29,6 +29,7 @@ import numpy as np
 import pandas as pd
 import argparse
 
+
 ################################
 # Main
 ################################
@@ -106,6 +107,10 @@ if __name__ == "__main__":
     parser.add_argument('-ro', '--rinex_name_obs', type=str, help="Chemin du fichier RINEX d'observation", default='')
     parser.add_argument('-rn', '--rinex_name_nav', type=str, help="Chemin du fichier RINEX de navigation", default='')
     
+    # >>>>> NOUVEL ARGUMENT : MNT <<<<<
+    parser.add_argument('--mnt', type=float, default=0.0,
+                        help="Valeur moyenne d'altitude (ex. 45) : pour forcer le Z ou ajuster la hauteur des points.")
+    
     # Collision (NLOS)
     parser.add_argument('--detect_nlos', action="store_true", help="Effectuer la détection des collisions (NLOS)")
     parser.add_argument('-ll', '--line_length', type=float, help="Longueur de la ligne pour les rayons (Default=250)", default=250)
@@ -117,8 +122,8 @@ if __name__ == "__main__":
     
     # Mode temporel (calcul de la fenêtre temporelle optimale)
     if args.temporal:
+        # CAS 1: Trajectoire théorique => kmltraj
         if args.input_type == "kmltraj" and args.rinex_name_nav and args.detect_nlos:
-            # Trajectoire théorique : utilisation de start_time_kml/end_time_kml
             if args.buildings != "":
                 dummy_kml = simplekml.Kml()
                 buildings_dict = functions.shp2kml(args.buildings, dummy_kml, show=False)
@@ -126,6 +131,10 @@ if __name__ == "__main__":
                     print(f"{len(buildings_dict)} bâtiments chargés depuis {args.buildings}")
             else:
                 buildings_dict = {}
+                
+            # => compute_optimal_window_from_kml
+            #   On lui passera la valeur MNT, qu'on utilisera pour forcer z= MNT
+            #   (modifications dans functions.py)
             df_optimal = functions.compute_optimal_window_from_kml(
                 kml_file=args.input_file,
                 rinex_nav_file=args.rinex_name_nav,
@@ -135,11 +144,13 @@ if __name__ == "__main__":
                 distance_step=args.dist_step_kml,
                 velocity=args.velocity_kml,
                 time_step_sec=600,
-                output_csv="resultats_optimal_window_kml.csv"
+                output_csv="resultats_optimal_window_kml.csv",
+                mnt = args.mnt
             )
             print(df_optimal)
+            
+        # CAS 2: Trajectoire réelle => extevent ou log
         else:
-            # Trajectoire réelle (extevent ou log) : la plage temporelle est extraite du fichier
             if args.input_type == "extevent":
                 labels = csts.extevent_labels
             elif args.input_type == "log":
@@ -166,59 +177,58 @@ if __name__ == "__main__":
                         print(f"{len(buildings_dict)} bâtiments chargés depuis {args.buildings}")
                 else:
                     buildings_dict = {}
+                    
+                # => compute_optimal_window_from_log
+                #   qui va gérer la logique "z = h - mnt" si mnt!=0 (dans functions.py).
                 df_optimal = functions.compute_optimal_window_from_log(
                     data=data,
                     rinex_nav_file=args.rinex_name_nav,
                     buildings_dict=buildings_dict,
-                    time_step_sec=60,
+                    time_step_sec=3600,
                     output_csv="resultats_optimal_window_log.csv",
                     time_end=args.time_end
                 )
                 print(df_optimal)
-    
-    # Appel de la fonction principale de conversion en KML depuis tool.py
-    import tool
-    tool.csv_to_kml(
-        args.input_file,
-        args.input_type,
-        args.separator,
-        args.output_file,
-        args.doc_name,
-        args.quiet,
-        args.mode,
-        args.label_scale,
-        args.icon_scale,
-        args.icon_href,
-        args.show_pt_name,
-        args.data_range,
-        args.altitude_mode,
-        args.hide_pts,
-        args.hide_lines,
-        args.hide_conf_int,
-        args.scale_factor_pla,
-        args.incert_pla_max,
-        args.scale_factor_hig,
-        args.incert_hig_max,
-        args.hide_buildings,
-        args.margin,
-        args.buildings,
-        args.save_buildings,
-        args.hide_frustum,
-        args.fr_sensor,
-        args.fr_focal,
-        args.fr_distance,
-        args.fr_alpha,
-        args.fr_beta,
-        args.fr_gamma,
-        args.detect_nlos,
-        args.rinex_name_obs,
-        args.rinex_name_nav,
-        args.line_length,
-        args.show_extent,
-        start_time_kml=args.start_time_kml,
-        end_time_kml=args.end_time_kml,
-        dist_step_kml=args.dist_step_kml,
-        velocity_kml=args.velocity_kml,
-        date=args.date
-    )
+                
+    else:
+        # Si on n'est pas en mode temporel => CSV -> KML
+        # => utilise la fonction tool.csv_to_kml
+        tool.csv_to_kml(
+            input_file=args.input_file,
+            input_type=args.input_type,
+            separator=args.separator,
+            output_file=args.output_file,
+            doc_name=args.doc_name,
+            quiet=args.quiet,
+            mode=args.mode,
+            label_scale=args.label_scale,
+            icon_scale=args.icon_scale,
+            icon_href=args.icon_href,
+            show_pt_name=args.show_pt_name,
+            data_range=args.data_range,
+            altitude_mode=args.altitude_mode,
+            hide_pts=args.hide_pts,
+            hide_lines=args.hide_lines,
+            hide_conf_int=args.hide_conf_int,
+            scale_factor_pla=args.scale_factor_pla,
+            incert_pla_max=args.incert_pla_max,
+            scale_factor_hig=args.scale_factor_hig,
+            incert_hig_max=args.incert_hig_max,
+            hide_buildings=args.hide_buildings,
+            margin=args.margin,
+            buildings=args.buildings,
+            save_buildings=args.save_buildings,
+            hide_frustum=args.hide_frustum,
+            fr_sensor=args.fr_sensor,
+            fr_focal=args.fr_focal,
+            fr_distance=args.fr_distance,
+            fr_alpha=args.fr_alpha,
+            fr_beta=args.fr_beta,
+            fr_gamma=args.fr_gamma,
+            detect_nlos=args.detect_nlos,
+            rinex_obs=args.rinex_name_obs,
+            rinex_nav=args.rinex_name_nav,
+            line_length=args.line_length,
+            show_extent=args.show_extent
+        )
 
