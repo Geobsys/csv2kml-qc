@@ -465,30 +465,13 @@ def segment_intersects_bbox(ray_origin, ray_end, aabb_min, aabb_max):
 
 
 def read_and_discretize_kml(kml_file, start_time, end_time, distance_step, velocity):
-    """
-    Lit un fichier KML contenant une trajectoire, soit :
-      - un unique LineString (cas classique)
-      - une suite de <Placemark> <Point> isolés
-    et génère une discrétisation de la trajectoire en fonction du pas de distance et de la vitesse.
-
-    Paramètres :
-    - kml_file (str) : chemin du fichier KML.
-    - start_time (str) : heure de départ au format "HHhMM" (ex: "8h00").
-    - end_time (str) : heure de fin au format "HHhMM" (ex: "20h00").
-    - distance_step (float) : pas de discrétisation en mètres.
-    - velocity (float) : vitesse en m/s.
-
-    Retourne :
-    - Un DataFrame contenant les points interpolés (colonnes : time_sod, lat, lon, H, etc.).
-    """
     def parse_time(hhmm):
         hh, mm = map(int, hhmm.replace("h", ":").split(":"))
         return hh * 3600 + mm * 60  # Conversion en secondes depuis minuit
 
     start_sec = parse_time(start_time)
-    end_sec   = parse_time(end_time)
+    end_sec = parse_time(end_time)
 
-    # Charger le fichier KML
     try:
         tree = ET.parse(kml_file)
         root = tree.getroot()
@@ -499,7 +482,7 @@ def read_and_discretize_kml(kml_file, start_time, end_time, distance_step, veloc
     ns = {"kml": "http://www.opengis.net/kml/2.2"}
     coords_text = None
 
-    # 1) On cherche d'abord un unique LineString
+    # Chercher un unique LineString
     for linestring in root.findall(".//kml:LineString", ns):
         coord_elem = linestring.find(".//kml:coordinates", ns)
         if coord_elem is not None and coord_elem.text:
@@ -507,12 +490,10 @@ def read_and_discretize_kml(kml_file, start_time, end_time, distance_step, veloc
             break
 
     if coords_text:
-        # On a trouvé un LineString => on parse
         raw_coords = coords_text.split()
         if len(raw_coords) < 2:
             print("Polyligne trop courte ou vide.")
             return None
-
         wgs_coords = []
         for rc in raw_coords:
             parts = rc.split(',')
@@ -520,42 +501,35 @@ def read_and_discretize_kml(kml_file, start_time, end_time, distance_step, veloc
                 lon_f, lat_f = float(parts[0]), float(parts[1])
                 alt_f = float(parts[2]) if len(parts) > 2 else 0.0
                 wgs_coords.append((lon_f, lat_f, alt_f))
-
         if len(wgs_coords) < 2:
             print("Pas assez de points pour discrétiser (LineString).")
             return None
-        
     else:
-        # 2) Pas de LineString => on récupère tous les <Placemark><Point> 
-        #    pour construire une "fausse polyligne".
-        print("Aucun <LineString> trouvé => on tente d'utiliser les <Point> pour reconstruire la trajectoire.")
+        print("Aucun <LineString> trouvé => utilisation des <Point> pour reconstruire la trajectoire.")
         wgs_coords = []
         for placemark in root.findall(".//kml:Placemark", ns):
             pt_elem = placemark.find(".//kml:Point/kml:coordinates", ns)
             if pt_elem is not None and pt_elem.text:
-                txt = pt_elem.text.strip()
-                if txt:
-                    parts = txt.split(',')
-                    if len(parts) >= 2:
-                        lon_f, lat_f = float(parts[0]), float(parts[1])
-                        alt_f = float(parts[2]) if len(parts) > 2 else 0.0
-                        wgs_coords.append((lon_f, lat_f, alt_f))
-
+                parts = pt_elem.text.strip().split(',')
+                if len(parts) >= 2:
+                    lon_f, lat_f = float(parts[0]), float(parts[1])
+                    alt_f = float(parts[2]) if len(parts) > 2 else 0.0
+                    wgs_coords.append((lon_f, lat_f, alt_f))
         if len(wgs_coords) < 2:
             print("Aucun LineString et moins de 2 <Point> => impossible de discrétiser.")
             return None
 
-    # Conversion des coordonnées en Lambert 93 (L93)
-    wgs2l93 = pyproj.Transformer.from_crs(4326, 2154, always_xy=True)
-    l93_coords = [wgs2l93.transform(lon, lat, alt) for lon, lat, alt in wgs_coords]
+    # Conversion des coordonnées de WGS84 en Lambert93 (L93)
+    transformer_wgs_to_l93 = pyproj.Transformer.from_crs(4326, 2154, always_xy=True)
+    l93_coords = [transformer_wgs_to_l93.transform(lon, lat, alt) for lon, lat, alt in wgs_coords]
 
+    # Définition de la fonction de calcul de distance 3D
     def dist3D(a, b):
         return math.sqrt((b[0] - a[0])**2 + (b[1] - a[1])**2 + (b[2] - a[2])**2)
 
-    # Préparation pour la boucle de "discrétisation" 
+    # Initialisation de la liste des points
     points = []
     current_time_sod = float(start_sec)
-
     seg_idx = 0
     seg_p1 = l93_coords[0]
     seg_p2 = l93_coords[1]
@@ -563,15 +537,20 @@ def read_and_discretize_kml(kml_file, start_time, end_time, distance_step, veloc
     seg_used = 0.0
     current_pt = seg_p1
 
-    l932wgs = pyproj.Transformer.from_crs(2154, 4326, always_xy=True)
+    # Transformer pour revenir de Lambert93 en WGS84
+    transformer_l93_to_wgs = pyproj.Transformer.from_crs(2154, 4326, always_xy=True)
 
+    # Définition de la fonction interne add_point
     def add_point(x, y, z, t_sod):
-        lon2, lat2, alt2 = l932wgs.transform(x, y, z)
+        # Si l'altitude est très faible, on la force à 45 m (ou la valeur souhaitée)
+        if z <= 1.0:
+            z = 45.0
+        lon2, lat2, alt2 = transformer_l93_to_wgs.transform(x, y, z)
         points.append({
             "time_sod": t_sod,
             "lat": lat2,
             "lon": lon2,
-            "H": alt2,
+            "H": alt2,  # altitude convertie
             "state": "R",
             "incert_pla": 0.02,
             "incert_hig": 0.03,
@@ -580,14 +559,13 @@ def read_and_discretize_kml(kml_file, start_time, end_time, distance_step, veloc
             "coordZ": z
         })
 
-    # Ajouter le premier point
+    # Ajout du premier point
     add_point(*current_pt, current_time_sod)
 
     done = False
     while not done:
         step = distance_step
         remain = seg_len - seg_used
-
         if step <= remain:
             ratio = (seg_used + step) / seg_len
             nx = seg_p1[0] + ratio * (seg_p2[0] - seg_p1[0])
@@ -606,7 +584,6 @@ def read_and_discretize_kml(kml_file, start_time, end_time, distance_step, veloc
                 seg_p2 = l93_coords[seg_idx + 1]
                 seg_len = dist3D(seg_p1, seg_p2)
                 seg_used = 0.0
-                # On traite dist_left sur le nouveau segment
                 if dist_left < seg_len:
                     ratio2 = dist_left / seg_len
                     nx = seg_p1[0] + ratio2 * (seg_p2[0] - seg_p1[0])
@@ -615,7 +592,7 @@ def read_and_discretize_kml(kml_file, start_time, end_time, distance_step, veloc
                     current_pt = (nx, ny, nz)
                     seg_used = dist_left
                 else:
-                    while dist_left >= seg_len and not done:
+                    while dist_left >= seg_len and seg_idx < len(l93_coords) - 1:
                         dist_left -= seg_len
                         seg_idx += 1
                         if seg_idx >= len(l93_coords) - 1:
@@ -625,7 +602,6 @@ def read_and_discretize_kml(kml_file, start_time, end_time, distance_step, veloc
                         seg_p2 = l93_coords[seg_idx + 1]
                         seg_len = dist3D(seg_p1, seg_p2)
                         seg_used = 0.0
-                    
                     if not done and dist_left > 0:
                         ratio3 = dist_left / seg_len
                         nx = seg_p1[0] + ratio3 * (seg_p2[0] - seg_p1[0])
@@ -637,51 +613,39 @@ def read_and_discretize_kml(kml_file, start_time, end_time, distance_step, veloc
         dt_sec = distance_step / velocity
         current_time_sod += dt_sec
         if current_time_sod > end_sec:
-            done = True
-
+            # Si current_time_sod est légèrement supérieur à end_sec et dans la tolérance de 20%
+            tolerance = 0.2 * (end_sec - start_sec)
+            if current_time_sod - end_sec <= tolerance:
+                print(f"[read_and_discretize_kml] current_time_sod {current_time_sod} clamped to end_sec {end_sec} (tolérance ok)")
+                current_time_sod = end_sec
+            else:
+                done = True
         if not done:
             add_point(*current_pt, current_time_sod)
+    df_points = pd.DataFrame(points)
+    print(f"[read_and_discretize_kml] Discrétisation terminée avec {len(df_points)} points.")
+    return df_points
 
-    return pd.DataFrame(points)
 
 
-def get_sat_infos_theorique(data, rinex_nav, interval_minutes=15):
+def get_sat_infos_theorique(data, rinex_nav, interval_minutes=1, max_tol_sec=3600):
     """
     Calcule les éphémérides théoriques des satellites pour chaque point contenu dans 'data'.
+    Pour chaque point (défini par sa colonne 'time_sod' et ses coordonnées 'coordX', 'coordY', 'coordZ'),
+    on associe l’éphéméride dont l’instant (base_date + time_sod) est le plus proche.
 
-    Paramètres :
-      - data (pd.DataFrame) : doit contenir une colonne 'time_sod' (temps en secondes depuis la date de base)
-                               ainsi que les coordonnées 'coordX', 'coordY' et 'coordZ'.
-      - rinex_nav (str) : chemin vers le fichier RINEX NAV.
-      - interval_minutes (int) : intervalle (en minutes) auquel les éphémérides sont calculées.
-
-    Retourne :
-      - sat_dict (dict) : dictionnaire indexé par instant (format "%Y %m %d %H %M %S") 
-                          (choisi comme l’instant le plus proche dans les calculs d’éphémérides
-                           avec une tolérance de 60 secondes) et contenant pour chaque clé :
-                              { "rcvr_infos": { ... },
-                                "sat_infos": { "G1": {...}, "G2": {...}, ... } }
-
-    Remarques :
-      - La date de base est fixée au 23/02/2024.
-      - La recherche de l’éphéméride se fait en comparant le temps réel du point (base_date + time_sod)
-        à chaque clé d’éphéméride et en choisissant celle dont l’écart est inférieur ou égal à 60 secondes.
+    Seuls les satellites dont (X, Y, Z) ≠ (0, 0, 0) et non NaN sont retenus.
+    
+    Le paramètre max_tol_sec (défaut 3600 sec) indique qu'on accepte même un écart important, 
+    mais on affiche un avertissement.
     """
-    # Charger les éphémérides depuis le fichier RINEX NAV
     Nav = orb.orbit()
     Nav.loadRinexN(rinex_nav)
-
-    # Date de référence fixée au 23/02/2024
     base_date = datetime(2024, 2, 23)
-
-    # 1) Construire la liste des instants réels à partir de la colonne "time_sod"
     dt_list = []
     for row in data.itertuples(index=True, name="Pandas"):
-        row_dict = row._asdict()
-        if 'time_sod' not in row_dict:
-            continue
         try:
-            t_sod = float(row_dict['time_sod'])
+            t_sod = float(row.time_sod)
         except Exception as e:
             print("Erreur de conversion de time_sod :", e)
             continue
@@ -689,14 +653,11 @@ def get_sat_infos_theorique(data, rinex_nav, interval_minutes=15):
     if not dt_list:
         print("Aucun temps valide trouvé dans les données.")
         return {}
-
     start_time = min(dt_list)
     end_time = max(dt_list)
-
-    # 2) Calculer les éphémérides théoriques à intervalles réguliers
     sat_epochs = {}
     current_time = start_time.replace(second=0, microsecond=0)
-    # "Snap" current_time au multiple inférieur de interval_minutes
+    # "Snap" current_time aux intervalles (interval_minutes)
     current_time = current_time.replace(minute=(current_time.minute // interval_minutes) * interval_minutes)
     while current_time <= end_time:
         key = current_time.strftime("%Y %m %d %H %M %S")
@@ -707,7 +668,7 @@ def get_sat_infos_theorique(data, rinex_nav, interval_minutes=15):
             for prn in range(1, 33):
                 try:
                     Xs, Ys, Zs, dte = Nav.calcSatCoord(const, prn, gnssdate)
-                    if not np.isnan(Xs):
+                    if (Xs, Ys, Zs) != (0, 0, 0) and not (np.isnan(Xs) or np.isnan(Ys) or np.isnan(Zs)):
                         sat_cepoch_dict[f"{const}{prn}"] = {
                             "X": Xs,
                             "Y": Ys,
@@ -715,20 +676,15 @@ def get_sat_infos_theorique(data, rinex_nav, interval_minutes=15):
                             "dte": dte
                         }
                 except Exception:
-                    pass
+                    continue
         sat_epochs[key] = sat_cepoch_dict
         current_time += timedelta(minutes=interval_minutes)
-
-    # 3) Pour chaque point de 'data', associer l'éphéméride la plus proche dans le temps (tolérance 60 sec)
     sat_dict = {}
     for row in data.itertuples(index=True, name="Pandas"):
-        row_dict = row._asdict()
-        if 'time_sod' not in row_dict:
-            continue
         try:
-            t_sod = float(row_dict['time_sod'])
+            t_sod = float(row.time_sod)
         except Exception as e:
-            print("Erreur de conversion de time_sod :", e)
+            print("Erreur de conversion de time_sod (boucle finale):", e)
             continue
         dt_point = base_date + timedelta(seconds=t_sod)
         best_key = None
@@ -739,181 +695,173 @@ def get_sat_infos_theorique(data, rinex_nav, interval_minutes=15):
             if diff < best_diff:
                 best_diff = diff
                 best_key = key
-        # On n'associe ce point que si l'écart est inférieur ou égal à 60 secondes
         if best_diff > 60:
-            continue
-
-        # Construction des informations du récepteur à partir des coordonnées
+            print(f"[get_sat_infos_theorique] Avertissement : Pour le point à {dt_point.strftime('%H:%M:%S')}, "
+                  f"l’écart minimal est de {best_diff:.1f} sec (supérieur à 60 sec).")
         rcvr_dict = {
-            "coordX": row_dict.get("coordX"),
-            "coordY": row_dict.get("coordY"),
-            "coordZ": row_dict.get("coordZ"),
-            "index": row_dict.get("index", 0)
+            "coordX": row.coordX,
+            "coordY": row.coordY,
+            "coordZ": row.coordZ,
+            "index": row.index
         }
-        e_, n_, bigH_, _, _ = XYZ_2_ENH(
-            rcvr_dict["coordX"], rcvr_dict["coordY"], rcvr_dict["coordZ"],
-            csts.grid_path
-        )
+        try:
+            e_, n_, bigH_, _, _ = XYZ_2_ENH(rcvr_dict["coordX"], rcvr_dict["coordY"], rcvr_dict["coordZ"], csts.grid_path)
+        except Exception as e:
+            print("Erreur dans XYZ_2_ENH pour point index", row.index, ":", e)
+            continue
         rcvr_dict["coordE"] = e_
         rcvr_dict["coordN"] = n_
         rcvr_dict["H"] = bigH_
-
-        sat_cepoch_dict = sat_epochs.get(best_key, {})
         sat_dict[best_key] = {
             "rcvr_infos": rcvr_dict,
-            "sat_infos": sat_cepoch_dict
+            "sat_infos": sat_epochs.get(best_key, {})
         }
+        print(f"[get_sat_infos_theorique] Pour le point index {row.index} à {dt_point.strftime('%H:%M:%S')}, clé retenue: {best_key}")
     return sat_dict
 
 
 def compute_collisions(sat_dict, building_dict, dist_building=300, show=False):
+    # Transformer les coordonnées satellites depuis ECEF (EPSG:4978) vers Lambert93 (EPSG:2154)
+    transformer_sat_to_l93 = pyproj.Transformer.from_crs("EPSG:4978", "EPSG:2154", always_xy=True)
+    
     for ekey in sat_dict:
-        xr = sat_dict[ekey]["rcvr_infos"]["coordX"]
-        yr = sat_dict[ekey]["rcvr_infos"]["coordY"]
-        zr = sat_dict[ekey]["rcvr_infos"]["coordZ"]
-        er = sat_dict[ekey]["rcvr_infos"]["coordE"]
-        nr = sat_dict[ekey]["rcvr_infos"]["coordN"]
-        Hr = sat_dict[ekey]["rcvr_infos"]["H"]
-        if show:
-            print(f'Processing epoch {ekey} with {len(sat_dict[ekey]["sat_infos"])} satellites')
-        for skey in sat_dict[ekey]["sat_infos"]:
-            xs = sat_dict[ekey]["sat_infos"][skey]["X"]
-            ys = sat_dict[ekey]["sat_infos"][skey]["Y"]
-            zs = sat_dict[ekey]["sat_infos"][skey]["Z"]
-            if not np.isnan([xs, ys, zs]).any():
-                xn, yn, zn = pt_along_line((xr, yr, zr), (xs, ys, zs))
-                en, nn, Hn, lon, lat = XYZ_2_ENH(xn, yn, zn, csts.grid_path)
-                sat_dict[ekey]["sat_infos"][skey]["lon_apparente"] = lon
-                sat_dict[ekey]["sat_infos"][skey]["lat_apparente"] = lat
-                sat_dict[ekey]["sat_infos"][skey]["H_apparente"] = Hn
-                if show:
-                    print(f"Checking satellite {skey} with {len(building_dict)} buildings")
-                collision_detected = False
-                for bkey in building_dict:
-                    base_coords = np.array(building_dict[bkey]["base_coords"])
-                    distances = np.linalg.norm(base_coords - np.array([er, nr, Hr]), axis=1)
-                    distance = np.min(distances)
-                    if distance < dist_building:
-                        aabb_min = np.min(building_dict[bkey]["base_coords"], axis=0)
-                        aabb_max = np.max(building_dict[bkey]["roof_coords"], axis=0)
-                        if show:
-                            print(f"Checking building {bkey} with aabb_min={np.array2string(aabb_min, precision=1, suppress_small=True)}, aabb_max={np.array2string(aabb_max, precision=1, suppress_small=True)}")
-                        collision_status, _, _ = segment_intersects_bbox(
-                            np.array([er, nr, Hr]),
-                            np.array([en, nn, Hn]),
-                            aabb_min,
-                            aabb_max
-                        )
-                        if collision_status:
-                            collision_detected = True
-                            if show:
-                                print(f"Collision detected with building {bkey}")
-                            break
-                    if collision_detected:
+        rcvr = sat_dict[ekey]["rcvr_infos"]
+        xr, yr, zr = rcvr["coordX"], rcvr["coordY"], rcvr["coordZ"]
+        
+        for skey, sat in sat_dict[ekey]["sat_infos"].items():
+            xs_orig, ys_orig, zs_orig = sat["X"], sat["Y"], sat["Z"]
+            # Si les coordonnées satellites sont invalides, on marque le satellite comme "UNKNOWN"
+            if np.isnan(xs_orig) or np.isnan(ys_orig) or np.isnan(zs_orig):
+                sat["status"] = "UNKNOWN"
+                sat["Building ID"] = "None"
+                continue
+
+            # Transformation des coordonnées satellites depuis ECEF vers Lambert93
+            try:
+                xs, ys, zs = transformer_sat_to_l93.transform(xs_orig, ys_orig, zs_orig)
+            except Exception:
+                sat["status"] = "UNKNOWN"
+                sat["Building ID"] = "None"
+                continue
+
+            # Calcul d'un point intermédiaire sur la ligne entre le récepteur et le satellite
+            try:
+                # Ici, on choisit une distance fixe (par exemple 1000 m) le long de la ligne
+                xn, yn, zn = pt_along_line((xr, yr, zr), (xs, ys, zs), distance=1000)
+            except Exception:
+                sat["status"] = "UNKNOWN"
+                sat["Building ID"] = "None"
+                continue
+
+            # Pour le test d'intersection, on utilise directement ce point intermédiaire
+            en, nn, Hn = xn, yn, zn
+
+            collision_detected = False
+            # Parcours de chaque bâtiment pour vérifier une éventuelle collision
+            for bkey, building in building_dict.items():
+                base_coords = np.array(building["base_coords"])
+                distances = np.linalg.norm(base_coords - np.array([xr, yr, zr]), axis=1)
+                if np.min(distances) < dist_building:
+                    aabb_min = np.min(building["base_coords"], axis=0)
+                    aabb_max = np.max(building["roof_coords"], axis=0)
+                    collision_status, _, _ = segment_intersects_bbox(
+                        np.array([xr, yr, zr]),
+                        np.array([en, nn, Hn]),
+                        aabb_min,
+                        aabb_max
+                    )
+                    if collision_status:
+                        collision_detected = True
+                        b_detected = bkey  # sauvegarde l'ID du bâtiment en collision
                         break
-                if collision_detected:
-                    sat_dict[ekey]["sat_infos"][skey]["status"] = "NLOS"
-                    sat_dict[ekey]["sat_infos"][skey]["Building ID"] = bkey
-                else:
-                    sat_dict[ekey]["sat_infos"][skey]["status"] = "LOS"
-                    sat_dict[ekey]["sat_infos"][skey]["Building ID"] = "None"
+
+            if collision_detected:
+                sat["status"] = "NLOS"
+                sat["Building ID"] = b_detected
             else:
-                sat_dict[ekey]["sat_infos"][skey]["status"] = "UNKNOWN"
-                sat_dict[ekey]["sat_infos"][skey]["Building ID"] = "None"
+                sat["status"] = "LOS"
+                sat["Building ID"] = "None"
     return sat_dict
 
 
 def compute_optimal_window_from_kml(kml_file, rinex_nav_file, buildings_dict,
-                                    start_time, end_time, distance_step,
-                                    velocity, time_step_sec=1800,
-                                    output_csv="resultats_optimal_window.csv"):
+                                    start_time, end_time, distance_step, velocity,
+                                    time_step_sec=900, output_csv="resultats_optimal_window.csv"):
     """
-    Utilise la discrétisation d'un fichier KML pour calculer, pour chaque point,
-    l'instant (entre start_time et end_time) où le nombre de satellites LOS est maximal.
-    
-    Paramètres :
-      - kml_file (str) : chemin du fichier KML.
-      - rinex_nav_file (str) : chemin du fichier RINEX NAV.
-      - buildings_dict (dict) : dictionnaire des bâtiments.
-      - start_time (str) : heure de départ au format "HHhMM" (ex: "10h00").
-      - end_time (str) : heure de fin au format "HHhMM" (ex: "16h00").
-      - distance_step (float) : pas de discrétisation en mètres.
-      - velocity (float) : vitesse en m/s.
-      - time_step_sec (int) : intervalle de temps entre les tests (en secondes).
-      - output_csv (str) : fichier CSV dans lequel enregistrer les résultats.
-    
-    Retourne :
-      - Un DataFrame avec pour chaque point l’index, la latitude, la longitude, la hauteur,
-        l’heure optimale (formatée en HH:MM:SS) et le nombre maximal de satellites LOS.
-    
-    Remarque : La date de base pour la simulation est fixée dans get_sat_infos_theorique (ici 23/02/2024).
-    """
-    import sys  # pour forcer la sortie du script à la fin
+    Pour chaque point discrétisé de la trajectoire (issu du KML), simule à intervalles de temps
+    (time_step_sec) entre start_time et (end_time + 1h) pour déterminer l’instant où le nombre de
+    satellites LOS est maximal (après détection de collisions via la BD TOPO).
 
-    # Vérification de l'existence du fichier RINEX NAV
+    Pour chaque point, on conserve deux listes (affichées en debug) des temps simulés et des Nb LOS.
+    """
+    import sys
+
     if not os.path.exists(rinex_nav_file):
         print(f"Fichier RINEX NAV introuvable: {rinex_nav_file}")
         return None
 
-    # Discrétisation du fichier KML (on suppose que read_and_discretize_kml est déjà corrigé)
     points_list = read_and_discretize_kml(kml_file, start_time, end_time, distance_step, velocity)
-    if points_list is None or len(points_list) == 0:
+    if points_list is None or points_list.empty:
         print("Erreur : Aucun point extrait de la trajectoire KML.")
         return None
 
-    # Fonction de conversion d'une heure au format "HHhMM" en secondes depuis minuit.
     def parse_time(hhmm):
         hh, mm = map(int, hhmm.replace("h", ":").split(":"))
         return hh * 3600 + mm * 60
 
     global_end_sec = parse_time(end_time)
+    # Nous étendons la simulation jusqu'à end_time + 1 heure
+    simulation_end = global_end_sec + 3600
+
     results = []
+    print("\n[compute_optimal_window_from_kml] Début de la simulation de la fenêtre optimale.")
 
-    def get_los_count_for_point(pt, t_sod):
-        """
-        Retourne le nombre de satellites LOS à un instant donné pour un point.
-        La date de base utilisée dans get_sat_infos_theorique est celle fixée (23/02/2024).
-        Le paramètre quiet est ici forcé à True pour éviter des impressions répétitives.
-        """
-        df_pt = pd.DataFrame([{
-            "time_sod": t_sod,
-            "lat": pt["lat"],
-            "lon": pt["lon"],
-            "H": pt["H"],
-            "coordX": pt["coordX"],
-            "coordY": pt["coordY"],
-            "coordZ": pt["coordZ"],
-            "index": 0
-        }])
-        # On passe quiet=True pour supprimer les messages répétitifs
-        sat_dict = get_sat_infos_theorique(df_pt, rinex_nav_file, interval_minutes=15)
-        if not sat_dict or len(sat_dict.keys()) == 0:
-            return 0
-
-        # On prend la seule clé (issue de df_pt)
-        date_key = list(sat_dict.keys())[0]
-        sat_dict_collided = compute_collisions(sat_dict, buildings_dict, dist_building=300, show=False)
-        if date_key not in sat_dict_collided:
-            return 0
-        local_sat_infos = sat_dict_collided[date_key]["sat_infos"]
-        count_los = sum(1 for v in local_sat_infos.values() if v.get("status", "UNKNOWN") == "LOS")
-        return count_los
-
-    # Pour chaque point, simuler de son instant (time_sod) jusqu'à global_end_sec
     for i, pt in points_list.iterrows():
         pt_time = pt["time_sod"]
         best_time = pt_time
         best_los = -1
+
+        simulation_times = []  # liste des temps simulés pour ce point
+        simulation_los = []    # liste du Nb LOS pour chaque temps simulé
+
         t = float(pt_time)
-        while t <= global_end_sec:
-            n_los = get_los_count_for_point(pt, t)
+        print(f"\n[Point {i}] Coordonnées: ({pt['lon']:.6f}, {pt['lat']:.6f}), H = {pt['H']:.2f}, time_sod = {pt_time}")
+        while t <= simulation_end:
+            t_eval = t
+            # Si t dépasse global_end_sec, on le garde tel quel (aucun "clamp" ici)
+            print(f"  Simulation pour t = {t_eval} sec depuis minuit")
+            df_pt = pd.DataFrame([{
+                "time_sod": t_eval,
+                "lat": pt["lat"],
+                "lon": pt["lon"],
+                "H": pt["H"],
+                "coordX": pt["coordX"],
+                "coordY": pt["coordY"],
+                "coordZ": pt["coordZ"],
+                "index": 0
+            }])
+            sat_dict = get_sat_infos_theorique(df_pt, rinex_nav_file, interval_minutes=15)
+            if not sat_dict or len(sat_dict.keys()) == 0:
+                n_los = 0
+            else:
+                date_key = list(sat_dict.keys())[0]
+                print(f"    Éphéméride associée: {date_key}")
+                sat_dict_collided = compute_collisions(sat_dict, buildings_dict, dist_building=300, show=True)
+                local_sat_infos = sat_dict_collided.get(date_key, {}).get("sat_infos", {})
+                n_los = sum(1 for v in local_sat_infos.values() if v.get("status", "UNKNOWN") == "LOS")
+            print(f"    Nombre de satellites LOS pour ce point = {n_los}")
+            simulation_times.append(t_eval)
+            simulation_los.append(n_los)
             if n_los > best_los:
                 best_los = n_los
-                best_time = t
+                best_time = t_eval
+                print(f"    Nouvelle meilleure fenêtre: t = {t_eval} (Nb LOS = {best_los})")
             t += time_step_sec
-        # Convertir best_time (en secondes depuis minuit) en format HH:MM:SS.
-        optimal_time_str = (datetime.utcfromtimestamp(best_time)
-                             .strftime("%H:%M:%S"))
+
+        print(f"  Liste des temps simulés pour le point {i}: {simulation_times}")
+        print(f"  Liste des Nb LOS pour le point {i}: {simulation_los}")
+
+        optimal_time_str = datetime.utcfromtimestamp(best_time).strftime("%H:%M:%S")
         results.append({
             "Point Index": i,
             "Latitude": pt["lat"],
@@ -928,10 +876,7 @@ def compute_optimal_window_from_kml(kml_file, rinex_nav_file, buildings_dict,
     print(df_results)
     df_results.to_csv(output_csv, index=False)
     print(f"\nLes résultats ont été enregistrés dans '{output_csv}'.")
-
-    # Pour éviter que le script ne se relance, on termine ici.
     sys.exit(0)
-
 
 def draw_collision_rays(sat_dict, kml_layer):
     line_style_dict = {}
