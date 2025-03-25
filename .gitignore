@@ -4,3 +4,5 @@ __pycache__ directory
 src/.DS_Store
 __pycache__
 *.kml
+*.poly
+*.csv
