@@ -143,7 +143,7 @@ if __name__ == "__main__":
                 end_time=args.end_time_kml,
                 distance_step=args.dist_step_kml,
                 velocity=args.velocity_kml,
-                time_step_sec=600,
+                time_step_sec=60,
                 output_csv="resultats_optimal_window_kml.csv",
                 mnt = args.mnt
             )

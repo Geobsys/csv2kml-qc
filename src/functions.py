@@ -2,20 +2,18 @@
 
 """
 @authors:
-		 mehdi daakir
-		 gabin bourlon
-		 axel debock
-		 felix mercier
-		 clement cambours
-		 liu zijan
+    mehdi daakir
+    gabin bourlon
+    axel debock
+    felix mercier
+    clement cambours
+    liu zijan
 """
 
 ###########
 # Imports :
 ###########
-# Python files:
 import csts
-# Packages:
 import numpy as np
 import pyproj                       # Coordinates transformations
 import fiona                        # Shapefile management
@@ -33,19 +31,18 @@ import sys
 
 """ Creation of a kml point """
 def custom_pt(
-    kml, # simplekml object
-    pt,  # a point from imported data, pd.DataFrame object
-    mode="icon", # point representation, string
-    name="", # point name, string
-    desc="", # point description, string
-    label_scale=2, # point name scale, int
-    icon_scale=1, # point icon scale, int
-    icon_href="http://maps.google.com/mapfiles/kml/shapes/placemark_circle.png", # point icon reference, string
-    show_pt_name=False, # show the point name, bool
-    altitude_mode="absolute" # altitude mode in kml, string ("absolute","relativeToGround","clampToGround")
+    kml,
+    pt,
+    mode="icon",
+    name="",
+    desc="",
+    label_scale=2,
+    icon_scale=1,
+    icon_href="http://maps.google.com/mapfiles/kml/shapes/placemark_circle.png",
+    show_pt_name=False,
+    altitude_mode="absolute"
 ):
     if mode=="icon":
-        # append a point to the simplekml object
         pnt = kml.newpoint(
             altitudemode=altitude_mode,
             description=desc
@@ -59,19 +56,18 @@ def custom_pt(
         pnt.style.iconstyle.color = csts.colors_dict[csts.status_dict[pt['state']]["color"]]
         pnt.style.iconstyle.scale = icon_scale
         pnt.style.iconstyle.icon.href = icon_href
-
     return None
 
 """ Creation of a kml line """
 def custom_line(
-    kml,  # simplekml object
-    pts_coords, # list of tuples (2 or 3 floats)
-    status="None", # GNSS measure status (R, F, N or None), string
-    mode="line", # line representation, string
-    name="", # line name, string
-    description="", # line description, string
-    width=1, # line width, int
-    altitudemode="absolute" # altitude mode in kml
+    kml,
+    pts_coords,
+    status="None",
+    mode="line",
+    name="",
+    description="",
+    width=1,
+    altitudemode="absolute"
 ):
     if mode=="line":
         ls = kml.newlinestring(name=name, description=description, altitudemode=altitudemode)
@@ -83,21 +79,21 @@ def custom_line(
 
 """ Creation of a kml confidence interval """
 def custom_int_conf(
-    kml,  # simplekml object
-    pt,   # point (pandas Series)
-    mode="pyr",  # representation mode
-    name="",     # name for the interval
-    altitudemode="absolute", # altitude mode in kml
-    color=csts.colors_dict["green"],  # confidence interval color
-    incert_pla_factor_E=1e5,  # scale factor meters to degrees Est, float
-    incert_pla_factor_N=1e5,  # scale factor meters to degrees North, float
-    scale_factor_pla=1,       # planimetric scale factor, float
-    incert_pla_max=np.nan,    # maximum planimetric uncertainty, float
-    scale_factor_hig=1,       # altimetric scale factor, float
-    incert_hig_max=np.nan     # maximum altimetric uncertainty, float
+    kml,
+    pt,
+    mode="pyr",
+    name="",
+    altitudemode="absolute",
+    color=csts.colors_dict["green"],
+    incert_pla_factor_E=1e5,
+    incert_pla_factor_N=1e5,
+    scale_factor_pla=1,
+    incert_pla_max=np.nan,
+    scale_factor_hig=1,
+    incert_hig_max=np.nan
 ):
     if mode=="pyr":
-        # Adjust uncertainties with limits and scale factors
+        # Ajuster incertitudes selon limites/facteurs
         if not np.isnan(incert_pla_max) and pt["incert_pla"] > incert_pla_max:
             pt["incert_pla"] = incert_pla_max
         pt["incert_pla"] *= scale_factor_pla
@@ -105,11 +101,11 @@ def custom_int_conf(
             pt["incert_hig"] = incert_hig_max
         pt["incert_hig"] *= scale_factor_hig
 
-        # Convert uncertainties from meters to degrees
+        # Conversion en degrés (approx)
         incert_lon = pt["incert_pla"] * incert_pla_factor_E
         incert_lat = pt["incert_pla"] * incert_pla_factor_N
 
-        # Compute pyramid corners
+        # Sommets du "pyramide"
         corners = np.array([
             (pt["lon"]-incert_lon, pt["lat"],           pt["H"]),
             (pt["lon"],            pt["lat"]+incert_lat, pt["H"]),
@@ -121,39 +117,35 @@ def custom_int_conf(
         conf_int = [pt["incert_pla"], pt["incert_hig"], incert_lat, incert_lon]
         description_text = gen_description_conf_int(conf_int)
 
-        # Create four pyramid faces
+        # 4 faces
         for face in [[0,1], [1,2], [2,3], [3,0]]:
             pol = kml.newpolygon(name=name, description=description_text, altitudemode=altitudemode, extrude=0)
             pol.outerboundaryis = [corners[face[0]], corners[face[1]], corners[-1], corners[face[0]]]
             pol.style.polystyle.color = color
-
     return None
 
 """ Creation of a kml frustum """
 def custom_frustum(
-    kml,  # simplekml object
-    pt,   # point (pandas Series)
-    product_rotation_matrix, # rotation matrix (numpy array)
-    mode="fur",  # representation mode
-    name="",     # frustum name
-    description="",  # description
-    altitudemode="absolute", # altitude mode
-    incert_pla_factor_E=1e-5, # scale factor for meters->degrees (Est)
-    incert_pla_factor_N=1e-5, # scale factor for meters->degrees (North)
-    fr_sensor=1,      # sensor size
-    fr_focal=10,      # focal length
-    fr_distance=5,    # distance between near and far faces
+    kml,
+    pt,
+    product_rotation_matrix,
+    mode="fur",
+    name="",
+    description="",
+    altitudemode="absolute",
+    incert_pla_factor_E=1e-5,
+    incert_pla_factor_N=1e-5,
+    fr_sensor=1,
+    fr_focal=10,
+    fr_distance=5
 ):
     if mode == "fur":
         far = (fr_sensor / fr_focal * fr_distance)
-        # Ici, on s'attend à ce que pt possède 'lon', 'lat', et 'altitude'
-        # On peut utiliser 'height' ou 'H' selon le cas. Ici, on choisit 'altitude'
         lon, lat, altitude = pt['lon'], pt['lat'], pt['altitude'] if 'altitude' in pt else pt['H']
         oX, oY, oZ = pt['oX'], pt['oY'], pt['oZ']
 
-        # Rotation matrices (local camera orientation)
         rotation_matrixX = np.array([
-            [1,           0,            0],
+            [1, 0, 0],
             [0, np.cos(oX), -np.sin(oX)],
             [0, np.sin(oX),  np.cos(oX)]
         ])
@@ -179,15 +171,12 @@ def custom_frustum(
             [ 0,        -far     , fr_distance + fr_focal]
         ]
 
-        # Rotate the frustum into the geographical reference frame
         frustum_o = np.array(frustum) @ (rotation_matrixX @ rotation_matrixY @ rotation_matrixZ) @ product_rotation_matrix
 
-        # Translate the frustum points into WGS84 coordinates
         frustum_o[:,0] *= incert_pla_factor_E
         frustum_o[:,1] *= incert_pla_factor_N
         frustum_o += np.array([lon, lat, altitude])
 
-        # Create near and far polygons and the connecting lines
         pol = kml.newpolygon(name=name, description=description, altitudemode=altitudemode, extrude=0)
         pol.outerboundaryis = [tuple(frustum_o[i]) for i in range(4)] + [tuple(frustum_o[0])]
         pol.style.polystyle.color = simplekml.Color.blue
@@ -202,7 +191,6 @@ def custom_frustum(
             lin.altitudemode = altitudemode
             lin.style.linestyle.width = 2
             lin.style.linestyle.color = simplekml.Color.orange
-
     return None
 
 """ Generate a description text for a point """
@@ -219,6 +207,7 @@ def gen_description_pt(pt, max_index):
             else:
                 value = f"{pt[i]} {csts.param_dict.get(i, {}).get('unity', '')}"
         else:
+            # On formate la durée en hh/mm/ss
             value = f"{int(pt[i]//3600)}h {int((pt[i]%3600)//60)}min {round((pt[i]%3600)%60,3)}s"
         if i in csts.param_dict:
             text += f'<tr><td style="text-align: left;">{csts.param_dict[i]["name"]}</td><td style="text-align: left;">{value}</td></tr>\n'
@@ -312,10 +301,12 @@ def shp2kml(shp_file, kml, show=False):
                         if show:
                             print(f"Inserted {building_id} into buildings_infos")
                             print("Current dictionary keys:", list(buildings_infos.keys()))
+                    # Conversion en WGS84 pour le dessin KML
                     building_ground_coords = building_ground_coords.reshape((len(building_ground_coords), 3))[:, :2]
                     transformer = pyproj.Transformer.from_crs(2154, 4326)
                     coordsWGS = transformer.transform(building_ground_coords[:, :1], building_ground_coords[:, 1:2])
                     coords = [(coordsWGS[1][i][0], coordsWGS[0][i][0], building_height) for i in range(len(building_ground_coords))]
+
                     pol = kml.newpolygon(
                         name=building['properties']['ID'],
                         altitudemode="relativeToGround"
@@ -335,16 +326,25 @@ def shp2kml(shp_file, kml, show=False):
     return buildings_infos
 
 def llh_2_XYZ(lon, lat, h):
+    """
+    Convertit (lon, lat, h) ellipsoïdal WGS84 vers (X, Y, Z) EPSG:4964 (ECEF).
+    """
     transformer = pyproj.Transformer.from_crs(4326, 4964)
     coord_XYZ = transformer.transform(lat, lon, h)
     return np.array(coord_XYZ)
 
 def XYZ_2_ENh(X, Y, Z):
+    """
+    Convertit (X, Y, Z) ECEF (EPSG:4964) vers (E, N, h) Lambert-93 "2.5D".
+    """
     transformer = pyproj.Transformer.from_crs(4964, 2154)
     coord_ENh = transformer.transform(X, Y, Z)
     return np.array(coord_ENh)
 
 def llh_2_llH(lon, lat, h, grid_path=csts.grid_path):
+    """
+    Convertit h ellipsoïdal en H orthométrique (via un fichier de grille).
+    """
     try:
         transformer = pyproj.Transformer.from_pipeline("cct +proj=vgridshift +grids=" + grid_path)
         coord_LLH = transformer.transform(lon, lat, h)
@@ -357,15 +357,29 @@ def llh_2_llH(lon, lat, h, grid_path=csts.grid_path):
         return None
 
 def XYZ_2_ENH(X, Y, Z, grid_path=csts.grid_path):
+    """
+    Convertit (X, Y, Z) ECEF (EPSG:4964) en (E, N, H) Lambert-93 + alt. orthométrique.
+    Renvoie aussi (lon, lat) WGS84 si besoin.
+    """
+    # 1) ECEF => (lat, lon, h) ellipsoïdal
     transformer1 = pyproj.Transformer.from_crs(4964, 4326)
     coordLLh = transformer1.transform(X, Y, Z)
+
+    # 2) h ellipsoïdal => H orthométrique
     transformer2 = pyproj.Transformer.from_pipeline("cct +proj=vgridshift +grids=" + grid_path)
     coordLLH = transformer2.transform(coordLLh[1], coordLLh[0], coordLLh[2])
+
+    # 3) (lat, lon, H) => Lambert-93
     transformer3 = pyproj.Transformer.from_crs(4326, 2154)
     coordENH = transformer3.transform(coordLLH[1], coordLLH[0], coordLLH[2])
+
+    # On renvoie (E, N, H_ortho, lon, lat)
     return coordENH[0], coordENH[1], coordENH[2], coordLLH[0], coordLLH[1]
 
 def ENH_2_XYZ(pts, grid_path):
+    """
+    Convertit un tableau (E, N, H ortho) Lambert-93 => ECEF (X, Y, Z).
+    """
     pts = np.array(pts)
     result = np.zeros_like(pts)
     transformer1 = pyproj.Transformer.from_crs(2154, 4326)
@@ -381,6 +395,9 @@ def ENH_2_XYZ(pts, grid_path):
     return result
 
 def ENh_2_llh(E, N, h):
+    """
+    Convertit un point (E, N, h) Lambert-93 "2.5D" => (lat, lon, h) WGS84.
+    """
     transformer = pyproj.Transformer.from_crs(2154, 4326)
     coord_llh = transformer.transform(E, N, h)
     return np.array(coord_llh)
@@ -961,7 +978,7 @@ def compute_optimal_window_from_log(data, rinex_nav_file, buildings_dict,
         # Variables de recherche "meilleure fenêtre"
         best_los = -1
         best_time = point_time
-        best_nlos = 0
+        best_obs = 0
         simulation_times = []
         simulation_los = []
 
@@ -1035,9 +1052,13 @@ def compute_optimal_window_from_log(data, rinex_nav_file, buildings_dict,
             # Dictionnaire local pour collisions
             # => On place le récepteur en Lambert93 + H ortho
             rcvr_dict = {
-                "coordX": E_l93,
-                "coordY": N_l93,
-                "coordZ": H_ortho
+                "coordX": coordX,
+                "coordY": coordY,
+                "coordZ": coordZ,
+                "coordE": E_l93,
+                "coordN": N_l93,
+                "H": H_ortho,
+                # éventuellement "lon" et "lat" si utile ...
             }
 
             current_sat_dict = {
@@ -1048,7 +1069,7 @@ def compute_optimal_window_from_log(data, rinex_nav_file, buildings_dict,
             }
 
             if not current_sat_dict or len(current_sat_dict.keys()) == 0:
-                n_los, n_nlos = 0, 0
+                n_los, n_obs = 0, 0
             else:
                 sim_key = list(current_sat_dict.keys())[0]
                 print(f"    [DEBUG] Collision check => Epoch: {sim_key}")
@@ -1058,7 +1079,7 @@ def compute_optimal_window_from_log(data, rinex_nav_file, buildings_dict,
                 n_los = sum(1 for v in local_sat_infos.values() if v.get("status", "UNKNOWN") == "LOS")
                 n_nlos = sum(1 for v in local_sat_infos.values() if v.get("status", "UNKNOWN") == "NLOS")
 
-            print(f"    [DEBUG] LOS={n_los}, NLOS={n_nlos} (t_eval={t_eval}s)")
+            print(f"    [DEBUG] LOS={n_los}, NLOS={n_obs} (t_eval={t_eval}s)")
             simulation_times.append(t_eval)
             simulation_los.append(n_los)
 
@@ -1066,13 +1087,13 @@ def compute_optimal_window_from_log(data, rinex_nav_file, buildings_dict,
             if n_los > best_los:
                 best_los = n_los
                 best_time = t_eval
-                best_nlos = n_nlos
+                best_obs = n_obs
 
             t += time_step_sec
 
         # Fin simulation sur ce point
         optimal_time_str = datetime.utcfromtimestamp(best_time).strftime("%H:%M:%S")
-        score = compute_score(best_los, best_nlos, best_time, sim_start=0, sim_end=86399)
+        score = compute_score(best_los, best_obs, best_time, sim_start=0, sim_end=86399)
 
         # Enregistrement résultat
         results.append({
@@ -1104,69 +1125,92 @@ def compute_optimal_window_from_log(data, rinex_nav_file, buildings_dict,
 #########################################
 # ... custom_pt, custom_line, custom_int_conf, custom_frustum, gen_description_pt, etc.
 
-def compute_collisions(sat_dict, building_dict, dist_building=300, show=False):
-    # Transformer les coordonnées satellites depuis ECEF (EPSG:4978) vers Lambert93 (EPSG:2154)
-    transformer_sat_to_l93 = pyproj.Transformer.from_crs("EPSG:4978", "EPSG:2154", always_xy=True)
+def compute_collisions(
+    sat_dict,
+    building_dict,
+    dist_building=300,  # zone de proximité autour du récepteur
+    show=False
+):
+    """
+    Utilise pt_along_line + XYZ_2_ENH pour convertir le point intermédiaire
+    en Lambert-93 (E,N,H) + lat/lon. Vérifie la collision dans l'AABB du bâtiment.
     
+    => status "NLOS" si collision
+    => status "LOS" si aucun
+    => status "UNKNOWN" si coords invalides
+    """
     for ekey in sat_dict:
-        rcvr = sat_dict[ekey]["rcvr_infos"]
-        xr, yr, zr = rcvr["coordX"], rcvr["coordY"], rcvr["coordZ"]
+
+        # Récup coords ECEF du récepteur
+        xr = sat_dict[ekey]["rcvr_infos"]["coordX"]
+        yr = sat_dict[ekey]["rcvr_infos"]["coordY"]
+        zr = sat_dict[ekey]["rcvr_infos"]["coordZ"]
         
-        for skey, sat in sat_dict[ekey]["sat_infos"].items():
-            xs_orig, ys_orig, zs_orig = sat["X"], sat["Y"], sat["Z"]
-            #print(xs_orig, ys_orig, zs_orig)
-            # Si les coordonnées satellites sont invalides, on marque le satellite comme "UNKNOWN"
-            if np.isnan(xs_orig) or np.isnan(ys_orig) or np.isnan(zs_orig):
-                sat["status"] = "UNKNOWN"
-                sat["Building ID"] = "None"
-                continue
+        # Récup coords ENH du récepteur (si besoin)
+        er = sat_dict[ekey]["rcvr_infos"]["coordE"]
+        nr = sat_dict[ekey]["rcvr_infos"]["coordN"]
+        Hr = sat_dict[ekey]["rcvr_infos"]["H"]
 
-            # Transformation des coordonnées satellites depuis ECEF vers Lambert93
-            try:
-                xs, ys, zs = transformer_sat_to_l93.transform(xs_orig, ys_orig, zs_orig)
-                #print(xs, ys, zs)
-            except Exception:
-                sat["status"] = "UNKNOWN"
-                sat["Building ID"] = "None"
-                continue
+        if show:
+            print(f'[compute_collisions] Epoch {ekey} => {len(sat_dict[ekey]["sat_infos"])} satellites')
 
-            # Calcul d'un point intermédiaire sur la ligne entre le récepteur et le satellite
-            try:
-                # Ici, on choisit une distance fixe (par exemple 1000 m) le long de la ligne
+        # Pour chaque satellite
+        for skey in sat_dict[ekey]["sat_infos"]:
+            xs = sat_dict[ekey]["sat_infos"][skey]["X"]
+            ys = sat_dict[ekey]["sat_infos"][skey]["Y"]
+            zs = sat_dict[ekey]["sat_infos"][skey]["Z"]
+
+            # Vérif coords valides
+            if not np.isnan([xs, ys, zs]).any():
+                
+                # Point le long de la ligne
                 xn, yn, zn = pt_along_line((xr, yr, zr), (xs, ys, zs), distance=1000)
-            except Exception:
-                sat["status"] = "UNKNOWN"
-                sat["Building ID"] = "None"
-                continue
 
-            # Pour le test d'intersection, on utilise directement ce point intermédiaire
-            en, nn, Hn = xn, yn, zn
+                # Conversion en E, N, H + lon/lat apparents
+                en, nn, Hn, lon_app, lat_app = XYZ_2_ENH(xn, yn, zn, csts.grid_path)
 
-            collision_detected = False
-            # Parcours de chaque bâtiment pour vérifier une éventuelle collision
-            for bkey, building in building_dict.items():
-                base_coords = np.array(building["base_coords"])
-                distances = np.linalg.norm(base_coords - np.array([xr, yr, zr]), axis=1)
-                if np.min(distances) < dist_building:
-                    aabb_min = np.min(building["base_coords"], axis=0)
-                    aabb_max = np.max(building["roof_coords"], axis=0)
-                    collision_status, _, _ = segment_intersects_bbox(
-                        np.array([xr, yr, zr]),
-                        np.array([en, nn, Hn]),
-                        aabb_min,
-                        aabb_max
-                    )
-                    if collision_status:
-                        collision_detected = True
-                        b_detected = bkey  # sauvegarde l'ID du bâtiment en collision
-                        break
+                # Stockage pour le KML
+                sat_dict[ekey]["sat_infos"][skey]["lon_apparente"] = lon_app
+                sat_dict[ekey]["sat_infos"][skey]["lat_apparente"] = lat_app
+                sat_dict[ekey]["sat_infos"][skey]["H_apparente"]   = Hn
 
-            if collision_detected:
-                sat["status"] = "NLOS"
-                sat["Building ID"] = b_detected
+                collision_detected = False
+
+                # Pour chaque bâtiment
+                for bkey in building_dict:
+                    base_coords = np.array(building_dict[bkey]["base_coords"])
+                    # Distance min par rapport à la base
+                    distances = np.linalg.norm(base_coords - np.array([er, nr, Hr]), axis=1)
+                    distance_min = np.min(distances)
+
+                    # Si c'est dans la zone dist_building
+                    if distance_min < dist_building:
+                        aabb_min = np.min(building_dict[bkey]["base_coords"], axis=0)
+                        aabb_max = np.max(building_dict[bkey]["roof_coords"], axis=0)
+
+                        collision_status, _, _ = segment_intersects_bbox(
+                            np.array([er, nr, Hr]),
+                            np.array([en, nn, Hn]),
+                            aabb_min,
+                            aabb_max
+                        )
+                        if collision_status:
+                            collision_detected = True
+                            sat_dict[ekey]["sat_infos"][skey]["Building ID"] = bkey
+                            if show:
+                                print(f"[compute_collisions] Satellite {skey} => collision with building {bkey}")
+                            break
+
+                # Statut final
+                if collision_detected:
+                    sat_dict[ekey]["sat_infos"][skey]["status"] = "NLOS"
+                else:
+                    sat_dict[ekey]["sat_infos"][skey]["status"] = "LOS"
+
             else:
-                sat["status"] = "LOS"
-                sat["Building ID"] = "None"
+                # Coord invalide => UNKNOWN
+                sat_dict[ekey]["sat_infos"][skey]["status"] = "UNKNOWN"
+                sat_dict[ekey]["sat_infos"][skey]["Building ID"] = "None"
     return sat_dict
 
 def draw_collision_rays(sat_dict, kml_layer):
