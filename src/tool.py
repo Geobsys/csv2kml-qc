@@ -28,7 +28,7 @@ from functions import (
     snap_to_nearest_epoch,
     read_and_discretize_kml,
     compute_score,
-    compute_collisions_theorique,
+    compute_collisions,
     compute_optimal_window_from_kml,
     compute_optimal_window_from_log,
     compute_collisions,

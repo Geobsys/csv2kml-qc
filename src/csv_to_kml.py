@@ -193,8 +193,7 @@ if __name__ == "__main__":
                     output_csv="resultats_optimal_window_log.csv",
                     time_end=args.time_end,
                     start_time=args.start_time_log,
-                    velocity=args.velocity_log,
-                    dist_step=args.dist_step_kml
+                    velocity=args.velocity_log
                 )
                 print(df_optimal)
                 
