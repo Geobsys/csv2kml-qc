@@ -10,6 +10,9 @@
          felix mercier
          clement cambours
          liu zijan
+         anthony diallo
+         benoit esselami
+         anthony evrard
 """
 
 ################################
@@ -104,24 +107,20 @@ if __name__ == "__main__":
     
     parser.add_argument('-d', '--date', type=str, default="23/02/2024",
                         help="Acquisition date (DD/MM/YYYY)")
-    parser.add_argument('-start_time_kml', type=str, default="8h00",
-                        help="Start time for KML traj (Default=8h00)")
-    parser.add_argument('-end_time_kml', type=str, default="20h00",
-                        help="End time for KML traj (Default=20h00)")
-    parser.add_argument('-dist_step_kml', type=float, default=5,
+    parser.add_argument('-start_time', type=str, default="8h00",
+                        help="Start time for KML and LOG traj (Default=8h00)")
+    parser.add_argument('-end_time', type=str, default="20h00",
+                        help="End time for KML and LOG traj (Default=20h00)")
+    parser.add_argument('-dist_step', type=float, default=5,
                         help="Distance step for KML traj (Default=5)")
-    parser.add_argument('-velocity_kml', type=float, default=1.5,
-                        help="Velocity (m/s) for KML traj (Default=1.5)")
+    parser.add_argument('-velocity', type=float, default=1.5,
+                        help="Velocity (m/s) for KML and LOG traj (Default=1.5)")
 
-    parser.add_argument('--mnt', type=float, default=0.0,
-                        help="Altitude offset or mean altitude for forcing Z (ex. 45).")
-    parser.add_argument('--time_end', type=str, help="Heure de fin de simulation (format HH:MM:SS) pour étaler la simulation au-delà de la fin des relevés LOG", default=None)
+    parser.add_argument('-mnt', type=float, default=0.0,
+                        help="Altitude offset or mean altitude for forcing Z (ex. 45). (Default=0)")
+
     parser.add_argument('--detect_nlos', action="store_true", help="Detect collisions (NLOS).")
     parser.add_argument('-ll','--line_length', type=float, help="Line length for collisions (Default=250)", default=250)
-    parser.add_argument('-start_time_log', type=str, default="8h00",
-                        help="Start time for LOG trajectory simulation (e.g. 8h00)")
-    parser.add_argument('-velocity_log', type=float, default=1.5,
-                        help="Velocity (m/s) for LOG trajectory simulation (default=1.5)")
     args = parser.parse_args()
     
     # Conversion des chemins relatifs pour les fichiers situés dans le dossier 'test'
@@ -158,11 +157,11 @@ if __name__ == "__main__":
                 kml_file=args.input_file,
                 rinex_nav_file=args.rinex_name,
                 buildings_dict=buildings_dict,
-                start_time=args.start_time_kml,
-                end_time=args.end_time_kml,
+                start_time=args.start_time,
+                end_time=args.end_time,
                 date_arg=args.date,
-                distance_step=args.dist_step_kml,
-                velocity=args.velocity_kml,
+                distance_step=args.dist_step,
+                velocity=args.velocity,
                 time_step_sec=900,
                 output_csv="resultats_optimal_window_kml.csv",
                 mnt=args.mnt
@@ -205,9 +204,9 @@ if __name__ == "__main__":
                     time_step_sec=900,
                     date_arg=args.date,
                     output_csv="resultats_optimal_window_log.csv",
-                    time_end=args.time_end,
-                    start_time=args.start_time_log,
-                    velocity=args.velocity_log,
+                    end_time=args.end_time,
+                    start_time=args.start_time,
+                    velocity=args.velocity,
                     rinex_obs_file=args.ro
                 )
                 print(df_optimal)
