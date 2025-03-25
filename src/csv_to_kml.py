@@ -36,11 +36,6 @@ import argparse
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description="*************** csv_to_kml ***************")
-
-    # ---------------------
-    # 1) Arguments de base (ancien code) :
-    # ---------------------
-
     # Import parameters
     parser.add_argument('input_file', type=str, help="input file from the Geostix, LOG, EXTEVENT or KML")
     parser.add_argument('-it', '--input_type', type=str, help="input file type between 'extevent' and 'log' (Default=log)",
@@ -105,13 +100,8 @@ if __name__ == "__main__":
     parser.add_argument('-fr_beta', type=float,   help="angle around Y-axis. (Default=0)", default=0)
     parser.add_argument('-fr_gamma', type=float,  help="angle around Z-axis. (Default=0)", default=0)
 
-    # ---------------------
-    # 2) Ajout minimal de la logique "temporal"
-    # ---------------------
-
     parser.add_argument('--temporal', action="store_true", help="Perform a temporal window calculation instead of the usual CSV->KML.")
     
-    # Ex. param. si vous voulez kmltraj
     parser.add_argument('-d', '--date', type=str, default="23/02/2024",
                         help="Acquisition date (DD/MM/YYYY)")
     parser.add_argument('-start_time_kml', type=str, default="8h00",
@@ -146,10 +136,7 @@ if __name__ == "__main__":
                     print(f"{len(buildings_dict)} bâtiments chargés depuis {args.buildings}")
             else:
                 buildings_dict = {}
-                
-            # => compute_optimal_window_from_kml
-            #   On lui passera la valeur MNT, qu'on utilisera pour forcer z= MNT
-            #   (modifications dans functions.py)
+
             df_optimal = functions.compute_optimal_window_from_kml(
                 kml_file=args.input_file,
                 rinex_nav_file=args.rinex_name,
@@ -158,7 +145,7 @@ if __name__ == "__main__":
                 end_time=args.end_time_kml,
                 distance_step=args.dist_step_kml,
                 velocity=args.velocity_kml,
-                time_step_sec=60,
+                time_step_sec=900,
                 output_csv="resultats_optimal_window_kml.csv",
                 mnt = args.mnt
             )
@@ -206,8 +193,6 @@ if __name__ == "__main__":
                 print(df_optimal)
                 
     else:
-        # Si on n'est pas en mode temporel => CSV -> KML
-        # => utilise la fonction tool.csv_to_kml
     	tool.csv_to_kml(
     					 args.input_file,
     					 args.input_type,

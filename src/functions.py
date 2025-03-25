@@ -756,61 +756,66 @@ def compute_collisions_theorique(sat_dict, building_dict, dist_building=300, sho
 
 def compute_optimal_window_from_kml(kml_file, rinex_nav_file, buildings_dict,
                                     start_time, end_time, distance_step, velocity,
-                                    time_step_sec=180, output_csv="resultats_optimal_window.csv", mnt=45.0):
+                                    time_step_sec=900, output_csv="resultats_optimal_window.csv", mnt=45.0):
     """
-    Calcule la fenêtre optimale (nb max de satellites LOS) pour une trajectoire
-    KML "théorique" (points en Lambert-93) et un shapefile de bâtiments (Lambert-93).
-
-    - On lit la polyligne KML (read_and_discretize_kml) => DataFrame points_list
-      contenant coordX, coordY, coordZ (Lambert-93).
-    - On fixe éventuellement H= mnt.
-    - On simule dans le temps (boucle) en chargeant le RINEX Nav (calcSatCoord ECEF).
-    - On appelle compute_collisions_theorique(...) pour déterminer LOS/NLOS.
+    Calcule la performance (total LOS satellites) pour différentes trajectoires théoriques.
+    Pour chaque instant de départ candidat, on simule la trajectoire (définie par
+    la discrétisation du fichier KML) en décalant le temps de chaque point par rapport
+    au premier, puis on agrège le nombre de satellites LOS perçus.
+    
+    Paramètres :
+      - kml_file : fichier KML de la trajectoire théorique.
+      - rinex_nav_file : fichier RINEX de navigation.
+      - buildings_dict : dictionnaire des bâtiments (en Lambert-93).
+      - start_time : heure de départ de référence (ex. "10h00").
+      - end_time : heure de fin utilisée pour définir la simulation.
+      - distance_step, velocity : paramètres de discrétisation.
+      - time_step_sec : pas temporel entre les simulations de trajectoire (ex. 900 sec pour 15 minutes).
+      - output_csv : nom du fichier CSV de sortie.
+      - mnt : altitude forcée.
+      
+    Retourne un tableau avec pour chaque trajectoire candidate l’instant de départ et le total des LOS.
     """
-
     # 1) Discrétisation
     points_list = read_and_discretize_kml(kml_file, start_time, end_time, distance_step, velocity)
     if points_list is None or points_list.empty:
         print("Erreur : Aucun point extrait de la trajectoire KML.")
         return None
 
-    # 2) MNT forcé si besoin
+    # 2) Forçage de l'altitude (MNT)
     if mnt != 0.0:
         points_list["coordZ"] = mnt
-        points_list["H"] = mnt  # altitude orthométrique "artificielle"
+        points_list["H"] = mnt  # altitude orthométrique artificielle
 
+    # Fonction utilitaire pour convertir "HHhMM" en secondes
     def parse_time(hhmm):
         hh, mm = map(int, hhmm.replace("h", ":").split(":"))
         return hh * 3600 + mm * 60
 
+    candidate_start_min = parse_time(start_time)
     global_end_sec = parse_time(end_time)
-    simulation_end = global_end_sec + 600
+    simulation_end = global_end_sec + 600  # limite supérieure de simulation
+
     base_date = datetime(2024, 2, 23)
+    base_point_time = points_list.iloc[0]["time_sod"]  # temps du premier point tel que calculé par read_and_discretize_kml
+    last_point_time = points_list.iloc[-1]["time_sod"]
+    trajectory_duration = last_point_time - base_point_time
+    candidate_start_max = simulation_end - trajectory_duration
 
     results = []
-    print("\n[compute_optimal_window_from_kml] Début de la simulation de la fenêtre optimale.")
+    print("\n[compute_optimal_window_from_kml] Début de la simulation par trajectoire.")
 
-    # 3) Pour chaque point (Lambert-93)
-    for i, pt in points_list.iterrows():
-        pt_time = pt["time_sod"]
-        best_time = pt_time
-        best_los = -1
-        best_nlos = 0
+    # Boucle sur les instants de départ candidats
+    candidate = candidate_start_min
+    while candidate <= candidate_start_max:
+        total_los = 0
+        simulation_details = []  # facultatif, pour stocker le LOS par point
 
-        simulation_times = []
-        simulation_los = []
-
-        # Rappel : coordX, coordY, coordZ en Lambert-93
-        E_l93 = pt["coordX"]
-        N_l93 = pt["coordY"]
-        H_l93 = pt["coordZ"]
-
-        print(f"\n[Point {i}] E={E_l93:.3f}, N={N_l93:.3f}, H={H_l93:.2f}, time_sod={pt_time}")
-
-        t = float(pt_time)
-        while t <= simulation_end:
-            t_eval = t
-            sim_dt = base_date + timedelta(seconds=t_eval)
+        # Pour chaque point de la trajectoire
+        for i, pt in points_list.iterrows():
+            # Calcul du temps effectif pour le point
+            effective_time = candidate + (pt["time_sod"] - base_point_time)
+            sim_dt = base_date + timedelta(seconds=effective_time)
             sim_dt = snap_to_nearest_epoch(sim_dt, snap_threshold=1)
             key = sim_dt.strftime("%Y %m %d %H %M %S")
 
@@ -819,9 +824,9 @@ def compute_optimal_window_from_kml(kml_file, rinex_nav_file, buildings_dict,
                 h=sim_dt.hour, min=sim_dt.minute, sec=sim_dt.second
             )
             mjd_time = gnssdate.mjd
-            print(f"  [Simulation] Date gnssdate: {key} | MJD: {mjd_time}")
+            print(f"  [Simulation] Trajectoire candidate démarrant à {datetime.utcfromtimestamp(candidate).strftime('%H:%M:%S')}, point {i} sim_dt: {key} | MJD: {mjd_time}")
 
-            # 4) Lecture RINEX
+            # Lecture du fichier RINEX nav
             try:
                 with open(rinex_nav_file, 'r') as f:
                     lines = f.readlines()
@@ -850,75 +855,52 @@ def compute_optimal_window_from_kml(kml_file, rinex_nav_file, buildings_dict,
                 return None
             os.remove(temp_filename)
 
-            # 5) Calcul sat ECEF
+            # Calcul des positions satellites (ECEF) pour la date simulée
             sat_cepoch_dict = {}
-            for const in ["G","R","E","C"]:
-                for prn in range(1,33):
+            for const in ["G", "R", "E", "C"]:
+                for prn in range(1, 33):
                     try:
                         Xs, Ys, Zs, dte = Nav.calcSatCoord(const, prn, mjd_time, degree=0)
-                        if (Xs, Ys, Zs)!=(0,0,0) and not np.isnan([Xs,Ys,Zs]).any():
+                        if (Xs, Ys, Zs) != (0, 0, 0) and not np.isnan([Xs, Ys, Zs]).any():
                             sat_cepoch_dict[f"{const}{prn:02d}"] = {"X": Xs, "Y": Ys, "Z": Zs, "dte": dte}
                     except:
                         pass
 
-            # 6) rcvr_infos en Lambert-93
-            rcvr_dict = {
-                "coordE": E_l93,
-                "coordN": N_l93,
-                "H": H_l93
-            }
+            # Préparation des infos du récepteur (extrait du point courant)
+            E_l93 = pt["coordX"]
+            N_l93 = pt["coordY"]
+            H_l93 = pt["coordZ"]
+            rcvr_dict = {"coordE": E_l93, "coordN": N_l93, "H": H_l93}
             current_sat_dict = { key: {"rcvr_infos": rcvr_dict, "sat_infos": sat_cepoch_dict} }
 
+            # Calcul des collisions pour le point
             if not current_sat_dict:
-                n_los=0
-                n_obs=0
+                los_count = 0
             else:
                 sim_key = list(current_sat_dict.keys())[0]
-                print(f"    [DEBUG] Éphéméride associée: {sim_key}")
-                # 7) Collisions => compute_collisions_theorique
                 current_sat_dict = compute_collisions_theorique(current_sat_dict, buildings_dict, dist_building=300)
                 local_sat_infos = current_sat_dict[sim_key]["sat_infos"].values()
+                los_count = sum(1 for s in local_sat_infos if s.get("status", "UNKNOWN") == "LOS")
+            print(f"    [DEBUG] Point {i}: LOS = {los_count}")
+            simulation_details.append(los_count)
+            total_los += los_count
 
-                n_los  = sum(1 for s in local_sat_infos if s.get("status","UNKNOWN")=="LOS")
-                n_obs = sum(1 for s in local_sat_infos if s.get("status","UNKNOWN")=="NLOS")
-
-            print(f"    Nombre de satellites LOS = {n_los}, OBS = {n_obs}")
-            simulation_times.append(t_eval)
-            simulation_los.append(n_los)
-
-            if n_los>best_los:
-                best_los = n_los
-                best_time= t_eval
-                best_obs= n_obs
-
-            t += time_step_sec
-
-        print(f"  Temps simulés point {i}: {simulation_times}")
-        print(f"  Nb LOS: {simulation_los}")
-
-        # 8) Score final
-        optimal_time_str = datetime.utcfromtimestamp(best_time).strftime("%H:%M:%S")
-        final_score = compute_score(best_los, best_obs, best_time, sim_start=0, sim_end=86399)
-        transformer_l93_to_wgs = pyproj.Transformer.from_crs("EPSG:2154", "EPSG:4326", always_xy=True)
-        lon_wgs, lat_wgs, alt_wgs = transformer_l93_to_wgs.transform(E_l93, N_l93, H_l93)
-
+        print(f"Trajectoire candidate démarrant à {datetime.utcfromtimestamp(candidate).strftime('%H:%M:%S')} a un total de LOS = {total_los}")
         results.append({
-            "Point Index": i,
-            "lon": lon_wgs,
-            "lat": lat_wgs,
-            "H ": alt_wgs,
-            "Optimal Time": optimal_time_str,
-            "Nb Max LOS": best_los,
-            "Score": final_score
+            "Trajectory Start": datetime.utcfromtimestamp(candidate).strftime("%H:%M:%S"),
+            "Total LOS": total_los,
+            "LOS par point": simulation_details
         })
+        candidate += time_step_sec
 
-    # 9) CSV
+    # Export des résultats dans un CSV
     df_results = pd.DataFrame(results)
-    print("\n--- Résultats Fenêtre Optimale ---")
+    print("\n--- Résultats Trajectoire Optimale ---")
     print(df_results)
     df_results.to_csv(output_csv, index=False)
-    print(f"[DEBUG] Fichier CSV = '{output_csv}'")
+    print(f"[DEBUG] Résultats enregistrés dans '{output_csv}'.")
     sys.exit(0)
+
 
 ###############################################
 # Fonctions de simulation temporelle pour LOG
@@ -959,7 +941,7 @@ def compute_optimal_window_from_log(data, rinex_nav_file, buildings_dict,
     if time_end:
         # L'utilisateur a fourni "HH:MM" => on ajoute 60 minutes
         global_end_sec = parse_time(time_end)
-        simulation_end = global_end_sec + 900
+        simulation_end = global_end_sec
         #print(f"  [DEBUG] Temps de fin imposé: time_end = {time_end} -> simulation_end = {simulation_end} sec")
     else:
         # On balaie le DataFrame pour trouver la plus grande heure
