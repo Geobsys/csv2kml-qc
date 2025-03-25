@@ -764,28 +764,130 @@ def compute_collisions(sat_dict, building_dict, dist_building=300, show=False):
 
     return sat_dict
 
+def candidate_simulation(candidate, points_list, cumulative, base_date, base_point_time,
+                         Nav_data, buildings_dict, velocity):
+    """
+    Simule une fenêtre candidate pour une valeur 'candidate' (en secondes).
+    Chaque worker crée son propre objet Nav à partir de Nav_data et utilise un cache local
+    pour éviter de recalculer les positions satellites pour des époques identiques.
+    
+    Retourne un dictionnaire avec les indicateurs suivants :
+      - "Trajectory Start": l'heure de départ (string)
+      - "Total LOS": somme des satellites LOS sur tous les points
+      - "Total Obstrué" (ou "Total NLOS" pour LOG) : somme des satellites non LOS sur tous les points
+      - "Total Observed": somme des satellites observés (LOS + Obstrué)
+      - "Avg PDOP": moyenne des PDOP sur la trajectoire candidate
+    """
+    import tempfile, contextlib, numpy as np
+    from datetime import timedelta
+
+    # Création de l'objet Nav à partir de Nav_data
+    Nav = orb.orbit()
+    try:
+        with tempfile.NamedTemporaryFile(mode='w', delete=False) as temp:
+            temp.writelines(Nav_data)
+            temp_filename = temp.name
+    except Exception:
+        return None
+    with contextlib.redirect_stdout(open(os.devnull, 'w')):
+        try:
+            Nav.loadRinexN(temp_filename)
+        except Exception:
+            os.remove(temp_filename)
+            return None
+    os.remove(temp_filename)
+
+    # Cache local pour les éphémérides, clé basée sur mjd_time arrondi à 5 décimales
+    ephemerides_cache = {}
+    total_los = 0
+    total_obstrue = 0
+    dop_list = []
+    
+    # Parcours de tous les points (aucune barre de progression interne dans cette version)
+    for _, pt in points_list.iterrows():
+        effective_time = candidate + (pt["time_sod"] - base_point_time)
+        sim_dt = base_date + timedelta(seconds=effective_time)
+        sim_dt = snap_to_nearest_epoch(sim_dt, snap_threshold=1)
+        key = sim_dt.strftime("%Y %m %d %H %M %S")
+        gnssdate = gpst.gpsdatetime(yyyy=sim_dt.year, mon=sim_dt.month, dd=sim_dt.day,
+                                    h=sim_dt.hour, min=sim_dt.minute, sec=sim_dt.second)
+        mjd_time = gnssdate.mjd
+        mjd_key = f"{mjd_time:.5f}"
+        if mjd_key in ephemerides_cache:
+            sat_cepoch_dict = ephemerides_cache[mjd_key]
+        else:
+            sat_cepoch_dict = {}
+            for const in ["G", "R", "E", "C"]:
+                for prn in range(1, 33):
+                    try:
+                        Xs, Ys, Zs, dte = Nav.calcSatCoord(const, prn, mjd_time, degree=0)
+                        if (Xs, Ys, Zs) != (0, 0, 0) and not np.isnan([Xs, Ys, Zs]).any():
+                            sat_cepoch_dict[f"{const}{prn:02d}"] = {"X": Xs, "Y": Ys, "Z": Zs, "dte": dte}
+                    except:
+                        pass
+            ephemerides_cache[mjd_key] = sat_cepoch_dict
+
+        # Pour supporter à la fois KML et LOG :
+        if "coordX" in pt:
+            rcv_pos_dict = {"coordE": pt["coordX"], "coordN": pt["coordY"], "H": pt["coordZ"]}
+        else:
+            rcv_pos_dict = {"coordE": pt["E"], "coordN": pt["N"], "H": pt["H"]}
+
+        current_sat_dict = { key: {"rcvr_infos": rcv_pos_dict, "sat_infos": sat_cepoch_dict} }
+        current_sat_dict = compute_collisions(current_sat_dict, buildings_dict, dist_building=300)
+        local_sat_infos = current_sat_dict[key]["sat_infos"].values()
+        los_count = sum(1 for s in local_sat_infos if s.get("status", "UNKNOWN") == "LOS")
+        # Ici, on considère que tous les satellites non marqués LOS sont obstrués/NLOS
+        obstrue_count = sum(1 for s in local_sat_infos if s.get("status", "UNKNOWN") != "LOS")
+        total_los += los_count
+        total_obstrue += obstrue_count
+
+        sat_positions = [s["sats_pos_l93"] for s in local_sat_infos
+                         if s.get("status", "UNKNOWN") == "LOS" and "sats_pos_l93" in s]
+        if len(sat_positions) >= 4:
+            sats_array = np.array(sat_positions)
+            rcv_pos = np.array([rcv_pos_dict["coordE"], rcv_pos_dict["coordN"], rcv_pos_dict["H"]])
+            try:
+                dop_dict = compute_dop(rcv_pos, sats_array)
+                dop_value = dop_dict["PDOP"]
+            except Exception:
+                dop_value = np.nan
+        else:
+            dop_value = np.nan
+        dop_list.append(dop_value)
+    avg_pdop = np.nanmean(dop_list) if dop_list else np.nan
+    total_observed = total_los + total_obstrue
+    return {"Trajectory Start": datetime.utcfromtimestamp(candidate).strftime("%H:%M:%S"),
+            "Total LOS": total_los,
+            "Total Obstrué": total_obstrue,
+            "Total Observed": total_observed,
+            "Avg PDOP": avg_pdop}
+
+
 def compute_optimal_window_from_kml(kml_file, rinex_nav_file, buildings_dict,
                                     start_time, end_time, distance_step, velocity,
                                     time_step_sec=900, output_csv="resultats_optimal_window.csv", mnt=45.0):
     """
     Calcule la performance pour différentes trajectoires théoriques.
-    Pour chaque candidate window, simule la trajectoire en décalant le temps de chaque point,
-    et agrège le nombre de satellites LOS et obstrués ainsi que la moyenne du PDOP.
-    Une barre de progression globale (sur les candidats) et une barre de progression interne (sur les points)
-    sont affichées.
+    Pour chaque fenêtre candidate, simule la trajectoire en décalant le temps de chaque point,
+    et agrège le nombre de satellites LOS, obstrués, le nombre total observé ainsi que la moyenne du PDOP.
+    
+    Une barre de progression globale est affichée pour le traitement des candidats.
+    Le DataFrame final est trié par ordre croissant de "Trajectory Start".
     """
     import math
     from datetime import datetime, timedelta
     import contextlib
     from tqdm import tqdm
+    import concurrent.futures
+    import pandas as pd
 
-    # Discrétisation de la trajectoire via read_and_discretize_kml
+    # Discrétisation via read_and_discretize_kml
     points_list = read_and_discretize_kml(kml_file, start_time, end_time, distance_step, velocity)
     if points_list is None or points_list.empty:
         print("Erreur : Aucun point extrait de la trajectoire KML.")
         return None
 
-    # Forçage de l'altitude (MNT)
     if mnt != 0.0:
         points_list["coordZ"] = mnt
         points_list["H"] = mnt
@@ -796,33 +898,44 @@ def compute_optimal_window_from_kml(kml_file, rinex_nav_file, buildings_dict,
 
     candidate_start_min = parse_time(start_time)
     global_end_sec = parse_time(end_time)
-    simulation_end = global_end_sec + 60  # ici 60 secondes de marge
+    simulation_end = global_end_sec + 60  # marge de 60 s
     base_date = datetime(2024, 2, 23)
     base_point_time = points_list.iloc[0]["time_sod"]
     last_point_time = points_list.iloc[-1]["time_sod"]
     trajectory_duration = last_point_time - base_point_time
     candidate_start_max = simulation_end - trajectory_duration
     if candidate_start_max < candidate_start_min:
-        candidate_start_max = candidate_start_min  # si l'intervalle est vide, on force une seule candidate
+        candidate_start_max = candidate_start_min
+
+    # Calcul du cumul des distances entre points (en mètres)
+    cumulative = [0.0]
+    for i in range(1, len(points_list)):
+        p1 = points_list.iloc[i-1]
+        p2 = points_list.iloc[i]
+        d = math.sqrt((p2["coordX"] - p1["coordX"])**2 +
+                      (p2["coordY"] - p1["coordY"])**2 +
+                      (p2["coordZ"] - p1["coordZ"])**2)
+        cumulative.append(cumulative[-1] + d)
 
     # --- Charger le fichier RINEX une seule fois ---
     try:
         with open(rinex_nav_file, 'r') as f:
-            lines = f.readlines()
+            Nav_data = f.readlines()
     except Exception:
         print("Erreur lors de l'ouverture du fichier RINEX.")
         return None
-    if not any("END OF HEADER" in line for line in lines):
+    if not any("END OF HEADER" in line for line in Nav_data):
         print("Header RINEX non trouvé.")
         return None
     try:
         with tempfile.NamedTemporaryFile(mode='w', delete=False) as temp:
-            temp.writelines(lines)
+            temp.writelines(Nav_data)
             temp_filename = temp.name
     except Exception:
         print("Erreur lors de la création du fichier temporaire.")
         return None
     Nav = orb.orbit()
+    import contextlib
     with contextlib.redirect_stdout(open(os.devnull, 'w')):
         try:
             Nav.loadRinexN(temp_filename)
@@ -836,70 +949,33 @@ def compute_optimal_window_from_kml(kml_file, rinex_nav_file, buildings_dict,
     results = []
     print("Traitement en cours...")
 
-    # Calcul du nombre de candidats
     num_candidates = int((candidate_start_max - candidate_start_min) // time_step_sec) + 1
-
-    # Barre de progression globale sur les trajectoires candidates
-    for candidate in tqdm(range(int(candidate_start_min), int(candidate_start_max)+1, int(time_step_sec)),
-                          total=num_candidates, desc="Trajectoires candidates"):
-        total_los = 0
-        total_obstrue = 0
-        dop_list = []
-        # Barre de progression interne sur les points de la candidate
-        for i, (_, pt) in enumerate(tqdm(points_list.iterrows(), total=len(points_list),
-                                          desc=f"Traj {datetime.utcfromtimestamp(candidate).strftime('%H:%M:%S')} - Points",
-                                          leave=False)):
-            effective_time = candidate + (pt["time_sod"] - base_point_time)
-            sim_dt = base_date + timedelta(seconds=effective_time)
-            sim_dt = snap_to_nearest_epoch(sim_dt, snap_threshold=1)
-            key = sim_dt.strftime("%Y %m %d %H %M %S")
-            gnssdate = gpst.gpsdatetime(yyyy=sim_dt.year, mon=sim_dt.month, dd=sim_dt.day,
-                                        h=sim_dt.hour, min=sim_dt.minute, sec=sim_dt.second)
-            mjd_time = gnssdate.mjd
-
-            # Pour chaque point, on utilise l'objet Nav déjà chargé
-            sat_cepoch_dict = {}
-            for const in ["G", "R", "E", "C"]:
-                for prn in range(1, 33):
-                    try:
-                        Xs, Ys, Zs, dte = Nav.calcSatCoord(const, prn, mjd_time, degree=0)
-                        if (Xs, Ys, Zs) != (0, 0, 0) and not np.isnan([Xs, Ys, Zs]).any():
-                            sat_cepoch_dict[f"{const}{prn:02d}"] = {"X": Xs, "Y": Ys, "Z": Zs, "dte": dte}
-                    except:
-                        pass
-
-            rcv_pos_dict = {"coordE": pt["coordX"], "coordN": pt["coordY"], "H": pt["coordZ"]}
-            current_sat_dict = { key: {"rcvr_infos": rcv_pos_dict, "sat_infos": sat_cepoch_dict} }
-            current_sat_dict = compute_collisions(current_sat_dict, buildings_dict, dist_building=300)
-            local_sat_infos = current_sat_dict[key]["sat_infos"].values()
-            los_count = sum(1 for s in local_sat_infos if s.get("status", "UNKNOWN") == "LOS")
-            obstrue_count = sum(1 for s in local_sat_infos if s.get("status", "UNKNOWN") != "LOS")
-            total_los += los_count
-            total_obstrue += obstrue_count
-
-            sat_positions = [s["sats_pos_l93"] for s in local_sat_infos 
-                             if s.get("status", "UNKNOWN") == "LOS" and "sats_pos_l93" in s]
-            if len(sat_positions) >= 4:
-                sats_array = np.array(sat_positions)
-                rcv_pos = np.array([rcv_pos_dict["coordE"], rcv_pos_dict["coordN"], rcv_pos_dict["H"]])
-                try:
-                    dop_dict = compute_dop(rcv_pos, sats_array)
-                    dop_value = dop_dict["PDOP"]
-                except Exception:
-                    dop_value = np.nan
-            else:
-                dop_value = np.nan
-            dop_list.append(dop_value)
-        avg_pdop = np.nanmean(dop_list) if dop_list else np.nan
-        results.append({
-            "Trajectory Start": datetime.utcfromtimestamp(candidate).strftime("%H:%M:%S"),
-            "Total LOS": total_los,
-            "Total Obstrué": total_obstrue,
-            "Avg PDOP": avg_pdop
-        })
+    candidate_values = list(range(int(candidate_start_min), int(candidate_start_max)+1, int(time_step_sec)))
+    
+    with concurrent.futures.ProcessPoolExecutor() as executor:
+        futures = [executor.submit(candidate_simulation,
+                                     candidate,
+                                     points_list,
+                                     cumulative,
+                                     base_date,
+                                     base_point_time,
+                                     Nav_data,
+                                     buildings_dict,
+                                     velocity)
+                   for candidate in candidate_values]
+        from tqdm import tqdm
+        for future in tqdm(concurrent.futures.as_completed(futures), total=len(futures),
+                           desc="Trajectoires candidates"):
+            res = future.result()
+            if res is not None:
+                results.append(res)
     df_results = pd.DataFrame(results)
+    # Tri du DataFrame par ordre croissant de "Trajectory Start"
+    df_results["Trajectory Start_dt"] = pd.to_datetime(df_results["Trajectory Start"], format="%H:%M:%S")
+    df_results = df_results.sort_values(by="Trajectory Start_dt").drop(columns=["Trajectory Start_dt"])
     df_results.to_csv(output_csv, index=False)
     return df_results
+
 
 ###############################################
 # Fonctions de simulation temporelle pour LOG
@@ -912,28 +988,30 @@ def compute_optimal_window_from_log(data, rinex_nav_file, buildings_dict,
                                     velocity=1.5):
     """
     Calcule la performance pour différentes trajectoires issues du fichier LOG en ignorant les horodatages.
-    Pour chaque trajectoire candidate, simule la trajectoire (temps artificiel basé sur la distance cumulée / velocity)
+    Pour chaque fenêtre candidate, simule la trajectoire (temps artificiel basé sur la distance cumulée / velocity)
     et agrège le nombre de satellites LOS et NLOS ainsi que la moyenne du PDOP.
     
-    Affiche une barre de progression globale (pour les candidats) et une barre de progression interne pour chaque trajectoire.
+    La parallélisation se fait sur les fenêtres candidates, avec une barre de progression globale.
+    Le résultat final est trié par ordre chronologique de "Trajectory Start".
     """
     import math
     from datetime import datetime, timedelta
-    # On suppose que numpy est importé globalement (import numpy as np)
+    import contextlib
+    from tqdm import tqdm
+    import concurrent.futures
+    import pandas as pd
 
-    # Filtrer les données et limiter au nombre voulu de points (ici 50)
+    # Filtrage des données LOG (assurez-vous que les colonnes 'lat', 'lon', 'h' existent)
     data = data[(data["lat"].notnull()) & (data["lon"].notnull()) & (data["h"].notnull()) &
                 (data["lat"] != "") & (data["lon"] != "") & (data["h"] != "")]
+    # Limiter par exemple aux 50 premiers points (à adapter selon vos besoins)
     data = data.head(50)
 
     def parse_time(hhmm):
-        try:
-            hh, mm = map(int, hhmm.replace("h", ":").split(":"))
-            return hh * 3600 + mm * 60
-        except Exception:
-            return 0
+        hh, mm = map(int, hhmm.replace("h", ":").split(":"))
+        return hh * 3600 + mm * 60
 
-    # Construction de la liste de points (coordonnées en Lambert93)
+    # Construction de la liste de points LOG
     log_points = []
     for i, row in data.iterrows():
         try:
@@ -942,6 +1020,7 @@ def compute_optimal_window_from_log(data, rinex_nav_file, buildings_dict,
             h = float(str(row["h"]).replace('"', '').strip())
         except Exception:
             continue
+        # Récupérer ou calculer les coordonnées en Lambert93
         try:
             coordX = float(row["coordX"])
             coordY = float(row["coordY"])
@@ -957,46 +1036,52 @@ def compute_optimal_window_from_log(data, rinex_nav_file, buildings_dict,
         except Exception:
             continue
         log_points.append({"E": E_l93, "N": N_l93, "H": H_ortho})
+    
     if not log_points:
         print("Aucun point valide extrait des données LOG.")
         return None
 
-    # Calcul de la distance cumulée entre points (en mètres)
+    # Calcul du cumul des distances entre points (en mètres)
     cumulative = [0.0]
     for i in range(1, len(log_points)):
         p1 = log_points[i-1]
         p2 = log_points[i]
-        dist = math.sqrt((p2["E"] - p1["E"])**2 + (p2["N"] - p1["N"])**2)
-        cumulative.append(cumulative[-1] + dist)
-    trajectory_duration = cumulative[-1] / velocity
-
+        d = math.sqrt((p2["E"] - p1["E"])**2 + (p2["N"] - p1["N"])**2)
+        cumulative.append(cumulative[-1] + d)
+    
+    # On ajoute un champ "time_sod" à chaque point (pour simuler le temps, on prend ici la distance cumulée)
+    for i, pt in enumerate(log_points):
+        pt["time_sod"] = cumulative[i]
+    
+    trajectory_duration = cumulative[-1] / velocity  # temps total de la trajectoire simulé en secondes
+    
     candidate_start_min = parse_time(start_time)
     if time_end:
-        simulation_end = parse_time(time_end)+60
+        simulation_end = parse_time(time_end) + 60
     else:
         simulation_end = candidate_start_min + trajectory_duration + 60
     candidate_start_max = simulation_end - trajectory_duration
     if candidate_start_max < candidate_start_min:
-        candidate_start_max = candidate_start_min  # Force une candidate unique
+        candidate_start_max = candidate_start_min  # Forcer au moins une candidate
 
     try:
         base_date = datetime.strptime(data.iloc[0]["date"].strip('"'), "%d/%m/%Y")
     except Exception:
         base_date = datetime(2024, 2, 23)
-
-    # Charger le fichier RINEX une seule fois
+    
+    # Charger le fichier RINEX une seule fois et récupérer les lignes dans Nav_data
     try:
         with open(rinex_nav_file, 'r') as f:
-            lines = f.readlines()
+            Nav_data = f.readlines()
     except Exception:
         print("Erreur lors de l'ouverture du fichier RINEX.")
         return None
-    if not any("END OF HEADER" in line for line in lines):
+    if not any("END OF HEADER" in line for line in Nav_data):
         print("Header RINEX non trouvé.")
         return None
     try:
         with tempfile.NamedTemporaryFile(mode='w', delete=False) as temp:
-            temp.writelines(lines)
+            temp.writelines(Nav_data)
             temp_filename = temp.name
     except Exception:
         print("Erreur lors de la création du fichier temporaire.")
@@ -1011,72 +1096,38 @@ def compute_optimal_window_from_log(data, rinex_nav_file, buildings_dict,
             print("Erreur lors du chargement des éphémérides.")
             return None
     os.remove(temp_filename)
+    # Nav_data sera transmis aux workers
 
     results = []
-    print("Traitement en cours...")  # Message global
+    print("Traitement en cours...")
 
-    # Calculer le nombre total de candidats
     num_candidates = int((candidate_start_max - candidate_start_min) // time_step_sec) + 1
-    from tqdm import tqdm
-    # Barre de progression globale sur les trajectoires candidates
-    for candidate in tqdm(range(int(candidate_start_min), int(candidate_start_max)+1, int(time_step_sec)),
-                          total=num_candidates, desc="Trajectoires candidates"):
-        total_los = 0
-        total_nlos = 0
-        dop_list = []
-        # Barre de progression interne sur les points de la trajectoire candidate
-        for i, pt in enumerate(tqdm(log_points, total=len(log_points),
-                                      desc=f"Traj {datetime.utcfromtimestamp(candidate).strftime('%H:%M:%S')} - Points",
-                                      leave=False)):
-            effective_time = candidate + (cumulative[i] / velocity)
-            sim_dt = base_date + timedelta(seconds=effective_time)
-            sim_dt = snap_to_nearest_epoch(sim_dt, snap_threshold=1)
-            key = sim_dt.strftime("%Y %m %d %H %M %S")
-            gnssdate = gpst.gpsdatetime(yyyy=sim_dt.year, mon=sim_dt.month, dd=sim_dt.day,
-                                        h=sim_dt.hour, min=sim_dt.minute, sec=sim_dt.second)
-            mjd_time = gnssdate.mjd
-
-            sat_cepoch_dict = {}
-            for const in ["G", "R", "E", "C"]:
-                for prn in range(1, 33):
-                    try:
-                        Xs, Ys, Zs, dte = Nav.calcSatCoord(const, prn, mjd_time, degree=0)
-                        if (Xs, Ys, Zs) != (0, 0, 0) and not np.isnan([Xs, Ys, Zs]).any():
-                            sat_cepoch_dict[f"{const}{prn:02d}"] = {"X": Xs, "Y": Ys, "Z": Zs, "dte": dte}
-                    except:
-                        pass
-
-            rcv_pos_dict = {"coordX": pt["E"], "coordY": pt["N"], "H": pt["H"],
-                            "coordE": pt["E"], "coordN": pt["N"], "H": pt["H"]}
-            current_sat_dict = { key: {"rcvr_infos": rcv_pos_dict, "sat_infos": sat_cepoch_dict} }
-            current_sat_dict = compute_collisions(current_sat_dict, buildings_dict, dist_building=300, show=False)
-            local_sat_infos = current_sat_dict[key]["sat_infos"].values()
-            los_count = sum(1 for s in local_sat_infos if s.get("status", "UNKNOWN") == "LOS")
-            nlos_count = sum(1 for s in local_sat_infos if s.get("status", "UNKNOWN") == "NLOS")
-            total_los += los_count
-            total_nlos += nlos_count
-
-            sat_positions = [s["sats_pos_l93"] for s in local_sat_infos
-                             if s.get("status", "UNKNOWN") == "LOS" and "sats_pos_l93" in s]
-            if len(sat_positions) >= 4:
-                sats_array = np.array(sat_positions)
-                rcv_pos = np.array([rcv_pos_dict["coordE"], rcv_pos_dict["coordN"], rcv_pos_dict["H"]])
-                try:
-                    dop_dict = compute_dop(rcv_pos, sats_array)
-                    dop_value = dop_dict["PDOP"]
-                except Exception:
-                    dop_value = np.nan
-            else:
-                dop_value = np.nan
-            dop_list.append(dop_value)
-        avg_pdop = np.nanmean(dop_list) if dop_list else np.nan
-        results.append({
-            "Trajectory Start": datetime.utcfromtimestamp(candidate).strftime("%H:%M:%S"),
-            "Total LOS": total_los,
-            "Total NLOS": total_nlos,
-            "Avg PDOP": avg_pdop
-        })
+    candidate_values = list(range(int(candidate_start_min), int(candidate_start_max)+1, int(time_step_sec)))
+    
+    # Parallélisation sur les candidats
+    with concurrent.futures.ProcessPoolExecutor() as executor:
+        futures = [executor.submit(candidate_simulation,
+                                     candidate,
+                                     pd.DataFrame(log_points),
+                                     cumulative,
+                                     base_date,
+                                     pd.DataFrame(log_points).iloc[0]["time_sod"],
+                                     Nav_data,
+                                     buildings_dict,
+                                     velocity)
+                   for candidate in candidate_values]
+        from tqdm import tqdm
+        for future in tqdm(concurrent.futures.as_completed(futures), total=len(futures),
+                           desc="Progression"):
+            res = future.result()
+            if res is not None:
+                results.append(res)
+    
     df_results = pd.DataFrame(results)
+    # Tri du DataFrame par ordre chronologique (en convertissant la colonne Trajectory Start en datetime)
+    df_results["Trajectory Start_dt"] = pd.to_datetime(df_results["Trajectory Start"], format="%H:%M:%S")
+    df_results = df_results.sort_values(by="Trajectory Start_dt")
+    df_results = df_results.drop(columns=["Trajectory Start_dt"])
     df_results.to_csv(output_csv, index=False)
     return df_results
 
