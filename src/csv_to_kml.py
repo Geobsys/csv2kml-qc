@@ -76,7 +76,7 @@ if __name__ == "__main__":
     parser.add_argument('-am', '--altitude_mode', type=str,
                         help="Mode d'altitude (absolute, relativeToGround, clampToGround) (Default=absolute)",
                         default="absolute", choices=["absolute", "relativeToGround", "clampToGround"])
-    
+    parser.add_argument('--time_end', type=str, help="Heure de fin de simulation (format HH:MM:SS) pour étaler la simulation au-delà de la fin des relevés LOG", default=None)
     # Options pour la conversion CSV -> KML
     parser.add_argument('--hide_pts', action="store_true", help="Ne pas afficher les points")
     parser.add_argument('--hide_lines', action="store_true", help="Ne pas afficher les lignes")
@@ -134,7 +134,7 @@ if __name__ == "__main__":
                 end_time=args.end_time_kml,
                 distance_step=args.dist_step_kml,
                 velocity=args.velocity_kml,
-                time_step_sec=1800,
+                time_step_sec=600,
                 output_csv="resultats_optimal_window_kml.csv"
             )
             print(df_optimal)
@@ -171,7 +171,8 @@ if __name__ == "__main__":
                     rinex_nav_file=args.rinex_name_nav,
                     buildings_dict=buildings_dict,
                     time_step_sec=60,
-                    output_csv="resultats_optimal_window_log.csv"
+                    output_csv="resultats_optimal_window_log.csv",
+                    time_end=args.time_end
                 )
                 print(df_optimal)
     
