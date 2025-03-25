@@ -27,7 +27,6 @@ from functions import (
     segment_intersects_bbox,
     snap_to_nearest_epoch,
     read_and_discretize_kml,
-    compute_score,
     compute_collisions,
     compute_optimal_window_from_kml,
     compute_optimal_window_from_log,

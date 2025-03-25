@@ -641,40 +641,49 @@ def read_and_discretize_kml(kml_file, start_time, end_time, distance_step, veloc
     print(f"[read_and_discretize_kml] Discrétisation terminée avec {len(df_points)} points.")
     return df_points
 
-# --- Fonction principale intégrant l'actualisation dynamique de gnssdate et la récupération des éphémérides ---
+#######################################
 
-# def compute_score(los, nlos, optimal_time, sim_start, sim_end, los_ref=85, nlos_ref=1, weights=(0.7, 0.3, 0.2)):
-#     """
-#     Calcule un score normalisé pour le meilleur instant (fenêtre optimale) d'un point.
+def compute_dop(
+                receiver_position,
+                sat_positions
+                ):
+    #number of staellites
+    nbr_sats = sat_positions.shape[0]
     
-#     Paramètres :
-#       - los : nombre maximal de satellites LOS trouvés durant la simulation.
-#       - nlos : nombre de satellites NLOS au moment où le nombre de LOS est maximal.
-#       - optimal_time : heure (en secondes depuis minuit) où le nb_max de LOS est atteint.
-#       - sim_start : début de la simulation en secondes (ex. 0 pour 00h00).
-#       - sim_end : fin de la simulation en secondes (ex. 86399 pour 23h59).
-#       - los_ref : valeur de référence pour normaliser le nombre de LOS (ex. 85).
-#       - nlos_ref : valeur de référence pour le nombre de NLOS (ex. 10).
-#       - weights : pondérations (alpha, beta, gamma) pour LOS, NLOS et le critère temporel (la somme doit être 1).
-      
-#     Retourne :
-#       - score : valeur entre 0 et 1, 1 correspondant au cas idéal.
-#     """
-#     # Normalisation du nb de LOS (borné à 1)
-#     los_factor = min(los / los_ref, 1.0)
+    #need at least 4 satellites
+    if(nbr_sats < 4):
+        raise ValueError("At least 4 satellites are required to compute DOP values.")
     
-#     # Facteur NLOS : 1 si aucun NLOS, 0 si nlos >= nlos_ref (décroissance linéaire)
-#     nlos_factor = 1 - min(nlos / nlos_ref, 1.0)
+    #compute unit vector
+    los_vectors = sat_positions - receiver_position
+    distances = np.linalg.norm(los_vectors,axis=1).reshape(-1,1)
+    unit_vectors = los_vectors / distances
     
-#     # Calcul de l'heure "idéale" (milieu de la plage)
-#     perfect_time = (sim_start + sim_end) / 2.0
-#     max_deviation = (sim_end - sim_start) / 2.0
-#     time_factor = 1 - (abs(optimal_time - perfect_time) / max_deviation)
-#     time_factor = max(0, min(time_factor, 1))
+    #compute matrix G
+    G = np.hstack((unit_vectors,np.ones((nbr_sats,1))))
     
-#     # Score final pondéré
-#     score = 1000*(weights[0] * los_factor + weights[1] * nlos_factor + weights[2] * time_factor)
-#     return score
+    #compute (G^T * G)^{-1}
+    Q = np.linalg.inv(G.T @ G)
+    
+    #extract DOP values
+    GDOP = np.sqrt(np.trace(Q))
+    PDOP = np.sqrt(Q[0, 0] + Q[1, 1] + Q[2, 2])
+    HDOP = np.sqrt(Q[0, 0] + Q[1, 1])
+    VDOP = np.sqrt(Q[2, 2])
+    TDOP = np.sqrt(Q[3, 3])
+    
+    #store in a dict
+    out_dict = {
+                "GDOP": GDOP,
+                "PDOP": PDOP,
+                "HDOP": HDOP,
+                "VDOP": VDOP,
+                "TDOP": TDOP
+               }
+               
+    return out_dict
+
+#######################################
 
 def compute_collisions(sat_dict, building_dict, dist_building=300, show=False):
     """
@@ -713,6 +722,7 @@ def compute_collisions(sat_dict, building_dict, dist_building=300, show=False):
             #     et on se déplace de 1000 m.
             try:
                 xn, yn, zn = pt_along_line((Er, Nr, Hr), (xs_l93, ys_l93, zs_l93), distance=1000)
+                sat["sats_pos_l93"] = (xs_l93, ys_l93, zs_l93)
             except Exception:
                 sat["status"] = "UNKNOWN"
                 sat["Building ID"] = "None"
@@ -794,6 +804,7 @@ def compute_optimal_window_from_kml(kml_file, rinex_nav_file, buildings_dict,
     while candidate <= candidate_start_max:
         total_los = 0
         total_obstrue = 0  # pour le cas théorique, les satellites non LOS sont considérés comme obstrués
+        dop_list = []  # liste des PDOP pour chaque point de la trajectoire
         for i, pt in points_list.iterrows():
             effective_time = candidate + (pt["time_sod"] - base_point_time)
             sim_dt = base_date + timedelta(seconds=effective_time)
@@ -860,12 +871,37 @@ def compute_optimal_window_from_kml(kml_file, rinex_nav_file, buildings_dict,
             print(f"    [DEBUG] Point {i}: LOS = {los_count} | Obstrué = {obstrue_count}")
             total_los += los_count
             total_obstrue += obstrue_count
-
-        print(f"Trajectoire candidate démarrant à {datetime.utcfromtimestamp(candidate).strftime('%H:%M:%S')} => Total LOS = {total_los} | Total Obstrué = {total_obstrue}")
+            
+            sat_positions = []
+            for s in local_sat_infos:
+                if s.get("status", "UNKNOWN") == "LOS" and "sats_pos_l93" in s:
+                    sat_positions.append(s["sats_pos_l93"])
+            if len(sat_positions) >= 4:
+                sats_array = np.array(sat_positions)
+                # rcv_pos en Lambert93, par exemple
+                # Utilisation du dictionnaire déjà créé
+                # Utilisation du dictionnaire déjà créé
+                rcv_pos = np.array([rcvr_dict["coordE"], rcvr_dict["coordN"], rcvr_dict["H"]])
+                try:
+                    dop_dict = compute_dop(rcv_pos, sats_array)
+                    # On choisit ici le PDOP comme indicateur de qualité (plus faible est meilleur)
+                    dop_value = dop_dict["PDOP"]
+                except Exception as e:
+                    dop_value = np.nan
+            else:
+                dop_value = np.nan
+            dop_list.append(dop_value)
+            
+        if len(dop_list) > 0:
+            avg_pdop = np.nanmean(dop_list)
+        else:
+            avg_pdop = np.nan
+        print(f"Trajectoire candidate démarrant à {datetime.utcfromtimestamp(candidate).strftime('%H:%M:%S')} => Total LOS = {total_los} | Total Obstrué = {total_obstrue} | Moyenne PDOP = {avg_pdop}")
         results.append({
             "Trajectory Start": datetime.utcfromtimestamp(candidate).strftime("%H:%M:%S"),
             "Total LOS": total_los,
-            "Total Obstrué": total_obstrue
+            "Total Obstrué": total_obstrue,
+            "Avg PDOP": avg_pdop
         })
         candidate += time_step_sec
 
@@ -964,6 +1000,7 @@ def compute_optimal_window_from_log(data, rinex_nav_file, buildings_dict,
     while candidate <= candidate_start_max:
         total_los = 0
         total_nlos = 0
+        dop_list = []
         for i, point in enumerate(log_points):
             effective_time = candidate + (cumulative[i] / velocity)
             sim_dt = base_date + timedelta(seconds=effective_time)
@@ -1036,12 +1073,32 @@ def compute_optimal_window_from_log(data, rinex_nav_file, buildings_dict,
             print(f"[DEBUG] Point {i}: LOS = {los_count} | NLOS = {nlos_count}")
             total_los += los_count
             total_nlos += nlos_count
-
-        print(f"Trajectoire candidate démarrant à {datetime.utcfromtimestamp(candidate).strftime('%H:%M:%S')} => Total LOS = {total_los} | Total NLOS = {total_nlos}")
+            sat_positions = []
+            for s in local_sat_infos:
+                if s.get("status", "UNKNOWN") == "LOS" and "sats_pos_l93" in s:
+                    sat_positions.append(s["sats_pos_l93"])
+            if len(sat_positions) >= 4:
+                sats_array = np.array(sat_positions)
+                rcv_pos = np.array([point["E"], point["N"], point["H"]])
+                try:
+                    dop_dict = compute_dop(rcv_pos, sats_array)
+                    dop_value = dop_dict["PDOP"]
+                except Exception as e:
+                    dop_value = np.nan
+            else:
+                dop_value = np.nan
+            dop_list.append(dop_value)
+            #print(f"[DEBUG] Point {i}: LOS = {los_count} | NLOS = {nlos_count} | PDOP = {dop_value}")
+        if len(dop_list) > 0:
+            avg_pdop = np.nanmean(dop_list)
+        else:
+            avg_pdop = np.nan
+        print(f"Trajectoire candidate démarrant à {datetime.utcfromtimestamp(candidate).strftime('%H:%M:%S')} => Total LOS = {total_los} | Total NLOS = {total_nlos} | Moyenne PDOP = {avg_pdop}")
         results.append({
             "Trajectory Start": datetime.utcfromtimestamp(candidate).strftime("%H:%M:%S"),
             "Total LOS": total_los,
-            "Total NLOS": total_nlos
+            "Total NLOS": total_nlos,
+            "Avg PDOP": avg_pdop
         })
         candidate += time_step_sec
 
