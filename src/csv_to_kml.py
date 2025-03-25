@@ -42,9 +42,9 @@ if __name__ == "__main__":
     # ---------------------
 
     # Import parameters
-    parser.add_argument('input_file', type=str, help="input file from the Geostix in .csv format")
+    parser.add_argument('input_file', type=str, help="input file from the Geostix, LOG, EXTEVENT or KML")
     parser.add_argument('-it', '--input_type', type=str, help="input file type between 'extevent' and 'log' (Default=log)",
-                        default="log", choices=["extevent", "log"])
+                        default="log", choices=["kmltraj","extevent", "log"])
     parser.add_argument('-sep','--separator', type=str, help="separator used in the .csv file (Default=,)", default=",")
     parser.add_argument('-ro', type=str, help="RINEX observation file", default='')
     # Export parameters
