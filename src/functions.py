@@ -684,62 +684,161 @@ def compute_score(los, nlos, optimal_time, sim_start, sim_end, los_ref=85, nlos_
     score = 1000*(weights[0] * los_factor + weights[1] * nlos_factor + weights[2] * time_factor)
     return score
 
+def compute_collisions_theorique(sat_dict, building_dict, dist_building=300, show=False):
+    """
+    Version adaptée pour un récepteur déjà en Lambert-93 + altitude (coordE, coordN, H).
+    Le satellite, lui, est transformé ECEF -> Lambert93 localement,
+    puis on calcule pt_along_line(...) en Lambert-93.
+    """
+    # Transformer les coordonnées satellites depuis ECEF (EPSG:4978) vers Lambert93 (EPSG:2154)
+    transformer_sat_to_l93 = pyproj.Transformer.from_crs("EPSG:4978", "EPSG:2154", always_xy=True)
+
+    for ekey in sat_dict:
+        rcvr = sat_dict[ekey]["rcvr_infos"]
+
+        # Au lieu de xr, yr, zr = rcvr["coordX"], on récupère E, N, H => la position du récepteur en Lambert-93
+        Er, Nr, Hr = rcvr["coordE"], rcvr["coordN"], rcvr["H"]
+
+        for skey, sat in sat_dict[ekey]["sat_infos"].items():
+            xs_orig, ys_orig, zs_orig = sat["X"], sat["Y"], sat["Z"]
+
+            # (1) Vérifier coords satellites valides
+            if np.isnan([xs_orig, ys_orig, zs_orig]).any():
+                sat["status"] = "UNKNOWN"
+                sat["Building ID"] = "None"
+                continue
+
+            # (2) Transformation satellite ECEF -> Lambert-93
+            try:
+                xs_l93, ys_l93, zs_l93 = transformer_sat_to_l93.transform(xs_orig, ys_orig, zs_orig)
+            except Exception:
+                sat["status"] = "UNKNOWN"
+                sat["Building ID"] = "None"
+                continue
+
+            # (3) Calcul d’un point intermédiaire sur la ligne (en Lambert-93) :
+            #     On part de (Er,Nr,Hr) vers (xs_l93,ys_l93,zs_l93),
+            #     et on se déplace de 1000 m.
+            try:
+                xn, yn, zn = pt_along_line((Er, Nr, Hr), (xs_l93, ys_l93, zs_l93), distance=1000)
+            except Exception:
+                sat["status"] = "UNKNOWN"
+                sat["Building ID"] = "None"
+                continue
+
+            # (4) Test de collision (toujours en Lambert-93), on appelle ce point (en,nn,Hn).
+            en, nn, Hn = xn, yn, zn
+
+            collision_detected = False
+            b_detected = "None"
+
+            # (5) Parcours des bâtiments (base_coords/roof_coords sont aussi en Lambert-93).
+            for bkey, building in building_dict.items():
+                base_coords = np.array(building["base_coords"])
+                # Distances par rapport au récepteur (Er,Nr,Hr)
+                distances = np.linalg.norm(base_coords - np.array([Er, Nr, Hr]), axis=1)
+                if np.min(distances) < dist_building:
+                    aabb_min = np.min(building["base_coords"], axis=0)
+                    aabb_max = np.max(building["roof_coords"], axis=0)
+                    collision_status, _, _ = segment_intersects_bbox(
+                        np.array([Er, Nr, Hr]),
+                        np.array([en, nn, Hn]),
+                        aabb_min,
+                        aabb_max
+                    )
+                    if collision_status:
+                        collision_detected = True
+                        b_detected = bkey
+                        break
+
+            # (6) Attribuer LOS / NLOS
+            if collision_detected:
+                sat["status"] = "NLOS"
+                sat["Building ID"] = b_detected
+            else:
+                sat["status"] = "LOS"
+                sat["Building ID"] = "None"
+
+    return sat_dict
+
 
 def compute_optimal_window_from_kml(kml_file, rinex_nav_file, buildings_dict,
                                     start_time, end_time, distance_step, velocity,
                                     time_step_sec=180, output_csv="resultats_optimal_window.csv", mnt=45.0):
-    # Discrétisation de la trajectoire depuis le fichier KML
+    """
+    Calcule la fenêtre optimale (nb max de satellites LOS) pour une trajectoire
+    KML "théorique" (points en Lambert-93) et un shapefile de bâtiments (Lambert-93).
+
+    - On lit la polyligne KML (read_and_discretize_kml) => DataFrame points_list
+      contenant coordX, coordY, coordZ (Lambert-93).
+    - On fixe éventuellement H= mnt.
+    - On simule dans le temps (boucle) en chargeant le RINEX Nav (calcSatCoord ECEF).
+    - On appelle compute_collisions_theorique(...) pour déterminer LOS/NLOS.
+    """
+
+    # 1) Discrétisation
     points_list = read_and_discretize_kml(kml_file, start_time, end_time, distance_step, velocity)
     if points_list is None or points_list.empty:
         print("Erreur : Aucun point extrait de la trajectoire KML.")
         return None
-    
+
+    # 2) MNT forcé si besoin
     if mnt != 0.0:
-        # On écrase la coordZ et H
         points_list["coordZ"] = mnt
-        points_list["H"] = mnt
+        points_list["H"] = mnt  # altitude orthométrique "artificielle"
 
     def parse_time(hhmm):
         hh, mm = map(int, hhmm.replace("h", ":").split(":"))
         return hh * 3600 + mm * 60
 
     global_end_sec = parse_time(end_time)
-    simulation_end = global_end_sec + 3600  # Simulation jusqu'à end_time + 1h
+    simulation_end = global_end_sec + 600
     base_date = datetime(2024, 2, 23)
 
     results = []
     print("\n[compute_optimal_window_from_kml] Début de la simulation de la fenêtre optimale.")
+
+    # 3) Pour chaque point (Lambert-93)
     for i, pt in points_list.iterrows():
         pt_time = pt["time_sod"]
         best_time = pt_time
         best_los = -1
-        best_obs = 0  # Nombre de satellites OBS associé à la meilleure fenêtre
+        best_nlos = 0
+
         simulation_times = []
         simulation_los = []
+
+        # Rappel : coordX, coordY, coordZ en Lambert-93
+        E_l93 = pt["coordX"]
+        N_l93 = pt["coordY"]
+        H_l93 = pt["coordZ"]
+
+        print(f"\n[Point {i}] E={E_l93:.3f}, N={N_l93:.3f}, H={H_l93:.2f}, time_sod={pt_time}")
+
         t = float(pt_time)
-        print(f"\n[Point {i}] Coordonnées: ({pt['lon']:.6f}, {pt['lat']:.6f}), H = {pt['H']:.2f}, time_sod = {pt_time}")
         while t <= simulation_end:
             t_eval = t
-            # Calcul de la date de simulation (base_date + t_eval secondes)
             sim_dt = base_date + timedelta(seconds=t_eval)
             sim_dt = snap_to_nearest_epoch(sim_dt, snap_threshold=1)
             key = sim_dt.strftime("%Y %m %d %H %M %S")
-            # Création dynamique de l'objet gnssdate pour cet instant
-            gnssdate = gpst.gpsdatetime(yyyy=sim_dt.year, mon=sim_dt.month, dd=sim_dt.day,
-                                        h=sim_dt.hour, min=sim_dt.minute, sec=sim_dt.second)
-            print(f"  [Simulation] Date de gnssdate: {key} | MJD: {gnssdate.mjd}")
-            mjd_time = gnssdate.mjd
 
-            # Chargement du fichier RINEX navigation (à chaque simulation)
+            gnssdate = gpst.gpsdatetime(
+                yyyy=sim_dt.year, mon=sim_dt.month, dd=sim_dt.day,
+                h=sim_dt.hour, min=sim_dt.minute, sec=sim_dt.second
+            )
+            mjd_time = gnssdate.mjd
+            print(f"  [Simulation] Date gnssdate: {key} | MJD: {mjd_time}")
+
+            # 4) Lecture RINEX
             try:
                 with open(rinex_nav_file, 'r') as f:
                     lines = f.readlines()
             except Exception as e:
-                print(f"[compute_optimal_window_from_kml] Erreur lors de l'ouverture du fichier Rinex: {e}")
+                print(f"[compute_optimal_window_from_kml] Erreur ouverture RINEX: {e}")
                 return None
 
             if not any("END OF HEADER" in line for line in lines):
-                print("[compute_optimal_window_from_kml] Le header n'a pas été trouvé dans le fichier Rinex.")
+                print("[compute_optimal_window_from_kml] Pas de header RINEX.")
                 return None
 
             try:
@@ -747,91 +846,88 @@ def compute_optimal_window_from_kml(kml_file, rinex_nav_file, buildings_dict,
                     temp.writelines(lines)
                     temp_filename = temp.name
             except Exception as e:
-                print(f"[compute_optimal_window_from_kml] Erreur lors de l'écriture du fichier temporaire: {e}")
+                print(f"[compute_optimal_window_from_kml] Erreur fichier temp: {e}")
                 return None
 
-            # Création d'un nouvel objet Orb et chargement du fichier RINEX
             Nav = orb.orbit()
             try:
                 Nav.loadRinexN(temp_filename)
             except Exception as e:
-                print(f"[compute_optimal_window_from_kml] Erreur lors du chargement des éphémérides: {e}")
+                print(f"[compute_optimal_window_from_kml] Erreur chargement éphémérides: {e}")
                 os.remove(temp_filename)
                 return None
             os.remove(temp_filename)
-            
-            # Récupération des éphémérides pour cet instant simulé pour toutes les constellations
+
+            # 5) Calcul sat ECEF
             sat_cepoch_dict = {}
-            for const in ["G", "R", "E", "C"]:
-                for prn in range(1, 33):
+            for const in ["G","R","E","C"]:
+                for prn in range(1,33):
                     try:
                         Xs, Ys, Zs, dte = Nav.calcSatCoord(const, prn, mjd_time, degree=0)
-                        if (Xs, Ys, Zs) != (0, 0, 0) and not (math.isnan(Xs) or math.isnan(Ys) or math.isnan(Zs)):
+                        if (Xs, Ys, Zs)!=(0,0,0) and not np.isnan([Xs,Ys,Zs]).any():
                             sat_cepoch_dict[f"{const}{prn:02d}"] = {"X": Xs, "Y": Ys, "Z": Zs, "dte": dte}
-                    except Exception:
-                        continue
+                    except:
+                        pass
 
-            # Préparation des informations du récepteur
-            try:
-                e_, n_, bigH_, _, _ = XYZ_2_ENH(pt["coordX"], pt["coordY"], pt["coordZ"], csts.grid_path)
-            except Exception as e:
-                print("Erreur dans XYZ_2_ENH :", e)
-                e_, n_, bigH_ = None, None, None
-
+            # 6) rcvr_infos en Lambert-93
             rcvr_dict = {
-                "coordX": pt["coordX"],
-                "coordY": pt["coordY"],
-                "coordZ": pt["coordZ"],
-                "coordE": e_,
-                "coordN": n_,
-                "H": bigH_
+                "coordE": E_l93,
+                "coordN": N_l93,
+                "H": H_l93
             }
-            
             current_sat_dict = { key: {"rcvr_infos": rcvr_dict, "sat_infos": sat_cepoch_dict} }
-            if not current_sat_dict or len(current_sat_dict.keys()) == 0:
-                n_los = 0
-                n_obs = 0
+
+            if not current_sat_dict:
+                n_los=0
+                n_obs=0
             else:
                 sim_key = list(current_sat_dict.keys())[0]
-                print(f"    Éphéméride associée: {sim_key}")
-                current_sat_dict = compute_collisions(current_sat_dict, buildings_dict, dist_building=300, show=False)
-                local_sat_infos = current_sat_dict.get(sim_key, {}).get("sat_infos", {})
-                n_los = sum(1 for v in local_sat_infos.values() if v.get("status", "UNKNOWN") == "LOS")
-                n_obs = sum(1 for v in local_sat_infos.values() if v.get("status", "UNKNOWN") == "NLOS")
-            print(f"    Nombre de satellites LOS pour ce point = {n_los}")
+                print(f"    [DEBUG] Éphéméride associée: {sim_key}")
+                # 7) Collisions => compute_collisions_theorique
+                current_sat_dict = compute_collisions_theorique(current_sat_dict, buildings_dict, dist_building=300)
+                local_sat_infos = current_sat_dict[sim_key]["sat_infos"].values()
+
+                n_los  = sum(1 for s in local_sat_infos if s.get("status","UNKNOWN")=="LOS")
+                n_obs = sum(1 for s in local_sat_infos if s.get("status","UNKNOWN")=="NLOS")
+
+            print(f"    Nombre de satellites LOS = {n_los}, OBS = {n_obs}")
             simulation_times.append(t_eval)
             simulation_los.append(n_los)
-            if n_los > best_los:
+
+            if n_los>best_los:
                 best_los = n_los
-                best_time = t_eval
-                best_obs = n_obs
-                print(f"    Nouvelle meilleure fenêtre: t = {t_eval} sec (Nb LOS = {best_los})")
-                print(f"    nb OBS = {best_obs})")
+                best_time= t_eval
+                best_obs= n_obs
+
             t += time_step_sec
 
-        print(f"  Temps simulés pour le point {i}: {simulation_times}")
-        print(f"  Nb LOS pour le point {i}: {simulation_los}")
+        print(f"  Temps simulés point {i}: {simulation_times}")
+        print(f"  Nb LOS: {simulation_los}")
+
+        # 8) Score final
         optimal_time_str = datetime.utcfromtimestamp(best_time).strftime("%H:%M:%S")
-        
-        # Calcul du score pour la meilleure fenêtre optimale (simulation de 00h00 à 23h59)
-        score = compute_score(best_los, best_obs, best_time, sim_start=0, sim_end=86399)
-        
+        final_score = compute_score(best_los, best_obs, best_time, sim_start=0, sim_end=86399)
+        transformer_l93_to_wgs = pyproj.Transformer.from_crs("EPSG:2154", "EPSG:4326", always_xy=True)
+        lon_wgs, lat_wgs, alt_wgs = transformer_l93_to_wgs.transform(E_l93, N_l93, H_l93)
+
         results.append({
             "Point Index": i,
-            "Latitude": pt["lat"],
-            "Longitude": pt["lon"],
-            "Hauteur (H)": pt["H"],
+            "lon": lon_wgs,
+            "lat": lat_wgs,
+            "H ": alt_wgs,
             "Optimal Time": optimal_time_str,
             "Nb Max LOS": best_los,
-            "Score": score
+            "Score": final_score
         })
+
+    # 9) CSV
     df_results = pd.DataFrame(results)
     print("\n--- Résultats Fenêtre Optimale ---")
     print(df_results)
     df_results.to_csv(output_csv, index=False)
-    print(f"\nLes résultats ont été enregistrés dans '{output_csv}'.")
+    print(f"[DEBUG] Fichier CSV = '{output_csv}'")
     sys.exit(0)
-    
+
 ###############################################
 # Fonctions de simulation temporelle pour LOG
 ###############################################
@@ -856,7 +952,7 @@ def compute_optimal_window_from_log(data, rinex_nav_file, buildings_dict,
     """
 
     results = []
-    print("\n[DEBUG] Début de la simulation de la fenêtre optimale pour le fichier LOG.")
+    #print("\n[DEBUG] Début de la simulation de la fenêtre optimale pour le fichier LOG.")
 
     # Sous-fonction pour parser "HH:MM" en secondes
     def parse_time(hhmm):
@@ -864,15 +960,15 @@ def compute_optimal_window_from_log(data, rinex_nav_file, buildings_dict,
             hh, mm = map(int, hhmm.replace("h", ":").split(":"))
             return hh * 3600 + mm * 60
         except Exception as e:
-            print(f"[DEBUG] Erreur lors du parsing de '{hhmm}': {e}")
+            #print(f"[DEBUG] Erreur lors du parsing de '{hhmm}': {e}")
             return 0
 
     # Détermination du temps de fin global (simulation_end)
     if time_end:
         # L'utilisateur a fourni "HH:MM" => on ajoute 60 minutes
         global_end_sec = parse_time(time_end)
-        simulation_end = global_end_sec + 3600
-        print(f"  [DEBUG] Temps de fin imposé: time_end = {time_end} -> simulation_end = {simulation_end} sec")
+        simulation_end = global_end_sec + 900
+        #print(f"  [DEBUG] Temps de fin imposé: time_end = {time_end} -> simulation_end = {simulation_end} sec")
     else:
         # On balaie le DataFrame pour trouver la plus grande heure
         max_time_sod = 0
@@ -896,7 +992,7 @@ def compute_optimal_window_from_log(data, rinex_nav_file, buildings_dict,
                 if time_sod > max_time_sod:
                     max_time_sod = time_sod
             except Exception as e:
-                print(f"  [DEBUG] Erreur parsing ligne {i}: {e}")
+                #print(f"  [DEBUG] Erreur parsing ligne {i}: {e}")
                 continue
         simulation_end = max_time_sod + 3600
 
@@ -904,7 +1000,7 @@ def compute_optimal_window_from_log(data, rinex_nav_file, buildings_dict,
     try:
         base_date = datetime.strptime(data.iloc[0]["date"].strip('"'), "%d/%m/%Y")
     except Exception as e:
-        print(f"  [DEBUG] Erreur lors de l'extraction de la base date: {e}. Utilisation de la date par défaut.")
+        #print(f"  [DEBUG] Erreur lors de l'extraction de la base date: {e}. Utilisation de la date par défaut.")
         base_date = datetime(2024, 2, 23)
 
     # Parcours de chaque point du fichier LOG
@@ -915,10 +1011,10 @@ def compute_optimal_window_from_log(data, rinex_nav_file, buildings_dict,
             lon_ellip = float(row["lon"])
             h_ellip   = float(str(row["h"]).replace('"','').strip())
         except Exception as e:
-            print(f"[DEBUG] Ignoré la ligne {i} : coordonnées invalides ({e}).")
+            #print(f"[DEBUG] Ignoré la ligne {i} : coordonnées invalides ({e}).")
             continue
         if any(np.isnan(v) for v in [lat_ellip, lon_ellip, h_ellip]):
-            print(f"[DEBUG] Ignoré la ligne {i} : NaN détecté.")
+            #print(f"[DEBUG] Ignoré la ligne {i} : NaN détecté.")
             continue
 
         # Conversion date / heure
@@ -941,7 +1037,7 @@ def compute_optimal_window_from_log(data, rinex_nav_file, buildings_dict,
                 time_str_cvt = f"{hh:02d}:{mm:02d}:{ss:06.3f}"
                 sim_dt = datetime.strptime(date_str + " " + time_str_cvt, "%d/%m/%Y %H:%M:%S.%f")
         except Exception as e:
-            print(f"[DEBUG] Erreur parsing date/heure pour la ligne {i}: {e}")
+            #print(f"[DEBUG] Erreur parsing date/heure pour la ligne {i}: {e}")
             continue
 
         # Temps du point (sec depuis minuit)
@@ -952,13 +1048,13 @@ def compute_optimal_window_from_log(data, rinex_nav_file, buildings_dict,
             coordX = float(row["coordX"])
             coordY = float(row["coordY"])
             coordZ = float(row["coordZ"])
-            print(f"[DEBUG] Ligne {i} => ECEF extrait: ({coordX}, {coordY}, {coordZ})")
+            #print(f"[DEBUG] Ligne {i} => ECEF extrait: ({coordX}, {coordY}, {coordZ})")
         except Exception:
             # On calcule via llh_2_XYZ (ellipsoïdal -> ECEF)
             try:
                 receiver_xyz = llh_2_XYZ(lon_ellip, lat_ellip, h_ellip)
                 coordX, coordY, coordZ = receiver_xyz
-                print(f"[DEBUG] Ligne {i} => ECEF calculé via llh_2_XYZ: ({coordX}, {coordY}, {coordZ})")
+                #print(f"[DEBUG] Ligne {i} => ECEF calculé via llh_2_XYZ: ({coordX}, {coordY}, {coordZ})")
             except Exception as e2:
                 print(f"[DEBUG] Erreur lors de la conversion ECEF ligne {i}: {e2}")
                 continue
@@ -970,7 +1066,7 @@ def compute_optimal_window_from_log(data, rinex_nav_file, buildings_dict,
         #       return (E, N, H, lon2, lat2)
         try:
             E_l93, N_l93, H_ortho, lon2, lat2 = XYZ_2_ENH(coordX, coordY, coordZ, csts.grid_path)
-            print(f"[DEBUG] Ligne {i} => XYZ_2_ENH => E={E_l93:.3f}, N={N_l93:.3f}, H={H_ortho:.3f}")
+            #print(f"[DEBUG] Ligne {i} => XYZ_2_ENH => E={E_l93:.3f}, N={N_l93:.3f}, H={H_ortho:.3f}")
         except Exception as e3:
             print(f"[DEBUG] Erreur lors de XYZ_2_ENH ligne {i}: {e3}")
             continue
@@ -1025,7 +1121,7 @@ def compute_optimal_window_from_log(data, rinex_nav_file, buildings_dict,
             Nav = orb.orbit()
             try:
                 Nav.loadRinexN(temp_filename)
-                print(f"  [DEBUG] Éphémérides chargées pour {key}.")
+                #print(f"  [DEBUG] Éphémérides chargées pour {key}.")
             except Exception as e:
                 print(f"[DEBUG] Erreur loadRinexN: {e}")
                 os.remove(temp_filename)
@@ -1072,7 +1168,7 @@ def compute_optimal_window_from_log(data, rinex_nav_file, buildings_dict,
                 n_los, n_obs = 0, 0
             else:
                 sim_key = list(current_sat_dict.keys())[0]
-                print(f"    [DEBUG] Collision check => Epoch: {sim_key}")
+                #print(f"    [DEBUG] Collision check => Epoch: {sim_key}")
                 current_sat_dict = compute_collisions(current_sat_dict, buildings_dict,
                                                       dist_building=300, show=False)
                 local_sat_infos = current_sat_dict.get(sim_key, {}).get("sat_infos", {})
