@@ -122,7 +122,10 @@ if __name__ == "__main__":
     parser.add_argument('--time_end', type=str, help="Heure de fin de simulation (format HH:MM:SS) pour étaler la simulation au-delà de la fin des relevés LOG", default=None)
     parser.add_argument('--detect_nlos', action="store_true", help="Detect collisions (NLOS).")
     parser.add_argument('-ll','--line_length', type=float, help="Line length for collisions (Default=250)", default=250)
-
+    parser.add_argument('-start_time_log', type=str, default="8h00",
+                        help="Start time for LOG trajectory simulation (e.g. 8h00)")
+    parser.add_argument('-velocity_log', type=float, default=1.5,
+                        help="Velocity (m/s) for LOG trajectory simulation (default=1.5)")
     args = parser.parse_args()
     
     # Mode temporel (calcul de la fenêtre temporelle optimale)
@@ -186,9 +189,11 @@ if __name__ == "__main__":
                     data=data,
                     rinex_nav_file=args.rinex_name,
                     buildings_dict=buildings_dict,
-                    time_step_sec=3600,
+                    time_step_sec=900,
                     output_csv="resultats_optimal_window_log.csv",
-                    time_end=args.time_end
+                    time_end=args.time_end,
+                    start_time=args.start_time_log,
+                    velocity=args.velocity_log
                 )
                 print(df_optimal)
                 
