@@ -29,6 +29,8 @@ import pandas as pd
 import tempfile
 import sys
 from tqdm import tqdm
+import contextlib
+import concurrent.futures
 
 """ Creation of a kml point """
 def custom_pt(kml, # simplekml object
@@ -476,14 +478,100 @@ def segment_intersects_bbox(ray_origin, ray_end, aabb_min, aabb_max):
         return True, t_entry, t_exit
     return False, None, None
 
-# --- Fonctions utilitaires ---
+def draw_collision_rays(sat_dict, kml_layer):
+    line_style_dict = {}
+    for key, style in csts.line_styles.items():
+        s = simplekml.Style()
+        s.linestyle.color = style['color']
+        s.linestyle.width = 2
+        line_style_dict[key] = s
+    for key in sat_dict:
+        folder = kml_layer.newfolder(name=f"Vectors for Point at Epoch {key}", visibility=0)
+        for skey in sat_dict[key]["sat_infos"]:
+            sat_status = sat_dict[key]["sat_infos"][skey]["status"]
+            desc = (
+                '<table style="border: 1px solid black;">'
+                '<tr><td></td><td></td></tr>\n'
+                f'<tr><td style="text-align: left;">Nom :</td><td style="text-align: left;">{skey}</td></tr>\n'
+                f'<tr><td style="text-align: left;">Epoch :</td><td style="text-align: left;">{key}</td></tr>\n'
+                f'<tr><td style="text-align: left;">Status :</td><td style="text-align: left;">{sat_status}</td></tr>\n'
+                f'<tr><td style="text-align: left;">Building ID :</td><td style="text-align: left;">{sat_dict[key]["sat_infos"][skey]["Building ID"]}</td></tr>\n'
+                '</table>'
+            )
+            rcvr_lon = sat_dict[key]["rcvr_infos"]["lon"]
+            rcvr_lat = sat_dict[key]["rcvr_infos"]["lat"]
+            rcvr_H = sat_dict[key]["rcvr_infos"]["H"]
+            sat_lon_app = sat_dict[key]["sat_infos"][skey]["lon_apparente"]
+            sat_lat_app = sat_dict[key]["sat_infos"][skey]["lat_apparente"]
+            sat_H_app = sat_dict[key]["sat_infos"][skey]["H_apparente"]
+            end_coords = [(rcvr_lon, rcvr_lat, rcvr_H), (sat_lon_app, sat_lat_app, sat_H_app)]
+            vector_placemark = kml_layer.newlinestring(name=f"Vector to {skey} ({sat_status})", description=desc)
+            vector_placemark.coords = end_coords
+            vector_placemark.altitudemode = simplekml.AltitudeMode.absolute
+            style_key = 'LOS' if sat_status == 'LOS' else 'NLOS'
+            vector_placemark.style = line_style_dict[style_key]
+    return None
 
-def snap_to_nearest_epoch(dt, snap_threshold=3600):
+def chemin_relatif(nom_fichier: str, type_fichier: str) -> str:
     """
-    Arrondit un datetime dt à l’époché la plus proche si la différence (en secondes)
-    entre dt et l’arrondi est inférieure ou égale à snap_threshold.
+    Retourne le chemin absolu d'un fichier en utilisant des chemins relatifs à partir du dossier 'test'.
+
+    La structure du projet est la suivante :
+        csv_to_kml/
+            src/
+                csv_to_kml.py
+                functions.py
+            test/
+                kml/     -> pour les fichiers KML
+                shp/     -> pour les fichiers shape
+                log/     -> pour les fichiers LOG
+                rinex/   -> pour les fichiers Rinex
+
+    :param nom_fichier: Nom du fichier (par exemple 'short.kml' ou '20240223.LOG').
+    :param type_fichier: Type de fichier, parmi 'kml', 'shp', 'log' ou 'rinex'.
+    :return: Chemin absolu vers le fichier.
+    """
+    import os
+
+    dossiers_valides = ['kml', 'shp', 'log', 'rinex']
+    if type_fichier not in dossiers_valides:
+        raise ValueError(
+            f"Type de fichier '{type_fichier}' non supporté. Choisissez parmi {dossiers_valides}."
+        )
     
-    Avec snap_threshold=1, chaque seconde est pratiquement conservée.
+    # Détermine le chemin du dossier courant (celui de functions.py, dans src)
+    chemin_courant = os.path.dirname(os.path.abspath(__file__))
+    # Le dossier 'test' se trouve au même niveau que 'src', on remonte d'un niveau et on rejoint 'test'
+    dossier_test = os.path.abspath(os.path.join(chemin_courant, "..", "test"))
+    
+    # Construit le chemin complet en rejoignant le sous-dossier (kml, shp, log ou rinex) et le nom du fichier
+    chemin_fichier = os.path.join(dossier_test, type_fichier, nom_fichier)
+    
+    return chemin_fichier
+
+
+#####################################################################################################################
+# --- Fonctions temporelles ---
+
+def snap_to_nearest_epoch(dt, snap_threshold):
+    """
+   Arrondissement d'un datetime à l'époché la plus proche.
+
+    Procédure :
+      - Conversion de dt en secondes depuis minuit.
+      - Calcul du reste de la division par snap_threshold.
+      - Arrondissement à l'entier multiple de snap_threshold le plus proche
+        (si l'écart est inférieur ou égal à snap_threshold).
+      - Conversion du résultat en heures, minutes et secondes et mise à jour de dt.
+    
+    Paramètres :
+      dt (datetime): Date et heure à arrondir.
+      snap_threshold (int, optionnel): Seuil d'arrondissement en secondes 
+                                       (par défaut 3600, soit 1 heure).
+    
+    Retourne :
+      datetime: dt arrondi à l'époché la plus proche si la différence en secondes
+                est inférieure ou égale à snap_threshold, sinon dt d'origine.
     """
     total_sec = dt.hour * 3600 + dt.minute * 60 + dt.second
     remainder = total_sec % snap_threshold
@@ -498,10 +586,334 @@ def snap_to_nearest_epoch(dt, snap_threshold=3600):
         return dt.replace(hour=new_hour, minute=new_minute, second=new_second)
     return dt
 
+def compute_dop(receiver_position, sat_positions):
+    """
+    Calcul du DOP (Dilution of Precision) à partir de la position du récepteur et des positions satellites.
+    
+    Étapes :
+    - Calcul des vecteurs de ligne de visée (los_vectors) et normalisation pour obtenir les vecteurs unitaires.
+    - Construction de la matrice G en associant les composantes spatiales et une colonne de 1 pour modéliser l'erreur d'horloge.
+    - Inversion de (G^T * G) pour obtenir la matrice de covariance Q.
+    - Extraction des indices DOP à partir des termes diagonaux de Q :
+        • GDOP : qualité globale (spatiale + temporelle) = √(trace(Q))
+        • PDOP : position (X, Y, Z) = √(Q[0,0] + Q[1,1] + Q[2,2])
+        • HDOP : horizontale (X, Y) = √(Q[0,0] + Q[1,1])
+        • VDOP : verticale (Z) = √(Q[2,2])
+        • TDOP : temporelle (horloge) = √(Q[3,3])
+    
+    Paramètres :
+      receiver_position (array-like): Position du récepteur en coordonnées (X, Y, Z).
+      sat_positions (np.ndarray): Tableau (n x 3) des positions satellites en coordonnées (X, Y, Z).
+      
+    Retourne :
+      dict: Dictionnaire contenant les valeurs calculées de GDOP, PDOP, HDOP, VDOP et TDOP.
+      
+    Remarque :
+      Nécessite au moins 4 satellites pour assurer une solution unique.
+    """
+    # Nombre de satellites
+    nbr_sats = sat_positions.shape[0]
+    if nbr_sats < 4:
+        raise ValueError("At least 4 satellites are required to compute DOP values.")
+
+    # Calcul des vecteurs unitaires de ligne de visée
+    los_vectors = sat_positions - receiver_position
+    distances = np.linalg.norm(los_vectors, axis=1).reshape(-1, 1)
+    unit_vectors = los_vectors / distances
+
+    # Construction de la matrice G (intégration de la composante temporelle)
+    G = np.hstack((unit_vectors, np.ones((nbr_sats, 1))))
+
+    # Inversion de (G^T * G) pour obtenir la matrice de covariance Q
+    Q = np.linalg.inv(G.T @ G)
+
+    # Extraction des valeurs DOP à partir de Q
+    GDOP = np.sqrt(np.trace(Q))
+    PDOP = np.sqrt(Q[0, 0] + Q[1, 1] + Q[2, 2])
+    HDOP = np.sqrt(Q[0, 0] + Q[1, 1])
+    VDOP = np.sqrt(Q[2, 2])
+    TDOP = np.sqrt(Q[3, 3])
+
+    # Assemblage et retour des indices DOP
+    out_dict = {
+        "GDOP": GDOP,
+        "PDOP": PDOP,
+        "HDOP": HDOP,
+        "VDOP": VDOP,
+        "TDOP": TDOP
+    }
+    return out_dict
+
+
+def compute_collisions(sat_dict, building_dict, dist_building=300, show=False):
+    """
+    Calcul de collision entre les satellites et les bâtiments.
+    
+    Procédure :
+      1. Transformation des coordonnées satellites depuis ECEF (EPSG:4978) vers Lambert-93 (EPSG:2154).
+      2. Pour chaque satellite :
+         - Vérification de la validité des coordonnées.
+         - Transformation des coordonnées en Lambert-93.
+         - Calcul d'un point intermédiaire le long de la ligne joignant le récepteur (en Lambert-93)
+           à la position satellite, à une distance de 1000 m.
+         - Test de collision entre le segment (récepteur - point intermédiaire) et la boite englobante 
+           du bâtiment (définie par les coordonnées de base et de toit).
+      3. Attribution du statut :
+         - "NLOS" (Non Line Of Sight) si collision détectée.
+         - "LOS" (Line Of Sight) sinon.
+    
+    Paramètres :
+      sat_dict (dict): Dictionnaire contenant les informations du récepteur et des satellites.
+      building_dict (dict): Dictionnaire des bâtiments avec leurs coordonnées en Lambert-93.
+      dist_building (float, optionnel): Distance seuil (en m) pour considérer un bâtiment proche (par défaut 300).
+      show (bool, optionnel): Flag pour afficher des informations (non utilisé ici).
+    
+    Retour :
+      dict: Le dictionnaire sat_dict mis à jour avec les statuts "LOS" ou "NLOS" et l'ID du bâtiment en collision.
+    """
+    # Transformation des coordonnées satellites depuis ECEF vers Lambert-93
+    transformer_sat_to_l93 = pyproj.Transformer.from_crs("EPSG:4978", "EPSG:2154", always_xy=True)
+
+    for ekey in sat_dict:
+        rcvr = sat_dict[ekey]["rcvr_infos"]
+        # Extraction de la position du récepteur en Lambert-93 (E, N, H)
+        Er, Nr, Hr = rcvr["coordE"], rcvr["coordN"], rcvr["H"]
+
+        for skey, sat in sat_dict[ekey]["sat_infos"].items():
+            xs_orig, ys_orig, zs_orig = sat["X"], sat["Y"], sat["Z"]
+
+            # Vérification de la validité des coordonnées satellites
+            if np.isnan([xs_orig, ys_orig, zs_orig]).any():
+                sat["status"] = "UNKNOWN"
+                sat["Building ID"] = "None"
+                continue
+
+            # Transformation des coordonnées satellite en Lambert-93
+            try:
+                xs_l93, ys_l93, zs_l93 = transformer_sat_to_l93.transform(xs_orig, ys_orig, zs_orig)
+            except Exception:
+                sat["status"] = "UNKNOWN"
+                sat["Building ID"] = "None"
+                continue
+
+            # Calcul d'un point intermédiaire sur la ligne récepteur-satellite (distance = 1000 m)
+            try:
+                xn, yn, zn = pt_along_line((Er, Nr, Hr), (xs_l93, ys_l93, zs_l93), distance=1000)
+                sat["sats_pos_l93"] = (xs_l93, ys_l93, zs_l93)
+            except Exception:
+                sat["status"] = "UNKNOWN"
+                sat["Building ID"] = "None"
+                continue
+
+            # Définition du point intermédiaire en Lambert-93
+            en, nn, Hn = xn, yn, zn
+
+            collision_detected = False
+            b_detected = "None"
+
+            # Parcours des bâtiments pour détecter une collision
+            for bkey, building in building_dict.items():
+                base_coords = np.array(building["base_coords"])
+                # Calcul des distances entre le récepteur et les points du bâtiment
+                distances = np.linalg.norm(base_coords - np.array([Er, Nr, Hr]), axis=1)
+                if np.min(distances) < dist_building:
+                    aabb_min = np.min(building["base_coords"], axis=0)
+                    aabb_max = np.max(building["roof_coords"], axis=0)
+                    collision_status, _, _ = segment_intersects_bbox(
+                        np.array([Er, Nr, Hr]),
+                        np.array([en, nn, Hn]),
+                        aabb_min,
+                        aabb_max
+                    )
+                    if collision_status:
+                        collision_detected = True
+                        b_detected = bkey
+                        break
+
+            # Attribution du statut selon la détection de collision
+            if collision_detected:
+                sat["status"] = "NLOS"
+                sat["Building ID"] = b_detected
+            else:
+                sat["status"] = "LOS"
+                sat["Building ID"] = "None"
+
+    return sat_dict
+
+def candidate_simulation(candidate, points_list, cumulative, base_date, base_point_time,
+                         Nav_data, buildings_dict, velocity, obs_data=None):
+    """
+    Simulation d'une fenêtre candidate pour une trajectoire et agrégation des statistiques.
+    
+    Simulation de la trajectoire avec décalage temporel, calcul du nombre de satellites LOS, NLOS, Obstructed et PDOP moyen.
+    
+    :return: Dictionnaire récapitulatif des statistiques pour la candidate.
+    """
+    #print(f"DEBUG: Début de candidate_simulation pour candidate = {candidate}")
+
+    # Création locale de l'objet Nav à partir de Nav_data
+    Nav = orb.orbit()
+    try:
+        with tempfile.NamedTemporaryFile(mode='w', delete=False) as temp:
+            temp.writelines(Nav_data)
+            nav_temp_filename = temp.name
+        #print(f"DEBUG: Fichier temporaire Nav créé : {nav_temp_filename}")
+    except Exception as e:
+        print("DEBUG: Exception lors de la création du fichier temporaire Nav :", e)
+        return None
+    with contextlib.redirect_stdout(open(os.devnull, 'w')):
+        try:
+            Nav.loadRinexN(nav_temp_filename)
+            #print("DEBUG: Nav.loadRinexN réussi")
+        except Exception as e:
+            print("DEBUG: Exception dans Nav.loadRinexN :", e)
+            os.remove(nav_temp_filename)
+            return None
+    os.remove(nav_temp_filename)
+
+    # Si obs_data est fourni (mode réel), créer l'objet Obs
+    Obs = None
+    if obs_data is not None:
+        Obs = rx.rinex_o()
+        try:
+            with tempfile.NamedTemporaryFile(mode='w', delete=False) as temp:
+                temp.writelines(obs_data)
+                obs_temp_filename = temp.name
+            #print(f"DEBUG: Fichier temporaire Obs créé : {obs_temp_filename}")
+        except Exception as e:
+            print("DEBUG: Exception lors de la création du fichier temporaire Obs :", e)
+            Obs = None
+        else:
+            with contextlib.redirect_stdout(open(os.devnull, 'w')):
+                try:
+                    Obs.loadRinexO(obs_temp_filename)
+                    #print("DEBUG: Obs.loadRinexO réussi")
+                except Exception as e:
+                    print("DEBUG: Exception dans Obs.loadRinexO :", e)
+                    os.remove(obs_temp_filename)
+                    Obs = None
+            os.remove(obs_temp_filename)
+    #else:
+        #print("DEBUG: Aucun obs_data fourni, mode théorique.")
+
+    ephemerides_cache = {}
+    total_los = 0
+    total_nlos = 0      # Calculé uniquement en mode réel
+    total_obstructed = 0
+    dop_list = []
+
+    # Parcours de tous les points de la candidate
+    for idx, pt in points_list.iterrows():
+        effective_time = candidate + (pt["time_sod"] - base_point_time)
+        sim_dt = base_date + timedelta(seconds=effective_time)
+        sim_dt = snap_to_nearest_epoch(sim_dt, snap_threshold=1)
+        key = sim_dt.strftime("%Y %m %d %H %M %S")
+        gnssdate = gpst.gpsdatetime(yyyy=sim_dt.year, mon=sim_dt.month, dd=sim_dt.day,
+                                    h=sim_dt.hour, min=sim_dt.minute, sec=sim_dt.second)
+        mjd_time = gnssdate.mjd
+        mjd_key = f"{mjd_time:.5f}"
+        #print(f"DEBUG: Point index {idx}: sim_dt = {sim_dt}, mjd_time = {mjd_time}, key = {key}")
+
+        if mjd_key in ephemerides_cache:
+            sat_cepoch_dict = ephemerides_cache[mjd_key]
+            #print(f"DEBUG: Cache trouvé pour mjd_key {mjd_key} avec {len(sat_cepoch_dict)} satellites")
+        else:
+            sat_cepoch_dict = {}
+            for const in ["G", "R", "E", "C"]:
+                for prn in range(1, 33):
+                    try:
+                        Xs, Ys, Zs, dte = Nav.calcSatCoord(const, prn, mjd_time, degree=0)
+                        if (Xs, Ys, Zs) != (0, 0, 0) and not np.isnan([Xs, Ys, Zs]).any():
+                            sat_cepoch_dict[f"{const}{prn:02d}"] = {"X": Xs, "Y": Ys, "Z": Zs, "dte": dte}
+                    except Exception as e:
+                        # Optionnel : décommenter pour plus de détails
+                        # print(f"DEBUG: Exception pour {const}{prn:02d} à mjd_time {mjd_time}: {e}")
+                        pass
+            ephemerides_cache[mjd_key] = sat_cepoch_dict
+            #print(f"DEBUG: Chargement des éphémérides pour mjd_key {mjd_key}: {len(sat_cepoch_dict)} satellites trouvés")
+
+        # Récupération de la position du récepteur
+        if "coordX" in pt:
+            rcv_pos_dict = {"coordE": pt["coordX"], "coordN": pt["coordY"], "H": pt["coordZ"]}
+        else:
+            rcv_pos_dict = {"coordE": pt["E"], "coordN": pt["N"], "H": pt["H"]}
+        # Assemblage du dictionnaire satellites/récepteur
+        current_sat_dict = { key: {"rcvr_infos": rcv_pos_dict, "sat_infos": sat_cepoch_dict} }
+        current_sat_dict = compute_collisions(current_sat_dict, buildings_dict, dist_building=300)
+        local_sat_infos = current_sat_dict[key]["sat_infos"]
+
+        # Comptage des satellites LOS
+        los_count = sum(1 for s in local_sat_infos.values() if s.get("status", "UNKNOWN") == "LOS")
+        #print(f"DEBUG: Point index {idx}: satellites LOS = {los_count}")
+
+        if Obs is not None:
+            epoch_obs = Obs.getEpochByMjd(gnssdate.mjd)
+            observed_set = set()
+            if epoch_obs is not None:
+                for sat in epoch_obs.satellites:
+                    if sat is not None:
+                        if sat.obs.get("C1C", 0) > 0:
+                            observed_set.add(f"{sat.const}{sat.PRN}")
+            # Reclassification des satellites de NLOS en Obstructed si non observés
+            for sat_id, s in local_sat_infos.items():
+                if s.get("status", "UNKNOWN") == "NLOS" and (sat_id not in observed_set):
+                    s["status"] = "Obstructed"
+            nlos_count = sum(1 for s in local_sat_infos.values() if s.get("status", "UNKNOWN") == "NLOS")
+            obstructed_count = sum(1 for s in local_sat_infos.values() if s.get("status", "UNKNOWN") == "Obstructed")
+        else:
+            nlos_count = 0
+            obstructed_count = sum(1 for s in local_sat_infos.values() if s.get("status", "UNKNOWN") == "NLOS")
+        total_los += los_count
+        total_nlos += nlos_count
+        total_obstructed += obstructed_count
+
+        # Calcul du GDOP à partir des satellites LOS
+        sat_positions = [s["sats_pos_l93"] for s in local_sat_infos.values()
+                         if s.get("status", "UNKNOWN") == "LOS" and "sats_pos_l93" in s]
+        if len(sat_positions) >= 4:
+            sats_array = np.array(sat_positions)
+            rcv_pos = np.array([rcv_pos_dict["coordE"], rcv_pos_dict["coordN"], rcv_pos_dict["H"]])
+            try:
+                dop_dict = compute_dop(rcv_pos, sats_array)
+                dop_value = dop_dict["GDOP"]
+            except Exception as e:
+                print(f"DEBUG: Exception dans compute_dop pour point index {idx} : {e}")
+                dop_value = np.nan
+        else:
+            dop_value = np.nan
+        #print(f"DEBUG: Point index {idx}: GDOP = {dop_value}")
+        dop_list.append(dop_value)
+
+    avg_gdop = np.nanmean(dop_list) if dop_list else np.nan
+    total_observed = total_los + total_nlos + total_obstructed
+    #print(f"DEBUG: Fin de candidate_simulation pour candidate {candidate}")
+    #print(f"DEBUG: Total LOS = {total_los}, Total NLOS = {total_nlos}, Total Obstructed = {total_obstructed}, Avg GDOP = {avg_gdop}")
+
+    if Obs is not None:
+        return {"Trajectory Start": datetime.utcfromtimestamp(candidate).strftime("%H:%M:%S"),
+                "Total LOS": total_los,
+                "Total NLOS": total_nlos,
+                "Total Obstructed": total_obstructed,
+                "Total Observed": total_observed,
+                "Avg GDOP": avg_gdop}
+    else:
+        return {"Trajectory Start": datetime.utcfromtimestamp(candidate).strftime("%H:%M:%S"),
+                "Total LOS": total_los,
+                "Total Obstructed": total_obstructed,
+                "Total Observed": total_observed,
+                "Avg GDOP": avg_gdop}
+
+#####################################################################################################################
+# --- Fonctions de simulation temporelle ---
+
 def read_and_discretize_kml(kml_file, start_time, end_time, distance_step, velocity):
     """
-    Lit un fichier KML et discrétise la trajectoire pour obtenir une série de points
-    avec leurs coordonnées en Lambert93 et en WGS84 ainsi qu’un temps (en secondes depuis minuit).
+    Calcul de la fenêtre optimale à partir d'un fichier KML.
+    
+    Discrétisation de la trajectoire KML, simulation de candidats temporels et agrégation
+    des statistiques (LOS, Obstructed, PDOP moyen).
+    
+    :return: DataFrame des résultats
     """
     def parse_time(hhmm):
         hh, mm = map(int, hhmm.replace("h", ":").split(":"))
@@ -642,147 +1054,39 @@ def read_and_discretize_kml(kml_file, start_time, end_time, distance_step, veloc
     print(f"[read_and_discretize_kml] Discrétisation terminée avec {len(df_points)} points.")
     return df_points
 
-#######################################
-
-def compute_dop(
-                receiver_position,
-                sat_positions
-                ):
-    #number of staellites
-    nbr_sats = sat_positions.shape[0]
-    
-    #need at least 4 satellites
-    if(nbr_sats < 4):
-        raise ValueError("At least 4 satellites are required to compute DOP values.")
-    
-    #compute unit vector
-    los_vectors = sat_positions - receiver_position
-    distances = np.linalg.norm(los_vectors,axis=1).reshape(-1,1)
-    unit_vectors = los_vectors / distances
-    
-    #compute matrix G
-    G = np.hstack((unit_vectors,np.ones((nbr_sats,1))))
-    
-    #compute (G^T * G)^{-1}
-    Q = np.linalg.inv(G.T @ G)
-    
-    #extract DOP values
-    GDOP = np.sqrt(np.trace(Q))
-    PDOP = np.sqrt(Q[0, 0] + Q[1, 1] + Q[2, 2])
-    HDOP = np.sqrt(Q[0, 0] + Q[1, 1])
-    VDOP = np.sqrt(Q[2, 2])
-    TDOP = np.sqrt(Q[3, 3])
-    
-    #store in a dict
-    out_dict = {
-                "GDOP": GDOP,
-                "PDOP": PDOP,
-                "HDOP": HDOP,
-                "VDOP": VDOP,
-                "TDOP": TDOP
-               }
-               
-    return out_dict
-
-#######################################
-
-def compute_collisions(sat_dict, building_dict, dist_building=300, show=False):
-    """
-    Version adaptée pour un récepteur déjà en Lambert-93 + altitude (coordE, coordN, H).
-    Le satellite, lui, est transformé ECEF -> Lambert93 localement,
-    puis on calcule pt_along_line(...) en Lambert-93.
-    """
-    # Transformer les coordonnées satellites depuis ECEF (EPSG:4978) vers Lambert93 (EPSG:2154)
-    transformer_sat_to_l93 = pyproj.Transformer.from_crs("EPSG:4978", "EPSG:2154", always_xy=True)
-
-    for ekey in sat_dict:
-        rcvr = sat_dict[ekey]["rcvr_infos"]
-
-        # Au lieu de xr, yr, zr = rcvr["coordX"], on récupère E, N, H => la position du récepteur en Lambert-93
-        Er, Nr, Hr = rcvr["coordE"], rcvr["coordN"], rcvr["H"]
-
-        for skey, sat in sat_dict[ekey]["sat_infos"].items():
-            xs_orig, ys_orig, zs_orig = sat["X"], sat["Y"], sat["Z"]
-
-            # (1) Vérifier coords satellites valides
-            if np.isnan([xs_orig, ys_orig, zs_orig]).any():
-                sat["status"] = "UNKNOWN"
-                sat["Building ID"] = "None"
-                continue
-
-            # (2) Transformation satellite ECEF -> Lambert-93
-            try:
-                xs_l93, ys_l93, zs_l93 = transformer_sat_to_l93.transform(xs_orig, ys_orig, zs_orig)
-            except Exception:
-                sat["status"] = "UNKNOWN"
-                sat["Building ID"] = "None"
-                continue
-
-            # (3) Calcul d’un point intermédiaire sur la ligne (en Lambert-93) :
-            #     On part de (Er,Nr,Hr) vers (xs_l93,ys_l93,zs_l93),
-            #     et on se déplace de 1000 m.
-            try:
-                xn, yn, zn = pt_along_line((Er, Nr, Hr), (xs_l93, ys_l93, zs_l93), distance=1000)
-                sat["sats_pos_l93"] = (xs_l93, ys_l93, zs_l93)
-            except Exception:
-                sat["status"] = "UNKNOWN"
-                sat["Building ID"] = "None"
-                continue
-
-            # (4) Test de collision (toujours en Lambert-93), on appelle ce point (en,nn,Hn).
-            en, nn, Hn = xn, yn, zn
-
-            collision_detected = False
-            b_detected = "None"
-
-            # (5) Parcours des bâtiments (base_coords/roof_coords sont aussi en Lambert-93).
-            for bkey, building in building_dict.items():
-                base_coords = np.array(building["base_coords"])
-                # Distances par rapport au récepteur (Er,Nr,Hr)
-                distances = np.linalg.norm(base_coords - np.array([Er, Nr, Hr]), axis=1)
-                if np.min(distances) < dist_building:
-                    aabb_min = np.min(building["base_coords"], axis=0)
-                    aabb_max = np.max(building["roof_coords"], axis=0)
-                    collision_status, _, _ = segment_intersects_bbox(
-                        np.array([Er, Nr, Hr]),
-                        np.array([en, nn, Hn]),
-                        aabb_min,
-                        aabb_max
-                    )
-                    if collision_status:
-                        collision_detected = True
-                        b_detected = bkey
-                        break
-
-            # (6) Attribuer LOS / NLOS
-            if collision_detected:
-                sat["status"] = "NLOS"
-                sat["Building ID"] = b_detected
-            else:
-                sat["status"] = "LOS"
-                sat["Building ID"] = "None"
-
-    return sat_dict
-
 def compute_optimal_window_from_kml(kml_file, rinex_nav_file, date_arg, buildings_dict,
                                     start_time, end_time, distance_step, velocity,
                                     time_step_sec, mnt=60, output_csv="resultats_optimal_window.csv"):
     """
-    Calcule la performance pour différentes trajectoires théoriques.
-    Pour chaque fenêtre candidate, simule la trajectoire en décalant le temps de chaque point,
-    et agrège le nombre de satellites LOS, obstrués, le nombre total observé ainsi que la moyenne du PDOP.
-    
-    Une barre de progression globale est affichée pour le traitement des candidats.
-    Le DataFrame final est trié par ordre croissant de "Trajectory Start".
-    """
-    import math
-    from datetime import datetime, timedelta
-    import contextlib
-    from tqdm import tqdm
-    import concurrent.futures
-    import pandas as pd
-    import os, tempfile
+    Calcul de la fenêtre optimale à partir d'un fichier KML.
 
+    Procédure :
+      - Discrétisation de la trajectoire extraite du fichier KML via read_and_discretize_kml.
+      - Correction temporelle des points par soustraction du décalage initial.
+      - Application d'une altitude fixe (mnt) aux points si spécifiée.
+      - Calcul du cumul des distances parcourues pour déterminer la durée de la trajectoire.
+      - Définition de l'intervalle temporel candidat (début et fin de simulation).
+      - Chargement unique des données RINEX de navigation.
+      - Simulation parallèle de candidats temporels via candidate_simulation.
+      - Agrégation et tri des résultats basés sur la statistique (GDOP moyen ici).
+      - Sauvegarde des résultats dans un fichier CSV.
+
+    Paramètres :
+      kml_file (str): Chemin vers le fichier KML contenant la trajectoire.
+      rinex_nav_file (str): Chemin vers le fichier RINEX de navigation.
+      date_arg (str): Date d'acquisition au format "dd/mm/yyyy".
+      buildings_dict (dict): Dictionnaire des bâtiments avec leurs coordonnées.
+      start_time (str): Heure de début de la trajectoire (exemple "8h00").
+      end_time (str): Heure de fin de la trajectoire (exemple "20h00").
+      distance_step (float): Pas de distance pour la discrétisation (en mètres).
+      velocity (float): Vitesse utilisée pour la simulation (en m/s).
+      time_step_sec (float): Pas temporel entre chaque candidat (en secondes).
+      mnt (float, optionnel): Altitude fixe à appliquer aux points, par défaut 60.
+      output_csv (str, optionnel): Nom du fichier CSV de sortie.
+
+    Retour :
+      DataFrame: Résumé des statistiques pour chaque fenêtre candidate (LOS, Obstructed, GDOP moyen, etc.).
+    """
     # Discrétisation via read_and_discretize_kml
     points_df = read_and_discretize_kml(kml_file, start_time, end_time, distance_step, velocity)
     if points_df is None or points_df.empty:
@@ -790,7 +1094,6 @@ def compute_optimal_window_from_kml(kml_file, rinex_nav_file, date_arg, building
         return None
     offset = points_df.iloc[0]["time_sod"]
     points_df["time_sod"] = points_df["time_sod"] - offset
-
 
     if mnt is not None:
         points_df["coordZ"] = mnt
@@ -876,201 +1179,47 @@ def compute_optimal_window_from_kml(kml_file, rinex_nav_file, date_arg, building
     df_results = df_results.sort_values(by="Trajectory Start_dt").drop(columns=["Trajectory Start_dt"])
     df_results.to_csv(output_csv, index=False)
     # Vérification avant de chercher le minimum
-    if df_results["Avg PDOP"].notna().any():
-        best_candidate = df_results.loc[df_results["Avg PDOP"].idxmin()]["Trajectory Start"]
+    if df_results["Avg GDOP"].notna().any():
+        best_candidate = df_results.loc[df_results["Avg GDOP"].idxmin()]["Trajectory Start"]
         print(f"\nFenêtre optimale estimée : {best_candidate}")
     else:
-        print("\nAucune fenêtre avec PDOP valide détectée (tous les PDOP sont NaN). Vérifie la couverture satellite ou les positions dans les bâtiments.")
+        print("\nAucune fenêtre avec GDOP valide détectée (tous les GDOP sont NaN). Vérifie la couverture satellite ou les positions dans les bâtiments.")
         best_candidate = None
     return df_results
 
-###############################################
-# Fonctions de simulation temporelle pour LOG
-###############################################
-def candidate_simulation(candidate, points_list, cumulative, base_date, base_point_time,
-                         Nav_data, buildings_dict, velocity, obs_data=None):
-    """
-    Simule une fenêtre candidate pour une trajectoire (LOG ou théorique) et calcule
-    les statistiques (nombre de satellites LOS, NLOS, Obstructed, PDOP, etc.).
-
-    Des messages de debug ont été ajoutés pour suivre la récupération des éphémérides
-    et le calcul des PDOP pour chaque point de la trajectoire simulée.
-    """
-    import tempfile, contextlib
-    from datetime import timedelta
-    import math
-    import numpy as np
-
-    print(f"DEBUG: Début de candidate_simulation pour candidate = {candidate}")
-
-    # Création locale de l'objet Nav à partir de Nav_data
-    Nav = orb.orbit()
-    try:
-        with tempfile.NamedTemporaryFile(mode='w', delete=False) as temp:
-            temp.writelines(Nav_data)
-            nav_temp_filename = temp.name
-        print(f"DEBUG: Fichier temporaire Nav créé : {nav_temp_filename}")
-    except Exception as e:
-        print("DEBUG: Exception lors de la création du fichier temporaire Nav :", e)
-        return None
-    with contextlib.redirect_stdout(open(os.devnull, 'w')):
-        try:
-            Nav.loadRinexN(nav_temp_filename)
-            print("DEBUG: Nav.loadRinexN réussi")
-        except Exception as e:
-            print("DEBUG: Exception dans Nav.loadRinexN :", e)
-            os.remove(nav_temp_filename)
-            return None
-    os.remove(nav_temp_filename)
-
-    # Si obs_data est fourni (mode réel), créer l'objet Obs
-    Obs = None
-    if obs_data is not None:
-        Obs = rx.rinex_o()
-        try:
-            with tempfile.NamedTemporaryFile(mode='w', delete=False) as temp:
-                temp.writelines(obs_data)
-                obs_temp_filename = temp.name
-            print(f"DEBUG: Fichier temporaire Obs créé : {obs_temp_filename}")
-        except Exception as e:
-            print("DEBUG: Exception lors de la création du fichier temporaire Obs :", e)
-            Obs = None
-        else:
-            with contextlib.redirect_stdout(open(os.devnull, 'w')):
-                try:
-                    Obs.loadRinexO(obs_temp_filename)
-                    print("DEBUG: Obs.loadRinexO réussi")
-                except Exception as e:
-                    print("DEBUG: Exception dans Obs.loadRinexO :", e)
-                    os.remove(obs_temp_filename)
-                    Obs = None
-            os.remove(obs_temp_filename)
-    else:
-        print("DEBUG: Aucun obs_data fourni, mode théorique.")
-
-    ephemerides_cache = {}
-    total_los = 0
-    total_nlos = 0      # Calculé uniquement en mode réel
-    total_obstructed = 0
-    dop_list = []
-
-    # Parcours de tous les points de la candidate
-    for idx, pt in points_list.iterrows():
-        effective_time = candidate + (pt["time_sod"] - base_point_time)
-        sim_dt = base_date + timedelta(seconds=effective_time)
-        sim_dt = snap_to_nearest_epoch(sim_dt, snap_threshold=1)
-        key = sim_dt.strftime("%Y %m %d %H %M %S")
-        gnssdate = gpst.gpsdatetime(yyyy=sim_dt.year, mon=sim_dt.month, dd=sim_dt.day,
-                                    h=sim_dt.hour, min=sim_dt.minute, sec=sim_dt.second)
-        mjd_time = gnssdate.mjd
-        mjd_key = f"{mjd_time:.5f}"
-        print(f"DEBUG: Point index {idx}: sim_dt = {sim_dt}, mjd_time = {mjd_time}, key = {key}")
-
-        if mjd_key in ephemerides_cache:
-            sat_cepoch_dict = ephemerides_cache[mjd_key]
-            print(f"DEBUG: Cache trouvé pour mjd_key {mjd_key} avec {len(sat_cepoch_dict)} satellites")
-        else:
-            sat_cepoch_dict = {}
-            for const in ["G", "R", "E", "C"]:
-                for prn in range(1, 33):
-                    try:
-                        Xs, Ys, Zs, dte = Nav.calcSatCoord(const, prn, mjd_time, degree=0)
-                        if (Xs, Ys, Zs) != (0, 0, 0) and not np.isnan([Xs, Ys, Zs]).any():
-                            sat_cepoch_dict[f"{const}{prn:02d}"] = {"X": Xs, "Y": Ys, "Z": Zs, "dte": dte}
-                    except Exception as e:
-                        # Optionnel : décommenter pour plus de détails
-                        # print(f"DEBUG: Exception pour {const}{prn:02d} à mjd_time {mjd_time}: {e}")
-                        pass
-            ephemerides_cache[mjd_key] = sat_cepoch_dict
-            print(f"DEBUG: Chargement des éphémérides pour mjd_key {mjd_key}: {len(sat_cepoch_dict)} satellites trouvés")
-
-        # Récupération de la position du récepteur
-        if "coordX" in pt:
-            rcv_pos_dict = {"coordE": pt["coordX"], "coordN": pt["coordY"], "H": pt["coordZ"]}
-        else:
-            rcv_pos_dict = {"coordE": pt["E"], "coordN": pt["N"], "H": pt["H"]}
-        # Assemblage du dictionnaire satellites/récepteur
-        current_sat_dict = { key: {"rcvr_infos": rcv_pos_dict, "sat_infos": sat_cepoch_dict} }
-        current_sat_dict = compute_collisions(current_sat_dict, buildings_dict, dist_building=300)
-        local_sat_infos = current_sat_dict[key]["sat_infos"]
-
-        # Comptage des satellites LOS
-        los_count = sum(1 for s in local_sat_infos.values() if s.get("status", "UNKNOWN") == "LOS")
-        print(f"DEBUG: Point index {idx}: satellites LOS = {los_count}")
-
-        if Obs is not None:
-            epoch_obs = Obs.getEpochByMjd(gnssdate.mjd)
-            observed_set = set()
-            if epoch_obs is not None:
-                for sat in epoch_obs.satellites:
-                    if sat is not None:
-                        if sat.obs.get("C1C", 0) > 0:
-                            observed_set.add(f"{sat.const}{sat.PRN}")
-            # Reclassification des satellites de NLOS en Obstructed si non observés
-            for sat_id, s in local_sat_infos.items():
-                if s.get("status", "UNKNOWN") == "NLOS" and (sat_id not in observed_set):
-                    s["status"] = "Obstructed"
-            nlos_count = sum(1 for s in local_sat_infos.values() if s.get("status", "UNKNOWN") == "NLOS")
-            obstructed_count = sum(1 for s in local_sat_infos.values() if s.get("status", "UNKNOWN") == "Obstructed")
-        else:
-            nlos_count = 0
-            obstructed_count = sum(1 for s in local_sat_infos.values() if s.get("status", "UNKNOWN") == "NLOS")
-        total_los += los_count
-        total_nlos += nlos_count
-        total_obstructed += obstructed_count
-
-        # Calcul du PDOP à partir des satellites LOS
-        sat_positions = [s["sats_pos_l93"] for s in local_sat_infos.values()
-                         if s.get("status", "UNKNOWN") == "LOS" and "sats_pos_l93" in s]
-        if len(sat_positions) >= 4:
-            sats_array = np.array(sat_positions)
-            rcv_pos = np.array([rcv_pos_dict["coordE"], rcv_pos_dict["coordN"], rcv_pos_dict["H"]])
-            try:
-                dop_dict = compute_dop(rcv_pos, sats_array)
-                dop_value = dop_dict["PDOP"]
-            except Exception as e:
-                print(f"DEBUG: Exception dans compute_dop pour point index {idx} : {e}")
-                dop_value = np.nan
-        else:
-            dop_value = np.nan
-        print(f"DEBUG: Point index {idx}: PDOP = {dop_value}")
-        dop_list.append(dop_value)
-
-    avg_pdop = np.nanmean(dop_list) if dop_list else np.nan
-    total_observed = total_los + total_nlos + total_obstructed
-    print(f"DEBUG: Fin de candidate_simulation pour candidate {candidate}")
-    print(f"DEBUG: Total LOS = {total_los}, Total NLOS = {total_nlos}, Total Obstructed = {total_obstructed}, Avg PDOP = {avg_pdop}")
-
-    if Obs is not None:
-        return {"Trajectory Start": datetime.utcfromtimestamp(candidate).strftime("%H:%M:%S"),
-                "Total LOS": total_los,
-                "Total NLOS": total_nlos,
-                "Total Obstructed": total_obstructed,
-                "Total Observed": total_observed,
-                "Avg PDOP": avg_pdop}
-    else:
-        return {"Trajectory Start": datetime.utcfromtimestamp(candidate).strftime("%H:%M:%S"),
-                "Total LOS": total_los,
-                "Total Obstructed": total_obstructed,
-                "Total Observed": total_observed,
-                "Avg PDOP": avg_pdop}
-    
 def compute_optimal_window_from_log(data, rinex_nav_file, buildings_dict,
                                     time_step_sec, date_arg,
                                     time_end, start_time, velocity,
                                     rinex_obs_file, output_csv="resultats_optimal_window_log.csv"):
     """
-    Calcule la performance pour différentes trajectoires issues du fichier LOG en ignorant les horodatages.
-    Pour chaque fenêtre candidate, la trajectoire est simulée (temps artificiel basé sur la distance cumulée/velocity)
-    et on agrège le nombre de satellites LOS, NLOS, Obstructed, le total observé ainsi que la moyenne du PDOP.
-    
-    La parallélisation se fait sur les fenêtres candidates avec une barre de progression globale.
-    Le DataFrame final est trié par ordre chronologique de "Trajectory Start".
-    """
-    import math, os, tempfile, contextlib, concurrent.futures, pandas as pd
-    from datetime import datetime, timedelta
-    from tqdm import tqdm
+    Calcul de la fenêtre optimale à partir de données LOG.
 
+    Procédure :
+      - Filtrage et limitation des données LOG pour obtenir un sous-ensemble (100 points).
+      - Conversion des points LOG en coordonnées Lambert93.
+      - Calcul du cumul des distances entre points pour déterminer le temps simulé (en fonction de la vitesse).
+      - Définition de l'intervalle temporel candidat à partir de l'heure de début et de fin.
+      - Chargement unique des données RINEX de navigation.
+      - Chargement conditionnel des données RINEX d'observation (si fournies).
+      - Simulation parallèle de candidats temporels via candidate_simulation.
+      - Agrégation et tri des résultats selon la statistique (GDOP moyen ici).
+      - Sauvegarde des résultats dans un fichier CSV.
+
+    Paramètres :
+      data (DataFrame): Données LOG brutes.
+      rinex_nav_file (str): Chemin vers le fichier RINEX de navigation.
+      buildings_dict (dict): Dictionnaire des bâtiments avec leurs coordonnées.
+      time_step_sec (float): Pas temporel entre chaque candidat (en secondes).
+      date_arg (str): Date d'acquisition au format "dd/mm/yyyy".
+      time_end (str): Heure de fin de simulation (exemple "14:00").
+      start_time (str): Heure de début de simulation (exemple "8h00").
+      velocity (float): Vitesse utilisée pour la simulation (en m/s).
+      rinex_obs_file (str): Chemin vers le fichier RINEX d'observation (peut être None).
+      output_csv (str, optionnel): Nom du fichier CSV de sortie.
+
+    Retour :
+      DataFrame: Résumé des statistiques pour chaque fenêtre candidate (LOS, NLOS, Obstructed, GDOP moyen, etc.).
+    """
     # Filtrage et limitation des données LOG (ici 100 points)
     data = data[(data["lat"].notnull()) & (data["lon"].notnull()) & (data["h"].notnull()) &
                 (data["lat"] != "") & (data["lon"] != "") & (data["h"] != "")]
@@ -1130,7 +1279,7 @@ def compute_optimal_window_from_log(data, rinex_nav_file, buildings_dict,
 
     base_date = datetime.strptime(date_arg, "%d/%m/%Y")
 
-    # Charger le fichier Rinex de navigation une seule fois
+    # Chargement du fichier Rinex de navigation une seule fois
     try:
         with open(rinex_nav_file, 'r') as f:
             Nav_data = f.readlines()
@@ -1157,7 +1306,7 @@ def compute_optimal_window_from_log(data, rinex_nav_file, buildings_dict,
             return None
     os.remove(nav_temp_filename)
 
-    # Charger le fichier Rinex d'observation, si fourni
+    # Chargement du fichier Rinex d'observation, si fourni
     Obs_data = None
     if rinex_obs_file is not None:
         try:
@@ -1196,81 +1345,13 @@ def compute_optimal_window_from_log(data, rinex_nav_file, buildings_dict,
     df_results = df_results.sort_values(by="Trajectory Start_dt").drop(columns=["Trajectory Start_dt"])
     df_results.to_csv(output_csv, index=False)
     # Vérification avant de chercher le minimum
-    if df_results["Avg PDOP"].notna().any():
-        best_candidate = df_results.loc[df_results["Avg PDOP"].idxmin()]["Trajectory Start"]
+    if df_results["Avg GDOP"].notna().any():
+        best_candidate = df_results.loc[df_results["Avg GDOP"].idxmin()]["Trajectory Start"]
         print(f"\nFenêtre optimale estimée : {best_candidate}")
     else:
-        print("\nAucune fenêtre avec PDOP valide détectée (tous les PDOP sont NaN). Vérifie la couverture satellite ou les positions dans les bâtiments.")
+        print("\nAucune fenêtre avec GDOP valide détectée (tous les PGOP sont NaN). Vérifie la couverture satellite ou les positions dans les bâtiments.")
         best_candidate = None
     return df_results
 
-def draw_collision_rays(sat_dict, kml_layer):
-    line_style_dict = {}
-    for key, style in csts.line_styles.items():
-        s = simplekml.Style()
-        s.linestyle.color = style['color']
-        s.linestyle.width = 2
-        line_style_dict[key] = s
-    for key in sat_dict:
-        folder = kml_layer.newfolder(name=f"Vectors for Point at Epoch {key}", visibility=0)
-        for skey in sat_dict[key]["sat_infos"]:
-            sat_status = sat_dict[key]["sat_infos"][skey]["status"]
-            desc = (
-                '<table style="border: 1px solid black;">'
-                '<tr><td></td><td></td></tr>\n'
-                f'<tr><td style="text-align: left;">Nom :</td><td style="text-align: left;">{skey}</td></tr>\n'
-                f'<tr><td style="text-align: left;">Epoch :</td><td style="text-align: left;">{key}</td></tr>\n'
-                f'<tr><td style="text-align: left;">Status :</td><td style="text-align: left;">{sat_status}</td></tr>\n'
-                f'<tr><td style="text-align: left;">Building ID :</td><td style="text-align: left;">{sat_dict[key]["sat_infos"][skey]["Building ID"]}</td></tr>\n'
-                '</table>'
-            )
-            rcvr_lon = sat_dict[key]["rcvr_infos"]["lon"]
-            rcvr_lat = sat_dict[key]["rcvr_infos"]["lat"]
-            rcvr_H = sat_dict[key]["rcvr_infos"]["H"]
-            sat_lon_app = sat_dict[key]["sat_infos"][skey]["lon_apparente"]
-            sat_lat_app = sat_dict[key]["sat_infos"][skey]["lat_apparente"]
-            sat_H_app = sat_dict[key]["sat_infos"][skey]["H_apparente"]
-            end_coords = [(rcvr_lon, rcvr_lat, rcvr_H), (sat_lon_app, sat_lat_app, sat_H_app)]
-            vector_placemark = kml_layer.newlinestring(name=f"Vector to {skey} ({sat_status})", description=desc)
-            vector_placemark.coords = end_coords
-            vector_placemark.altitudemode = simplekml.AltitudeMode.absolute
-            style_key = 'LOS' if sat_status == 'LOS' else 'NLOS'
-            vector_placemark.style = line_style_dict[style_key]
-    return None
 
-def chemin_relatif(nom_fichier: str, type_fichier: str) -> str:
-    """
-    Retourne le chemin absolu d'un fichier en utilisant des chemins relatifs à partir du dossier 'test'.
 
-    La structure de votre projet est la suivante :
-        project/
-            src/
-                csv_to_kml.py
-                functions.py
-            test/
-                kml/     -> pour les fichiers KML
-                shp/     -> pour les fichiers shape
-                log/     -> pour les fichiers LOG
-                rinex/   -> pour les fichiers Rinex
-
-    :param nom_fichier: Nom du fichier (par exemple 'short.kml' ou '20240223.LOG').
-    :param type_fichier: Type de fichier, parmi 'kml', 'shp', 'log' ou 'rinex'.
-    :return: Chemin absolu vers le fichier.
-    """
-    import os
-
-    dossiers_valides = ['kml', 'shp', 'log', 'rinex']
-    if type_fichier not in dossiers_valides:
-        raise ValueError(
-            f"Type de fichier '{type_fichier}' non supporté. Choisissez parmi {dossiers_valides}."
-        )
-    
-    # Détermine le chemin du dossier courant (celui de functions.py, dans src)
-    chemin_courant = os.path.dirname(os.path.abspath(__file__))
-    # Le dossier 'test' se trouve au même niveau que 'src', on remonte d'un niveau et on rejoint 'test'
-    dossier_test = os.path.abspath(os.path.join(chemin_courant, "..", "test"))
-    
-    # Construit le chemin complet en rejoignant le sous-dossier (kml, shp, log ou rinex) et le nom du fichier
-    chemin_fichier = os.path.join(dossier_test, type_fichier, nom_fichier)
-    
-    return chemin_fichier
