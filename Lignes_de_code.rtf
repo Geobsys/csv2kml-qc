@@ -8,7 +8,7 @@
 \f0\fs24 \cf0 Ligne pour acc\'e9der :\
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\partightenfactor0
 
-\f1\fs22 \cf2 \CocoaLigature0 cd /Users/anthonydiallo/Downloads/csv2kml-qc-calc-NLOS_ABS
+\f1\fs22 \cf2 \CocoaLigature0 cd /Users/anthonydiallo/Downloads/csv2kml-qc-calc-NLOS_RELATIF
 \f0\fs24 \cf0 \CocoaLigature1 \
 \pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
 \cf0 \
@@ -19,7 +19,13 @@ Ligne pour th\'e9orique : \
 \
 \
 Ligne pour r\'e9el :\
-python3 src/csv_to_kml.py --temporal test/20240223.LOG -it log -rn test/rinex/sept054n.24p --detect_nlos -buildings test/shp/Buildings.shp -end_time 16h05 -start_time 13h00 -velocity 2.5 -ro test/rinex/sept054n.24o -d 23/02/2024\
+python3 src/csv_to_kml.py --temporal test/20240223.LOG -it log -rn test/rinex/20250324.rnx -buildings test/shp/buildings_near_ensg.shp -end_time 13h00 -start_time 12h50 -velocity 0.95 -ro test/rinex/sept084n.24o -d 23/02/2024\
+\
+Cas acquisitions :  csv2kml-qc-calc-NLOS_RELATIF % python3 src/csv_to_kml.py --temporal test/log/20250325_midi.LOG -it log -rn test/rinex/20250324.rnx --detect_nlos -buildings test/shp/buildings_near_ensg.shp -end_time 13h00 -start_time 12h50 -velocity 0.95 -ro test/rinex/sept084m.24o -d 25/03/2025\
+640 b\'e2timents charg\'e9s depuis test/shp/buildings_near_ensg.shp\
+\
+python3 src/csv_to_kml.py --temporal test/log/20240223.LOG -it log -rn test/rinex/Journee.rnx --detect_nlos -buildings test/shp/Buildings.shp -end_time 13h00 -start_time 12h00 -velocity 3.5 -ro test/rinex/sept054n.24o -d 23/02/2024\
+\
 \
 Ligne pour ancien :\
 python3 csv_to_kml.py /Users/anthonydiallo/Downloads/csv2kml-qc-calc-NLOS_RELATIF/test/20240223.LOG \\\

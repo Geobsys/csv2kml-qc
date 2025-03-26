@@ -757,44 +757,6 @@ def candidate_simulation(candidate, points_list, cumulative, base_date, base_poi
         return elev
     # --------------------------------------------------------------------------
 
-    # -------------------- Ajout : fonction compute_dop pour GDOP, PDOP, HDOP, VDOP --------------------
-    def compute_dop(receiver_position, sat_positions):
-        """
-        Calcule le DOP (Dilution of Precision) à partir de la position du récepteur 
-        et des positions satellites (dans un même référentiel cartésien).
-        Retourne un dict: { "GDOP", "PDOP", "HDOP", "VDOP" } (TDOP inclus si besoin).
-        """
-        nbr_sats = sat_positions.shape[0]
-        if nbr_sats < 4:
-            raise ValueError("At least 4 satellites are required to compute DOP values.")
-
-        los_vectors = sat_positions - receiver_position
-        distances = np.linalg.norm(los_vectors, axis=1).reshape(-1, 1)
-        unit_vectors = los_vectors / distances
-
-        # Matrice G
-        G = np.hstack((unit_vectors, np.ones((nbr_sats, 1))))
-        Q = np.linalg.inv(G.T @ G)
-
-        GDOP = np.sqrt(np.trace(Q))
-        PDOP = np.sqrt(Q[0, 0] + Q[1, 1] + Q[2, 2])
-        HDOP = np.sqrt(Q[0, 0] + Q[1, 1])
-        VDOP = np.sqrt(Q[2, 2])
-        
-        return {
-            "GDOP": GDOP,
-            "PDOP": PDOP,
-            "HDOP": HDOP,
-            "VDOP": VDOP
-        }
-
-    # Import internes au code d’origine
-    import pyproj
-    from datetime import datetime, timedelta
-    import gpsdatetime as gpst          # GNSS date management
-    import gnsstoolbox.orbits as orb    # Orbit rinex management
-    import gnsstoolbox.rinex_o as rx    # Navigation rinex management
-
     # -------------------- Création locale de l'objet Nav --------------------
     Nav = orb.orbit()
     try:
@@ -815,26 +777,7 @@ def candidate_simulation(candidate, points_list, cumulative, base_date, base_poi
     os.remove(nav_temp_filename)
 
     # -------------------- Lecture du RINEX d'observation (si fourni) --------------------
-    Obs = None
-    if obs_data is not None:
-        Obs = rx.rinex_o()
-        try:
-            with tempfile.NamedTemporaryFile(mode='w', delete=False) as temp:
-                temp.writelines(obs_data)
-                obs_temp_filename = temp.name
-        except Exception as e:
-            print("DEBUG: Exception lors de la création du fichier temporaire Obs :", e)
-            Obs = None
-        else:
-            with contextlib.redirect_stdout(open(os.devnull, 'w')):
-                try:
-                    Obs.loadRinexO(obs_temp_filename)
-                except Exception as e:
-                    print("DEBUG: Exception dans Obs.loadRinexO :", e)
-                    os.remove(obs_temp_filename)
-                    Obs = None
-            os.remove(obs_temp_filename)
-
+    Obs = obs_data
     # -------------------- Mise en cache des éphémérides, et init compteurs --------------------
     ephemerides_cache = {}
     total_los = 0
@@ -923,6 +866,7 @@ def candidate_simulation(candidate, points_list, cumulative, base_date, base_poi
             nlos_count = sum(1 for s in local_sat_infos.values() if s.get("status", "UNKNOWN") == "NLOS")
             obstructed_count = sum(1 for s in local_sat_infos.values() if s.get("status", "UNKNOWN") == "Obstructed")
         else:
+            #print("Pas de fichier rinex d'observation")
             # Cas théorique => NLOS = NLOS, on ne requalifie pas
             nlos_count = 0
             obstructed_count = sum(1 for s in local_sat_infos.values() if s.get("status", "UNKNOWN") == "NLOS")
@@ -982,37 +926,28 @@ def candidate_simulation(candidate, points_list, cumulative, base_date, base_poi
 
     # Récupération de l'heure de début au format HH:MM:SS
     date_start_utc = datetime.utcfromtimestamp(candidate).strftime("%H:%M:%S")
+    avg_los = round(avg_los, 2)
+    avg_nlos = round(avg_nlos, 2)
+    avg_obstructed = round(avg_obstructed, 2)
+    avg_gdop = round(avg_gdop, 2) if not math.isnan(avg_gdop) else float('nan')
+    avg_pdop = round(avg_pdop, 2) if not math.isnan(avg_pdop) else float('nan')
+    avg_hdop = round(avg_hdop, 2) if not math.isnan(avg_hdop) else float('nan')
+    avg_vdop = round(avg_vdop, 2) if not math.isnan(avg_vdop) else float('nan')
 
     # Cas RINEX observation => on renvoie NLOS
-    if Obs is not None:
-        return {
-            "Trajectory Start": date_start_utc,
-            "Total LOS": total_los,
-            "Total NLOS": total_nlos,
-            #"Total Obstructed": total_obstructed,
-            "Average LOS": avg_los,
-            "Average NLOS": avg_nlos,
-            "Average Obstructed": avg_obstructed,
-            "Avg GDOP": avg_gdop,
-            "Avg PDOP": avg_pdop,
-            "Avg HDOP": avg_hdop,
-            "Avg VDOP": avg_vdop
-        }
-    else:
-        # Cas théorique => la logique existante + moyennes
-        return {
-            "Trajectory Start": date_start_utc,
-            "Total LOS": total_los,
-            "Total NLOS": total_nlos,  # par code, c'est 0
-            #"Total Obstructed": total_obstructed,
-            "Average LOS": avg_los,
-            "Average NLOS": avg_nlos,  # idem => 0
-            "Average Obstructed": avg_obstructed,
-            "Avg GDOP": avg_gdop,
-            "Avg PDOP": avg_pdop,
-            "Avg HDOP": avg_hdop,
-            "Avg VDOP": avg_vdop
-        }
+    return {
+        "Trajectory Start": date_start_utc,
+        "Total LOS": total_los,
+        "Total NLOS": total_nlos,
+        "Total Obstructed": total_obstructed,
+        "Average LOS": avg_los,
+        "Average NLOS": avg_nlos,
+        "Average Obstructed": avg_obstructed,
+        "Avg GDOP": avg_gdop,
+        "Avg PDOP": avg_pdop,
+        "Avg HDOP": avg_hdop,
+        "Avg VDOP": avg_vdop
+    }
 
 #####################################################################################################################
 # --- Fonctions de simulation temporelle ---
@@ -1334,7 +1269,7 @@ def compute_optimal_window_from_log(data, rinex_nav_file, buildings_dict,
     # Filtrage et limitation des données LOG (ici 100 points)
     data = data[(data["lat"].notnull()) & (data["lon"].notnull()) & (data["h"].notnull()) &
                 (data["lat"] != "") & (data["lon"] != "") & (data["h"] != "")]
-    data = data.head(100)
+    data = data.iloc[500:550]
 
     def parse_time(hhmm):
         hh, mm = map(int, hhmm.replace("h", ":").split(":"))
@@ -1420,13 +1355,16 @@ def compute_optimal_window_from_log(data, rinex_nav_file, buildings_dict,
     # Chargement du fichier Rinex d'observation, si fourni
     Obs_data = None
     if rinex_obs_file is not None:
-        try:
-            with open(rinex_obs_file, 'r') as f:
-                Obs_data = f.readlines()
-        except Exception:
-            Obs_data = None
-        if Obs_data is not None and not any("END OF HEADER" in line for line in Obs_data):
-            Obs_data = None
+        Obs_data = rx.rinex_o()
+        # On redirige les prints pour éviter le spam
+        with contextlib.redirect_stdout(open(os.devnull, 'w')):
+            try:
+                Obs_data.loadRinexO(rinex_obs_file)
+            except Exception as e:
+                print(f"Erreur lors du chargement du RINEX observation : {e}")
+                Obs_data = None
+    print("[DEBUG] => Apres loadRinexO, Obs_data est None ?", Obs_data is None)
+
 
     results = []
     candidate_values = list(range(int(candidate_start_min), int(candidate_start_max)+1, int(time_step_sec)))

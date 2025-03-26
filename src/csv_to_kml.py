@@ -105,8 +105,8 @@ if __name__ == "__main__":
 
     parser.add_argument('--temporal', action="store_true", help="Perform a temporal window calculation instead of the usual CSV->KML.")
     
-    parser.add_argument('-d', '--date', type=str, default="23/02/2024",
-                        help="Acquisition date (DD/MM/YYYY)")
+    parser.add_argument('-d', '--date', type=str, default="01/01/2000",
+                        help="Acquisition date (DD/MM/YYYY) (Default=01/01/2000)")
     parser.add_argument('-start_time', type=str, default="8h00",
                         help="Start time for KML and LOG traj (Default=8h00)")
     parser.add_argument('-end_time', type=str, default="20h00",
