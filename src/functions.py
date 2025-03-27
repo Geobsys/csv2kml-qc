@@ -30,7 +30,6 @@ import math
 import os
 import pandas as pd
 import tempfile
-import sys
 from tqdm import tqdm
 import contextlib
 import concurrent.futures
@@ -520,23 +519,20 @@ def draw_collision_rays(sat_dict, kml_layer):
 
 def snap_to_nearest_epoch(dt, snap_threshold):
     """
-   Arrondissement d'un datetime à l'époché la plus proche.
+    Arrondit un datetime à l'époché la plus proche.
 
-    Procédure :
-      - Conversion de dt en secondes depuis minuit.
-      - Calcul du reste de la division par snap_threshold.
-      - Arrondissement à l'entier multiple de snap_threshold le plus proche
-        (si l'écart est inférieur ou égal à snap_threshold).
-      - Conversion du résultat en heures, minutes et secondes et mise à jour de dt.
-    
-    Paramètres :
-      dt (datetime): Date et heure à arrondir.
-      snap_threshold (int, optionnel): Seuil d'arrondissement en secondes 
-                                       (par défaut 3600, soit 1 heure).
-    
-    Retourne :
-      datetime: dt arrondi à l'époché la plus proche si la différence en secondes
-                est inférieure ou égale à snap_threshold, sinon dt d'origine.
+    Parameters
+    ----------
+    dt : datetime
+        Date et heure à arrondir.
+    snap_threshold : int
+        Seuil d'arrondissement en secondes (par exemple, 3600 pour 1 heure).
+
+    Returns
+    -------
+    datetime
+        Date et heure arrondies si la différence en secondes est inférieure ou égale au seuil,
+        sinon la date et heure d'origine.
     """
     total_sec = dt.hour * 3600 + dt.minute * 60 + dt.second
     remainder = total_sec % snap_threshold
@@ -553,28 +549,24 @@ def snap_to_nearest_epoch(dt, snap_threshold):
 
 def compute_dop(receiver_position, sat_positions):
     """
-    Calcul du DOP (Dilution of Precision) à partir de la position du récepteur et des positions satellites.
-    
-    Étapes :
-    - Calcul des vecteurs de ligne de visée (los_vectors) et normalisation pour obtenir les vecteurs unitaires.
-    - Construction de la matrice G en associant les composantes spatiales et une colonne de 1 pour modéliser l'erreur d'horloge.
-    - Inversion de (G^T * G) pour obtenir la matrice de covariance Q.
-    - Extraction des indices DOP à partir des termes diagonaux de Q :
-        • GDOP : qualité globale (spatiale + temporelle) = √(trace(Q))
-        • PDOP : position (X, Y, Z) = √(Q[0,0] + Q[1,1] + Q[2,2])
-        • HDOP : horizontale (X, Y) = √(Q[0,0] + Q[1,1])
-        • VDOP : verticale (Z) = √(Q[2,2])
-        • TDOP : temporelle (horloge) = √(Q[3,3])
-    
-    Paramètres :
-      receiver_position (array-like): Position du récepteur en coordonnées (X, Y, Z).
-      sat_positions (np.ndarray): Tableau (n x 3) des positions satellites en coordonnées (X, Y, Z).
-      
-    Retourne :
-      dict: Dictionnaire contenant les valeurs calculées de GDOP, PDOP, HDOP, VDOP et TDOP.
-      
-    Remarque :
-      Nécessite au moins 4 satellites pour assurer une solution unique.
+    Calcule les indices DOP (Dilution of Precision) à partir de la position du récepteur et des positions satellites.
+
+    Parameters
+    ----------
+    receiver_position : array-like
+        Position du récepteur en coordonnées (X, Y, Z).
+    sat_positions : np.ndarray
+        Tableau (n x 3) des positions satellites en coordonnées (X, Y, Z).
+
+    Returns
+    -------
+    dict
+        Dictionnaire contenant les valeurs de GDOP, PDOP, HDOP, VDOP et TDOP.
+
+    Raises
+    ------
+    ValueError
+        Si le nombre de satellites est inférieur à 4.
     """
     # Nombre de satellites
     nbr_sats = sat_positions.shape[0]
@@ -612,29 +604,23 @@ def compute_dop(receiver_position, sat_positions):
 
 def compute_collisions(sat_dict, building_dict, dist_building=300, show=False):
     """
-    Calcul de collision entre les satellites et les bâtiments.
-    
-    Procédure :
-      1. Transformation des coordonnées satellites depuis ECEF (EPSG:4978) vers Lambert-93 (EPSG:2154).
-      2. Pour chaque satellite :
-         - Vérification de la validité des coordonnées.
-         - Transformation des coordonnées en Lambert-93.
-         - Calcul d'un point intermédiaire le long de la ligne joignant le récepteur (en Lambert-93)
-           à la position satellite, à une distance de 1000 m.
-         - Test de collision entre le segment (récepteur - point intermédiaire) et la boite englobante 
-           du bâtiment (définie par les coordonnées de base et de toit).
-      3. Attribution du statut :
-         - "NLOS" (Non Line Of Sight) si collision détectée.
-         - "LOS" (Line Of Sight) sinon.
-    
-    Paramètres :
-      sat_dict (dict): Dictionnaire contenant les informations du récepteur et des satellites.
-      building_dict (dict): Dictionnaire des bâtiments avec leurs coordonnées en Lambert-93.
-      dist_building (float, optionnel): Distance seuil (en m) pour considérer un bâtiment proche (par défaut 300).
-      show (bool, optionnel): Flag pour afficher des informations (non utilisé ici).
-    
-    Retour :
-      dict: Le dictionnaire sat_dict mis à jour avec les statuts "LOS" ou "NLOS" et l'ID du bâtiment en collision.
+    Détermine les collisions entre la ligne de visée du récepteur et les bâtiments pour chaque satellite.
+
+    Parameters
+    ----------
+    sat_dict : dict
+        Dictionnaire contenant les informations du récepteur et des satellites.
+    building_dict : dict
+        Dictionnaire des bâtiments avec leurs coordonnées en Lambert-93.
+    dist_building : float, optional
+        Distance seuil en mètres pour considérer un bâtiment proche (par défaut 300).
+    show : bool, optional
+        Flag pour afficher des informations supplémentaires (par défaut False).
+
+    Returns
+    -------
+    dict
+        Dictionnaire sat_dict mis à jour avec le statut "LOS" ou "NLOS" (ou "UNKNOWN") et l'ID du bâtiment en collision.
     """
     # Transformation des coordonnées satellites depuis ECEF vers Lambert-93
     transformer_sat_to_l93 = pyproj.Transformer.from_crs("EPSG:4978", "EPSG:2154", always_xy=True)
@@ -708,28 +694,52 @@ def compute_collisions(sat_dict, building_dict, dist_building=300, show=False):
 def candidate_simulation(candidate, points_list, cumulative, base_date, base_point_time,
                          Nav_data, buildings_dict, velocity, obs_data=None):
     """
-    Simulation d'une fenêtre candidate pour une trajectoire et agrégation des statistiques.
-    
-    1) Création locale de l'objet Nav à partir de Nav_data
-    2) Lecture du RINEX d'observation (si fourni)
-    3) Parcours de chaque point de la trajectoire discrétisée
-       - Calcul de la date GNSS (mjd_time)
-       - Extraction/chargement des coordonnées satellites
-       - Filtrage par angle d'élévation (exclusion des satellites sous l'horizon)
-       - Calcul de collisions avec les bâtiments (LOS / NLOS)
-       - Agrégation des statistiques (LOS, NLOS, PDOP/GDOP, etc.)
-    4) Retourne un dictionnaire contenant un résumé de la simulation pour cette 'fenêtre' candidate.
+    Simule une fenêtre candidate et agrège les statistiques liées aux satellites.
+
+    Parameters
+    ----------
+    candidate : int
+        Temps de début de la fenêtre candidate (en secondes).
+    points_list : pd.DataFrame
+        DataFrame contenant les points de la trajectoire discrétisée.
+    cumulative : list
+        Liste cumulée des distances (en mètres) parcourues.
+    base_date : datetime
+        Date de base de la simulation.
+    base_point_time : float
+        Temps de départ (en secondes) de la trajectoire.
+    Nav_data : list of str
+        Contenu du fichier Rinex de navigation (lignes).
+    buildings_dict : dict
+        Dictionnaire des bâtiments avec leurs coordonnées.
+    velocity : float
+        Vitesse utilisée pour la simulation (en m/s).
+    obs_data : object, optional
+        Objet Rinex d'observation déjà chargé (par défaut None).
+
+    Returns
+    -------
+    dict
+        Dictionnaire résumé contenant les statistiques de la fenêtre candidate (Total LOS, Total NLOS,
+        Total Obstructed, Moyennes de LOS, NLOS, GDOP, PDOP, HDOP et VDOP).
     """
-    import math
-    import tempfile
-    import contextlib
-    import numpy as np
 
     # -------------------- Fonction utilitaire pour l'élévation --------------------
     def compute_elevation(userXYZ, satXYZ):
         """
-        Calcule l'angle d'élévation (en degrés) d'un satellite
-        par rapport à un récepteur en coordonnées ECEF.
+        Calcule l'angle d'élévation (en degrés) d'un satellite par rapport à un récepteur en ECEF.
+
+        Parameters
+        ----------
+        userXYZ : array-like
+            Coordonnées ECEF du récepteur.
+        satXYZ : array-like
+            Coordonnées ECEF du satellite.
+
+        Returns
+        -------
+        float
+            Élévation en degrés.
         """
         # 1) Conversion de la position récepteur en (lat, lon, h)
         transformer_ecef_to_llh = pyproj.Transformer.from_crs("EPSG:4964", "EPSG:4326", always_xy=True)
@@ -962,16 +972,26 @@ def candidate_simulation(candidate, points_list, cumulative, base_date, base_poi
 
 def read_and_discretize_kml(kml_file, start_time, end_time, distance_step, velocity):
     """
-    Calcul de la fenêtre optimale à partir d'un fichier KML.
-    
-    Discrétisation de la trajectoire KML, simulation de candidats temporels et agrégation
-    des statistiques (LOS, Obstructed, PDOP moyen).
-    
-    :return: DataFrame des résultats
+    Discrétise la trajectoire extraite d'un fichier KML en points espacés d'une distance donnée.
+
+    Parameters
+    ----------
+    kml_file : str
+        Chemin vers le fichier KML contenant la trajectoire.
+    start_time : str
+        Heure de début de la trajectoire (exemple "8h00").
+    end_time : str
+        Heure de fin de la trajectoire (exemple "20h00").
+    distance_step : float
+        Distance (en mètres) entre chaque point discrétisé.
+    velocity : float
+        Vitesse (en m/s) utilisée pour la simulation.
+
+    Returns
+    -------
+    pd.DataFrame
+        DataFrame contenant les points discrétisés, avec pour chaque point les coordonnées (WGS84 et Lambert-93) et le temps associé.
     """
-    def parse_time(hhmm):
-        hh, mm = map(int, hhmm.replace("h", ":").split(":"))
-        return hh * 3600 + mm * 60
 
     start_sec = parse_time(start_time)
     end_sec = parse_time(end_time)
@@ -1112,34 +1132,49 @@ def compute_optimal_window_from_kml(kml_file, rinex_nav_file, date_arg, building
                                     start_time, end_time, distance_step, velocity,
                                     time_step_sec, mnt, output_csv="resultats_optimal_window.csv"):
     """
-    Calcul de la fenêtre optimale à partir d'un fichier KML.
+    Calcule la fenêtre optimale à partir d'un fichier KML.
 
     Procédure :
-      - Discrétisation de la trajectoire extraite du fichier KML via read_and_discretize_kml.
-      - Correction temporelle des points par soustraction du décalage initial.
-      - Application d'une altitude fixe (mnt) aux points si spécifiée.
-      - Calcul du cumul des distances parcourues pour déterminer la durée de la trajectoire.
-      - Définition de l'intervalle temporel candidat (début et fin de simulation).
-      - Chargement unique des données RINEX de navigation.
-      - Simulation parallèle de candidats temporels via candidate_simulation.
-      - Agrégation et tri des résultats basés sur la statistique (GDOP moyen ici).
-      - Sauvegarde des résultats dans un fichier CSV.
+      - Discrétise la trajectoire à l'aide de read_and_discretize_kml.
+      - Corrige temporellement les points en soustrayant le décalage initial.
+      - Applique une altitude fixe (mnt) aux points si spécifié.
+      - Calcule le cumul des distances parcourues pour déterminer la durée de la trajectoire.
+      - Définit l'intervalle temporel candidat (début et fin de simulation).
+      - Charge le fichier Rinex de navigation.
+      - Simule en parallèle plusieurs fenêtres candidates via candidate_simulation.
+      - Agrège et trie les résultats selon la statistique (GDOP moyen ici).
+      - Sauvegarde le résumé dans un fichier CSV.
 
-    Paramètres :
-      kml_file (str): Chemin vers le fichier KML contenant la trajectoire.
-      rinex_nav_file (str): Chemin vers le fichier RINEX de navigation.
-      date_arg (str): Date d'acquisition au format "dd/mm/yyyy".
-      buildings_dict (dict): Dictionnaire des bâtiments avec leurs coordonnées.
-      start_time (str): Heure de début de la trajectoire (exemple "8h00").
-      end_time (str): Heure de fin de la trajectoire (exemple "20h00").
-      distance_step (float): Pas de distance pour la discrétisation (en mètres).
-      velocity (float): Vitesse utilisée pour la simulation (en m/s).
-      time_step_sec (float): Pas temporel entre chaque candidat (en secondes).
-      mnt (float, optionnel): Altitude fixe à appliquer aux points, par défaut 60.
-      output_csv (str, optionnel): Nom du fichier CSV de sortie.
+    Parameters
+    ----------
+    kml_file : str
+        Chemin vers le fichier KML contenant la trajectoire.
+    rinex_nav_file : str
+        Chemin vers le fichier Rinex de navigation.
+    date_arg : str
+        Date d'acquisition au format "dd/mm/yyyy".
+    buildings_dict : dict
+        Dictionnaire des bâtiments avec leurs coordonnées.
+    start_time : str
+        Heure de début de la trajectoire (exemple "8h00").
+    end_time : str
+        Heure de fin de la trajectoire (exemple "20h00").
+    distance_step : float
+        Pas de distance pour la discrétisation (en mètres).
+    velocity : float
+        Vitesse utilisée pour la simulation (en m/s).
+    time_step_sec : float
+        Pas temporel entre chaque candidat (en secondes).
+    mnt : float
+        Altitude fixe à appliquer aux points (par défaut, par exemple 60).
+    output_csv : str, optional
+        Nom du fichier CSV de sortie (par défaut "resultats_optimal_window.csv").
 
-    Retour :
-      DataFrame: Résumé des statistiques pour chaque fenêtre candidate (LOS, Obstructed, GDOP moyen, etc.).
+    Returns
+    -------
+    pd.DataFrame
+        DataFrame contenant le résumé des statistiques pour chaque fenêtre candidate
+        (Total LOS, Total NLOS, Total Obstructed, Moyennes GDOP, PDOP, HDOP, VDOP, etc.).
     """
     # Discrétisation via read_and_discretize_kml
     points_df = read_and_discretize_kml(kml_file, start_time, end_time, distance_step, velocity)
@@ -1152,10 +1187,6 @@ def compute_optimal_window_from_kml(kml_file, rinex_nav_file, date_arg, building
     if mnt is not None:
         points_df["coordZ"] = mnt
         points_df["H"] = mnt
-
-    def parse_time(hhmm):
-        hh, mm = map(int, hhmm.replace("h", ":").split(":"))
-        return hh * 3600 + mm * 60
 
     candidate_start_min = parse_time(start_time)
     global_end_sec = parse_time(end_time)
@@ -1245,42 +1276,51 @@ def compute_optimal_window_from_log(data, rinex_nav_file, buildings_dict,
                                     end_time, start_time, velocity,
                                     rinex_obs_file, output_csv="resultats_optimal_window_log.csv"):
     """
-    Calcul de la fenêtre optimale à partir de données LOG.
+    Calcule la fenêtre optimale à partir de données LOG.
 
     Procédure :
-      - Filtrage et limitation des données LOG pour obtenir un sous-ensemble (100 points).
-      - Conversion des points LOG en coordonnées Lambert93.
-      - Calcul du cumul des distances entre points pour déterminer le temps simulé (en fonction de la vitesse).
-      - Définition de l'intervalle temporel candidat à partir de l'heure de début et de fin.
-      - Chargement unique des données RINEX de navigation.
-      - Chargement conditionnel des données RINEX d'observation (si fournies).
-      - Simulation parallèle de candidats temporels via candidate_simulation.
-      - Agrégation et tri des résultats selon la statistique (GDOP moyen ici).
-      - Sauvegarde des résultats dans un fichier CSV.
+      - Filtre et limite les données LOG pour obtenir un sous-ensemble.
+      - Convertit les points LOG en coordonnées Lambert93.
+      - Calcule le cumul des distances parcourues pour déterminer le temps simulé.
+      - Définit l'intervalle temporel candidat en fonction de l'heure de début et de fin.
+      - Charge le fichier Rinex de navigation.
+      - Charge conditionnellement le fichier Rinex d'observation.
+      - Simule en parallèle plusieurs fenêtres candidates via candidate_simulation.
+      - Agrège et trie les résultats en fonction du GDOP moyen.
+      - Sauvegarde les résultats dans un fichier CSV.
 
-    Paramètres :
-      data (DataFrame): Données LOG brutes.
-      rinex_nav_file (str): Chemin vers le fichier RINEX de navigation.
-      buildings_dict (dict): Dictionnaire des bâtiments avec leurs coordonnées.
-      time_step_sec (float): Pas temporel entre chaque candidat (en secondes).
-      date_arg (str): Date d'acquisition au format "dd/mm/yyyy".
-      end_time (str): Heure de fin de simulation (exemple "14:00").
-      start_time (str): Heure de début de simulation (exemple "8h00").
-      velocity (float): Vitesse utilisée pour la simulation (en m/s).
-      rinex_obs_file (str): Chemin vers le fichier RINEX d'observation (peut être None).
-      output_csv (str, optionnel): Nom du fichier CSV de sortie.
+    Parameters
+    ----------
+    data : pd.DataFrame
+        Données LOG brutes.
+    rinex_nav_file : str
+        Chemin vers le fichier Rinex de navigation.
+    buildings_dict : dict
+        Dictionnaire des bâtiments avec leurs coordonnées.
+    time_step_sec : float
+        Pas temporel entre chaque candidat (en secondes).
+    date_arg : str
+        Date d'acquisition au format "dd/mm/yyyy".
+    end_time : str
+        Heure de fin de simulation (exemple "14:00").
+    start_time : str
+        Heure de début de simulation (exemple "8h00").
+    velocity : float
+        Vitesse utilisée pour la simulation (en m/s).
+    rinex_obs_file : str
+        Chemin vers le fichier Rinex d'observation (peut être None).
+    output_csv : str, optional
+        Nom du fichier CSV de sortie (par défaut "resultats_optimal_window_log.csv").
 
-    Retour :
-      DataFrame: Résumé des statistiques pour chaque fenêtre candidate (LOS, NLOS, Obstructed, GDOP moyen, etc.).
+    Returns
+    -------
+    pd.DataFrame
+        DataFrame résumant les statistiques pour chaque fenêtre candidate (LOS, NLOS, obstructed, GDOP moyen, etc.).
     """
     # Filtrage et limitation des données LOG (ici 100 points)
     data = data[(data["lat"].notnull()) & (data["lon"].notnull()) & (data["h"].notnull()) &
                 (data["lat"] != "") & (data["lon"] != "") & (data["h"] != "")]
     data = data.iloc[500:550]
-
-    def parse_time(hhmm):
-        hh, mm = map(int, hhmm.replace("h", ":").split(":"))
-        return hh * 3600 + mm * 60
 
     # Construction de la liste de points LOG (coordonnées en Lambert93)
     log_points = []
@@ -1406,3 +1446,6 @@ def compute_optimal_window_from_log(data, rinex_nav_file, buildings_dict,
         best_candidate = None
     return df_results
 
+def parse_time(hhmm):
+    hh, mm = map(int, hhmm.replace("h", ":").split(":"))
+    return hh * 3600 + mm * 60

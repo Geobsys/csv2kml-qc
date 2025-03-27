@@ -17,6 +17,31 @@ Le fichier résultant est écrit dans un nouveau fichier.
 """
 
 def pad_rinex_file(input_filename, output_filename):
+    """
+    Lit un fichier RINEX d'observation et complète les lignes d'observation pour qu'elles fassent exactement 80 caractères.
+
+    Le script lit l'intégralité du fichier d'entrée et, pour chaque ligne qui ne commence pas par '>',
+    vérifie si la ligne contient moins de 80 caractères (sans compter le retour à la ligne). 
+    Si c'est le cas, la ligne est complétée avec des espaces jusqu'à atteindre exactement 80 caractères.
+    Les lignes commençant par '>' (lignes d'époque) sont conservées telles quelles.
+    Le contenu modifié est ensuite écrit dans le fichier spécifié par output_filename.
+
+    Parameters
+    ----------
+    input_filename : str
+        Chemin vers le fichier RINEX d'observation à lire.
+    output_filename : str
+        Chemin vers le fichier de sortie dans lequel le contenu modifié sera sauvegardé.
+
+    Returns
+    -------
+    None
+
+    Examples
+    --------
+    >>> pad_rinex_file("rinexO2503.25o.A", "rinexO2503_padded.25o.A")
+    Fichier avec lignes padées écrit dans rinexO2503_padded.25o.A
+    """
     with open(input_filename, 'r') as f:
         lines = f.readlines()
     
@@ -33,7 +58,7 @@ def pad_rinex_file(input_filename, output_filename):
             if not stripped:
                 new_lines.append("\n")
             else:
-                # Si la longueur est inférieure à 80, on pad
+                # Si la longueur est inférieure à 80, on pad avec des espaces.
                 if len(stripped) < 80:
                     padded = stripped.ljust(80)
                 else:
@@ -46,9 +71,16 @@ def pad_rinex_file(input_filename, output_filename):
     print(f"Fichier avec lignes padées écrit dans {output_filename}")
 
 def main():
-    input_filename = "sept084o.25o.A"   # Votre fichier nettoyé
-    output_filename = "sept084m_paddedo.25o.A"  # Fichier de sortie
+    """
+    Fonction principale du script.
+
+    Définit le fichier d'entrée et le fichier de sortie, puis appelle la fonction pad_rinex_file
+    pour traiter le fichier RINEX d'observation et générer le fichier avec les lignes complétées.
+    """
+    input_filename = "rinexO2503.25o.A"   # Votre fichier nettoyé
+    output_filename = "rinexO2503_padded.25o.A"  # Fichier de sortie
     pad_rinex_file(input_filename, output_filename)
 
 if __name__ == '__main__':
     main()
+
