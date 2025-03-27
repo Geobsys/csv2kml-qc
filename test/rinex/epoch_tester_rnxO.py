@@ -153,7 +153,7 @@ def main():
     de charger un fichier temporaire constitué de l'en-tête et de l'époque. En cas d'erreur lors du chargement,
     l'heure de l'époque problématique est affichée et l'exécution s'arrête.
     """
-    input_filename = "rinexO2503_padded.25o.A"
+    input_filename = "rinexO2703.25o.A"
     header, epochs = read_rinex_file(input_filename)
     print("Nombre total d'époques :", len(epochs))
     
