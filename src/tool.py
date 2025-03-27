@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """
-@author: mehdi daakir, gabin bourlon, axel debock, felix mercier, clement cambours
+@author: mehdi daakir, gabin bourlon, axel debock, felix mercier, clement cambours, diallo anthony,
+esselami benoit, evrard anthony
 """
 # Imports :
 # Python files :

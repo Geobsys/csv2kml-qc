@@ -183,7 +183,7 @@ if __name__ == "__main__":
                     data=data,
                     rinex_nav_file=args.rinex_name,
                     buildings_dict=buildings_dict,
-                    time_step_sec=120,
+                    time_step_sec=60,
                     date_arg=args.date,
                     output_csv="resultats_optimal_window_log.csv",
                     end_time=args.end_time,

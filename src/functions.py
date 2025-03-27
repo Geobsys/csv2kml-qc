@@ -732,7 +732,7 @@ def candidate_simulation(candidate, points_list, cumulative, base_date, base_poi
         par rapport à un récepteur en coordonnées ECEF.
         """
         # 1) Conversion de la position récepteur en (lat, lon, h)
-        transformer_ecef_to_llh = pyproj.Transformer.from_crs("EPSG:4978", "EPSG:4326", always_xy=True)
+        transformer_ecef_to_llh = pyproj.Transformer.from_crs("EPSG:4964", "EPSG:4326", always_xy=True)
         lat_u, lon_u, h_u = transformer_ecef_to_llh.transform(userXYZ[0], userXYZ[1], userXYZ[2])
         lat_u_rad = math.radians(lat_u)
         lon_u_rad = math.radians(lon_u)
@@ -824,7 +824,7 @@ def candidate_simulation(candidate, points_list, cumulative, base_date, base_poi
             sat_cepoch_dict = ephemerides_cache[mjd_key]
         else:
             sat_cepoch_dict = {}
-            for const in ["G", "R", "E", "C"]:
+            for const in ["G", "R", "E", "C", "S", "I", "J"]:
                 for prn in range(1, 40):
                     try:
                         Xs, Ys, Zs, dte = Nav.calcSatCoord(const, prn, mjd_time, degree=0)
@@ -855,14 +855,22 @@ def candidate_simulation(candidate, points_list, cumulative, base_date, base_poi
         # Gestion RINEX Obs : marquer en Obstructed si NLOS non observé
         if Obs is not None:
             epoch_obs = Obs.getEpochByMjd(gnssdate.mjd)
+            #print(f"Époque observation: {epoch_obs}")
             observed_set = set()
             if epoch_obs is not None:
                 for sat in epoch_obs.satellites:
-                    if sat is not None and sat.obs.get("C1C", 0) > 0:
+                    if sat is not None and sat.obs.get("C1C", 0) > 5:
+                        # print(sat.obs.get("C1C", 0))
                         observed_set.add(f"{sat.const}{sat.PRN}")
+                        # print(f"Satellite observé:{observed_set}")
+            nlos_before = {sat_id: s for sat_id, s in local_sat_infos.items() if s.get("status", "UNKNOWN") == "NLOS"}
+            #print(f"[{key}] Satellites initialement NLOS: {nlos_before}")
+            #print(f"[{key}] Satellites observés (C1C > 0): {observed_set}")
             for sat_id, s in local_sat_infos.items():
                 if s.get("status", "UNKNOWN") == "NLOS" and (sat_id not in observed_set):
                     s["status"] = "Obstructed"
+            obstructed_dict = {sat_id: s for sat_id, s in local_sat_infos.items() if s.get("status", "UNKNOWN") == "Obstructed"}
+            #print(f"[{key}] Satellites requalifiés en Obstructed: {obstructed_dict}")
             nlos_count = sum(1 for s in local_sat_infos.values() if s.get("status", "UNKNOWN") == "NLOS")
             obstructed_count = sum(1 for s in local_sat_infos.values() if s.get("status", "UNKNOWN") == "Obstructed")
         else:
@@ -1034,7 +1042,7 @@ def read_and_discretize_kml(kml_file, start_time, end_time, distance_step, veloc
 
     def add_point(x, y, z, t_sod):
         if z <= 1.0:
-            z = 45.0
+            z = 0.0
         lon2, lat2, alt2 = transformer_l93_to_wgs.transform(x, y, z)
         points.append({
             "time_sod": t_sod,
@@ -1220,7 +1228,6 @@ def compute_optimal_window_from_kml(kml_file, rinex_nav_file, date_arg, building
             if res is not None:
                 results.append(res)
     df_results = pd.DataFrame(results)
-    #df_results["Total Observed"] = df_results["Total LOS"] + df_results["Total Obstructed"]
     df_results["Trajectory Start_dt"] = pd.to_datetime(df_results["Trajectory Start"], format="%H:%M:%S")
     df_results = df_results.sort_values(by="Trajectory Start_dt").drop(columns=["Trajectory Start_dt"])
     df_results.to_csv(output_csv, index=False)
@@ -1363,7 +1370,6 @@ def compute_optimal_window_from_log(data, rinex_nav_file, buildings_dict,
             except Exception as e:
                 print(f"Erreur lors du chargement du RINEX observation : {e}")
                 Obs_data = None
-    print("[DEBUG] => Apres loadRinexO, Obs_data est None ?", Obs_data is None)
 
 
     results = []
