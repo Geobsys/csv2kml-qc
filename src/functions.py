@@ -30,9 +30,13 @@ import math
 import os
 import pandas as pd
 import tempfile
-from tqdm import tqdm
 import contextlib
 import concurrent.futures
+
+#######################
+# Nouvelle dépendance :
+#######################
+from tqdm import tqdm
 
 """ Creation of a kml point """
 def custom_pt(kml, # simplekml object
@@ -94,7 +98,7 @@ def custom_int_conf(kml, # simplekml object
 					incert_hig_max=np.nan # maximum altimetric uncertainty showed, float
 					):
 	if (mode=="pyr"):
-		# adjusting showing options
+		# adjusting showing options`
 		if pt["incert_pla"] > incert_pla_max :
 			pt["incert_pla"] = incert_pla_max
 		pt["incert_pla"] *= scale_factor_pla
@@ -1320,7 +1324,7 @@ def compute_optimal_window_from_log(data, rinex_nav_file, buildings_dict,
     # Filtrage et limitation des données LOG (ici 100 points)
     data = data[(data["lat"].notnull()) & (data["lon"].notnull()) & (data["h"].notnull()) &
                 (data["lat"] != "") & (data["lon"] != "") & (data["h"] != "")]
-    # data = data.iloc[500:550]
+    data = data.iloc[500:550]
 
     # Construction de la liste de points LOG (coordonnées en Lambert93)
     log_points = []

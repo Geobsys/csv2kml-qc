@@ -21,7 +21,7 @@
 # Python files:
 import csts
 import functions
-import tool  # On suppose que tool.py est dans le même dossier
+import tool
 
 # Packages:
 import os
@@ -115,6 +115,8 @@ if __name__ == "__main__":
                         help="Distance step for KML traj (Default=5)")
     parser.add_argument('-velocity', type=float, default=1.5,
                         help="Velocity (m/s) for KML and LOG traj (Default=1.5)")
+    parser.add_argument('-time_step_sec', type=int, default=900,
+                        help="Temporal step in seconds for KML and LOG traj (Default=900)")
 
     parser.add_argument('-mnt', type=float, default=0.0,
                         help="Altitude offset or mean altitude for forcing Z (ex. 45). (Default=0)")
@@ -122,112 +124,50 @@ if __name__ == "__main__":
     parser.add_argument('--detect_nlos', action="store_true", help="Detect collisions (NLOS).")
     parser.add_argument('-ll','--line_length', type=float, help="Line length for collisions (Default=250)", default=250)
     args = parser.parse_args()
-    
-    # Mode temporel (calcul de la fenêtre temporelle optimale)
-    if args.temporal:
-        # CAS 1: Trajectoire théorique => kmltraj
-        if args.input_type == "kmltraj" and args.rinex_name :
-            if args.buildings != "":
-                dummy_kml = simplekml.Kml()
-                buildings_dict = functions.shp2kml(args.buildings, dummy_kml)
-                if not args.quiet:
-                    print(f"{len(buildings_dict)} bâtiments chargés depuis {args.buildings}")
-            else:
-                buildings_dict = {}
-
-            df_optimal = functions.compute_optimal_window_from_kml(
-                kml_file=args.input_file,
-                rinex_nav_file=args.rinex_name,
-                buildings_dict=buildings_dict,
-                start_time=args.start_time,
-                end_time=args.end_time,
-                date_arg=args.date,
-                distance_step=args.dist_step,
-                velocity=args.velocity,
-                time_step_sec=900,
-                output_csv="resultats_optimal_window_kml.csv",
-                mnt=args.mnt
-            )
-            print(df_optimal)
-            
-        # CAS 2: Trajectoire réelle => extevent ou log
-        else:
-            if args.input_type == "extevent":
-                labels = csts.extevent_labels
-            elif args.input_type == "log":
-                labels = csts.log_labels
-            else:
-                print("Pour le calcul temporel, utilisez 'kmltraj', 'extevent' ou 'log'.")
-                exit(1)
-            try:
-                data = pd.read_csv(args.input_file, sep=args.separator, header=None)
-            except Exception as e:
-                print(f"Erreur lors de la lecture du fichier '{args.input_file}' avec le séparateur '{args.separator}': {e}")
-                exit(1)
-            try:
-                data.columns = labels
-            except Exception as e:
-                print("Le type d'entrée n'est pas supporté. Vous pouvez changer le type avec -it.")
-                exit(1)
                 
-            if args.input_type == "log":
-                if args.buildings != "":
-                    dummy_kml = simplekml.Kml()
-                    buildings_dict = functions.shp2kml(args.buildings, dummy_kml)
-                    if not args.quiet:
-                        print(f"{len(buildings_dict)} bâtiments chargés depuis {args.buildings}")
-                else:
-                    buildings_dict = {}
-
-                df_optimal = functions.compute_optimal_window_from_log(
-                    data=data,
-                    rinex_nav_file=args.rinex_name,
-                    buildings_dict=buildings_dict,
-                    time_step_sec=60,
-                    date_arg=args.date,
-                    output_csv="resultats_optimal_window_log.csv",
-                    end_time=args.end_time,
-                    start_time=args.start_time,
-                    velocity=args.velocity,
-                    rinex_obs_file=args.ro
-                )
-                print(df_optimal)
-                
-    else:
-        tool.csv_to_kml(
-             args.input_file,
-             args.input_type,
-             args.separator,
-             args.output_file,
-             args.doc_name,
-             args.quiet,
-             args.mode,
-             args.label_scale,
-             args.icon_scale,
-             args.icon_href,
-             args.show_pt_name,
-             args.data_range,
-             args.altitudemode,
-             args.show_point,
-             args.show_line,
-             args.show_conf_int,
-             args.scale_factor_pla,
-             args.incert_pla_max,
-             args.scale_factor_hig,
-             args.incert_hig_max,
-             args.show_buildings,
-             args.margin,
-             args.departments,
-             args.save_buildings,
-             args.calc_ephemerids,
-             args.rinex_name,
-             args.show_orientation,
-             args.fr_sensor,
-             args.fr_focal,
-             args.fr_distance,
-             args.fr_alpha,
-             args.fr_beta,
-             args.fr_gamma
-        )
-
+    tool.csv_to_kml(
+         args.input_file,
+         args.input_type,
+         args.separator,
+         args.output_file,
+         args.doc_name,
+         args.quiet,
+         args.mode,
+         args.label_scale,
+         args.icon_scale,
+         args.icon_href,
+         args.show_pt_name,
+         args.data_range,
+         args.altitudemode,
+         args.show_point,
+         args.show_line,
+         args.show_conf_int,
+         args.scale_factor_pla,
+         args.incert_pla_max,
+         args.scale_factor_hig,
+         args.incert_hig_max,
+         args.show_buildings,
+         args.margin,
+         args.buildings,
+         args.departments,
+         args.save_buildings,
+         args.calc_ephemerids,
+         args.rinex_name,
+         args.show_orientation,
+         args.fr_sensor,
+         args.fr_focal,
+         args.fr_distance,
+         args.fr_alpha,
+         args.fr_beta,
+         args.fr_gamma,
+         temporal=args.temporal,
+         start_time=args.start_time,
+         end_time=args.end_time,
+         date=args.date,
+         dist_step=args.dist_step,
+         velocity=args.velocity,
+         mnt=args.mnt,
+         ro=args.ro,
+         time_step_sec=args.time_step_sec
+    )
 
