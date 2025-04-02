@@ -84,53 +84,58 @@ def custom_line(kml, # simplekml object
 	return None
 
 """ Creation of a kml line """
-def custom_int_conf(kml, # simplekml object
-					pt,  # point object, pd.DataFrame object
-					mode="pyr", # confidence interval representation, string
-					name="", # confidence interval name, string
-					altitudemode="absolute", # altitude mode in kml, string ("absolute", "relativeToGround", "clampToGround")
-					color=csts.colors_dict["green"], # confidence interval color, string
-					incert_pla_factor_E=1e5, # scale factor meters to degres Est, float
-					incert_pla_factor_N=1e5, # scale factor meters to degres North, float
-					scale_factor_pla=1, # scale factor planimetric show, float
-					incert_pla_max=np.nan, # maximum planimetric uncertainty showed, float
-					scale_factor_hig=1, # scale factor altimetric show, float
-					incert_hig_max=np.nan # maximum altimetric uncertainty showed, float
-					):
-	if (mode=="pyr"):
-		# adjusting showing options`
-		if pt["incert_pla"] > incert_pla_max :
-			pt["incert_pla"] = incert_pla_max
-		pt["incert_pla"] *= scale_factor_pla
-		if pt["incert_hig"] > incert_hig_max :
-			pt["incert_hig"] = incert_hig_max
-		pt["incert_hig"] *= scale_factor_hig
-		# switching from meters to equivalent degres
-		incert_lon = pt["incert_pla"]*incert_pla_factor_E
-		incert_lat = pt["incert_pla"]*incert_pla_factor_N
-		# creating the pyramid (confidence interval) corners
-		corners = np.array([(pt["lon"]-incert_lon, pt["lat"]		   , pt["altitude"]), 
-			 	   			(pt["lon"]	   	     , pt["lat"]+incert_lat, pt["altitude"]), 
-				   			(pt["lon"]+incert_lon, pt["lat"]		   , pt["altitude"]), 
-				   			(pt["lon"]		     , pt["lat"]-incert_lat, pt["altitude"]), 
-				   			(pt["lon"]		     , pt["lat"]		   , pt["altitude"] + pt["incert_hig"] )])
-		# creating the description
-		conf_int = [pt["incert_pla"], pt["incert_hig"], incert_lat, incert_lon]
-		description_text = gen_description_conf_int(conf_int)
-		#append the four faces of the pyramid
-		pol = kml.newpolygon(name=name, description=description_text, altitudemode=altitudemode, extrude = 0)
-		pol.outerboundaryis = [corners[0], corners[1], corners[-1], corners[0]]
-		pol.style.polystyle.color = color
-		pol = kml.newpolygon(name=name, description=description_text, altitudemode=altitudemode, extrude = 0)
-		pol.outerboundaryis = [corners[1], corners[2], corners[-1], corners[1]]
-		pol.style.polystyle.color = color
-		pol = kml.newpolygon(name=name, description=description_text, altitudemode=altitudemode, extrude = 0)
-		pol.outerboundaryis = [corners[2], corners[3], corners[-1], corners[2]]
-		pol.style.polystyle.color = color
-		pol = kml.newpolygon(name=name, description=description_text, altitudemode=altitudemode, extrude = 0)
-		pol.outerboundaryis = [corners[3], corners[0], corners[-1], corners[3]]
-		pol.style.polystyle.color = color
-	return None
+def custom_int_conf(kml,  # simplekml object
+                    pt,  # point object, pd.DataFrame object
+                    mode="pyr",  # confidence interval representation, string
+                    name="",  # confidence interval name, string
+                    altitudemode="absolute",  # altitude mode in kml, string ("absolute", "relativeToGround", "clampToGround")
+                    color=csts.colors_dict["green"],  # confidence interval color, string
+                    incert_pla_factor_E=1e5,  # scale factor meters to degres Est, float
+                    incert_pla_factor_N=1e5,  # scale factor meters to degres North, float
+                    scale_factor_pla=1,  # scale factor planimetric show, float
+                    incert_pla_max=np.nan,  # maximum planimetric uncertainty showed, float
+                    scale_factor_hig=1,  # scale factor altimetric show, float
+                    incert_hig_max=np.nan  # maximum altimetric uncertainty showed, float
+                    ):
+    if (mode == "pyr"):
+        # adjusting showing options
+        incert_pla_val = float(pt["incert_pla"])
+        incert_hig_val = float(pt["incert_hig"])
+        if incert_pla_val > incert_pla_max:
+            incert_pla_val = incert_pla_max
+        incert_pla_val *= scale_factor_pla
+        if incert_hig_val > incert_hig_max:
+            incert_hig_val = incert_hig_max
+        incert_hig_val *= scale_factor_hig
+        # switching from meters to equivalent degres
+        incert_lon = incert_pla_val * incert_pla_factor_E
+        incert_lat = incert_pla_val * incert_pla_factor_N
+        # creating the pyramid (confidence interval) corners
+        corners = np.array([
+            (pt["lon"] - incert_lon, pt["lat"], pt["altitude"]),
+            (pt["lon"], pt["lat"] + incert_lat, pt["altitude"]),
+            (pt["lon"] + incert_lon, pt["lat"], pt["altitude"]),
+            (pt["lon"], pt["lat"] - incert_lat, pt["altitude"]),
+            (pt["lon"], pt["lat"], pt["altitude"] + incert_hig_val)
+        ])
+        # creating the description
+        conf_int = [incert_pla_val, incert_hig_val, incert_lat, incert_lon]
+        description_text = gen_description_conf_int(conf_int)
+        # append the four faces of the pyramid
+        pol = kml.newpolygon(name=name, description=description_text, altitudemode=altitudemode, extrude=0)
+        pol.outerboundaryis = [corners[0], corners[1], corners[-1], corners[0]]
+        pol.style.polystyle.color = color
+        pol = kml.newpolygon(name=name, description=description_text, altitudemode=altitudemode, extrude=0)
+        pol.outerboundaryis = [corners[1], corners[2], corners[-1], corners[1]]
+        pol.style.polystyle.color = color
+        pol = kml.newpolygon(name=name, description=description_text, altitudemode=altitudemode, extrude=0)
+        pol.outerboundaryis = [corners[2], corners[3], corners[-1], corners[2]]
+        pol.style.polystyle.color = color
+        pol = kml.newpolygon(name=name, description=description_text, altitudemode=altitudemode, extrude=0)
+        pol.outerboundaryis = [corners[3], corners[0], corners[-1], corners[3]]
+        pol.style.polystyle.color = color
+    return None
+
 
 """ Creation of a kml frustum """
 def custom_frustum(	kml,  # simplekml object
@@ -846,7 +851,7 @@ def candidate_simulation(candidate, points_list, cumulative, base_date, base_poi
                             # Vérification de l'élévation
                             sat_ecef = np.array([Xs, Ys, Zs], dtype=float)
                             elev_deg = compute_elevation(rcv_ecef, sat_ecef)
-                            if elev_deg >= 5.0:
+                            if elev_deg >= 12.0:
                                 sat_cepoch_dict[f"{const}{prn:02d}"] = {
                                     "X": Xs, 
                                     "Y": Ys, 
@@ -898,20 +903,23 @@ def candidate_simulation(candidate, points_list, cumulative, base_date, base_poi
         total_nlos += nlos_count
         total_obstructed += obstructed_count
 
-        # Calcul du DOP (GDOP, PDOP, HDOP, VDOP) à partir des satellites LOS
-        sat_positions = [
-            s["sats_pos_l93"] for s in local_sat_infos.values()
-            if s.get("status", "UNKNOWN") == "LOS" and "sats_pos_l93" in s
+        # ---- calcul DOP en ECEF ----
+        # On récupère tous les satellites LOS + on utilise sats_pos_ecef
+        sat_positions_ecef = [
+            (sat_["X"], sat_["Y"], sat_["Z"])
+            for sat_ in local_sat_infos.values()
+            if sat_.get("status", "UNKNOWN") == "LOS"
+               and ("X" in sat_ and "Y" in sat_ and "Z" in sat_)
         ]
-        if len(sat_positions) >= 4:
-            sats_array = np.array(sat_positions)
-            rcv_pos = np.array([rcv_pos_dict["coordE"], rcv_pos_dict["coordN"], rcv_pos_dict["H"]])
+        sat_positions_ecef = np.array(sat_positions_ecef)
+
+        if sat_positions_ecef.shape[0] >= 4:
             try:
-                dop_dict = compute_dop(rcv_pos, sats_array)
-                gdop_value = dop_dict["GDOP"]
-                pdop_value = dop_dict["PDOP"]
-                hdop_value = dop_dict["HDOP"]
-                vdop_value = dop_dict["VDOP"]
+                dop_res = compute_dop(rcv_ecef, sat_positions_ecef)
+                gdop_value = dop_res["GDOP"]
+                pdop_value = dop_res["PDOP"]
+                hdop_value = dop_res["HDOP"]
+                vdop_value = dop_res["VDOP"]
             except Exception:
                 gdop_value = np.nan
                 pdop_value = np.nan

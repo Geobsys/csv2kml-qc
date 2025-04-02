@@ -19,7 +19,7 @@ Après l'installation, il faudra préparer les fichiers nécessaires à l'éxecu
 
 - Un fichier représentant la trajectoire sur laquelle réaliser le traitement, soit au format KML (dessinée sur google EARTH ou un SIG), soit au format LOG (issue d'une acquisition avec Géostix).
 - Pour calculer les collisions entre les bâtiments et les droites (géostix, satellites), un fichier au format shapefile issue de la [BD-TOPO](https://geoservices.ign.fr/bdtopo) recouvrant la zone d'étude.
-- Pour calculer les éphémérides des satellites, un fichier RINEX de navigation quelque soit le type de trajectoire et récupérable sur le site de la [NASA](https://cddis.nasa.gov/Data_and_Derived_Products/GNSS/broadcast_ephemeris_data.html) en précisant le jour de l'année (par exemple le 84ème jour de l'année) et en prenant dans le bon dossier (24p pour les RINEX de navigation de l'année 2024) et un fichier RINEX d'observation pour les trajectoires réelles (issu du Géostix).
+- Pour calculer les positions des satellites, un fichier RINEX de navigation quelque soit le type de trajectoire et récupérable sur le site de la [NASA](https://cddis.nasa.gov/Data_and_Derived_Products/GNSS/broadcast_ephemeris_data.html) en précisant le jour de l'année (par exemple le 84ème jour de l'année) et en prenant dans le bon dossier (24p pour les RINEX de navigation de l'année 2024) et un fichier RINEX d'observation pour les trajectoires réelles (issu du Géostix).
 
 ## Premier exemple
 
@@ -30,7 +30,7 @@ Après l'installation, il faudra préparer les fichiers nécessaires à l'éxecu
 
 2. Lancez la commande suivante comme expliquer dans le README pour tester le code sur une trajectoire thérorique autour de l'ENSG:
    ```bash
-   python3 src/csv_to_kml.py test/kml/ensg.kml -it kmltraj --temporal -d 21/03/2025 -start_time 10h00 -end_time 18h00 -dist_sep 0.5 -velocity 1.5 -rn test/rinnex/20250323.rnx -buildings test/shp/buildings_near_ensg.shp -mnt=90 
+   python3 src/csv_to_kml.py test/kml/ensg.kml -it kmltraj --temporal -d 21/03/2025 -start_time 10h00 -end_time 18h00 -dist_sep 0.5 -velocity 1.5 -rn test/rinex/20250323.rnx -buildings test/shp/buildings_near_ensg.shp -mnt=90 
    ```
 (voir le README pour la commande trajectoire réelle)
 
